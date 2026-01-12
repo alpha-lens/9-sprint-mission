@@ -1,32 +1,29 @@
-package com.sprint.mission.discodeit.entity;
+package com.sprint.mission.discodeit.entity_;
 
-import com.sprint.mission.discodeit.entity.service.channel.Server;
+import com.sprint.mission.discodeit.entity_.service.channel.CreateServer;
+import com.sprint.mission.discodeit.entity_.service.channel.Server;
+import com.sprint.mission.discodeit.entity_.service.user.User;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+
 public class Main {
-    public static boolean duplicateCheck(List<Server> list, String name) {
-        int temp = list.stream().filter(e -> e.getName().equals(name)).toArray().length;
-
-        if(temp == 0) {
-            return true;
-        }
-        return false;
-    }
-
     public static void main(String[] args) {
         boolean run = true;
         Scanner sc = new Scanner(System.in);
         List<Server> server = new ArrayList<Server>();
+        List<User> user = new ArrayList<User>();
         SimpleDateFormat formattingDate = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 
         /// 채널 생성 잘 되는 것 확인함 - 20260109 1605
         /// formatting 부분까지도 추가해서 수정함.
         server.add(new Server("코드잇 스프린트: 스프링 백엔드 9기"));
         server.add(new Server("스프린트 커뮤니티"));
+        user.add(new User("이진용", "string", "ddd@naver.com", "010-0000-0000"));
+        user.add(new User("김경한", "string", "eee@naver.com", "010-0000-0000"));
 
         /// TODO: 채널 생성 로직 작성
         try {
@@ -37,10 +34,7 @@ public class Main {
             throw new RuntimeException(e);
         }
         while(run) {
-            System.out.println("=====================");
-            System.out.println("| 0. 종료하기");
-            System.out.println("| 1. 서버 생성하기");
-            System.out.println("| 2. 서버 조회하기");
+            Route.route(sc, 0, user);
             int menu = sc.nextInt();
             sc.nextLine();
 
@@ -50,15 +44,7 @@ public class Main {
                     run = false;
                     break;
                 case 1:
-                    System.out.println("서버 생성에 오신 것을 환영합니다!");
-                    System.out.println("사용하려는 서버명을 입력해주세요!");
-                    String serverName = sc.nextLine();
-//                    System.out.println(server.contains(serverName));
-                    if(duplicateCheck(server, serverName)) {
-                        server.add(new Server(serverName));
-                        System.out.println("잘 들어갔어요!");
-                    }
-                    else System.out.println("error!");
+                    CreateServer.createServer(sc, server);
                     break;
                 case 2:
 //                    System.out.println("현재는 지원하지 않는 기능입니다: " + menu);

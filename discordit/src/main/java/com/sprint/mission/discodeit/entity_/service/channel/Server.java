@@ -1,12 +1,18 @@
-package com.sprint.mission.discodeit.entity.service.channel;
+package com.sprint.mission.discodeit.entity_.service.channel;
 
-import com.sprint.mission.discodeit.entity.UUIDGenerate;
+import com.sprint.mission.discodeit.entity_.UUIDGenerate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class Server {
+    public static boolean duplicateCheck(List<Server> list, String name) {
+        int temp = list.stream().filter(e -> e.getName().equals(name)).toArray().length;
+
+        return temp == 0;
+    }
+
     private String id;
     private final List<String> channel = new ArrayList<>();
     private final long createAt;
@@ -53,8 +59,8 @@ public class Server {
         String channel = sc.nextLine();
         System.out.println("지금 입력한 채널명은 " + channel + "입니다. 맞나요?");
         String test = sc.nextLine().toUpperCase();
-        if(test == "Y") {
-            if(channel.indexOf(channel) == -1) {
+        if(test.equals("Y")) {
+            if(channel.contains(channel)) {
                 System.out.println("어머, 이미 존재하는 채널이에요!");
             } else {
                 System.out.println("오, 좋은 이름이네요!");

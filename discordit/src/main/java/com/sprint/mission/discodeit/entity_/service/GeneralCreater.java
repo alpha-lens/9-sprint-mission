@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.entity.service;
+package com.sprint.mission.discodeit.entity_.service;
 
 public class GeneralCreater {
     private String id;

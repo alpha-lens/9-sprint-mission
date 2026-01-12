@@ -1,6 +1,6 @@
-package com.sprint.mission.discodeit.entity.service.channel;
+package com.sprint.mission.discodeit.entity_.service.channel;
 
-import com.sprint.mission.discodeit.entity.UUIDGenerate;
+import com.sprint.mission.discodeit.entity_.UUIDGenerate;
 
 import java.util.Scanner;
 

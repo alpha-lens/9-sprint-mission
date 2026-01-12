@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.entity;
+package com.sprint.mission.discodeit.entity_;
 
 public interface CRUDInterface {
     public void create();
