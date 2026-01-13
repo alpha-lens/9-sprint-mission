@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Scanner;
 
 public interface UserService {
-    void data();
-    void createUser(Scanner sc, List<User> users);
-    void updateUser(Scanner sc, List<User> users);
+//    void data();
+    void createUser(Scanner sc);
+    void updateUser(Scanner sc);
     void getUserName(User user);
-    void getAllUserName(List<User> users);
-    void deleteUser(Scanner sc, List<User> users);
+    void getAllUserName();
+    void deleteUser(Scanner sc);
 }

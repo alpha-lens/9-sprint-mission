@@ -27,12 +27,11 @@ public class Message {
     }
 
     public UUID getId(){return this.id;};
-    public long getUpateAt(){return this.updateAt;};
+    public UUID getSendChannel(){return this.channelId;};
+    public UUID getSendUserId(){return this.userId;};
+    public String getContent() {return this.content;}
+    public void setContent(String content) {this.content = content;setUpdateAt();}
+    public long getUpdateAt(){return this.updateAt;};
     public long getCreateAt(){return this.createAt;};
     public void setUpdateAt(){this.updateAt = System.currentTimeMillis();};
-    public void editMessage(String msg){
-        this.content = msg;
-        setUpdateAt();
-    };
-    public void sendMessage(String content){};
 }

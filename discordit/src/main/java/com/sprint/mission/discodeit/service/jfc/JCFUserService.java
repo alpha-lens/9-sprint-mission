@@ -9,21 +9,16 @@ import java.util.Objects;
 import java.util.Scanner;
 
 public class JCFUserService implements UserService {
-    @Override
-    public void data() {
-        List<User> users = new ArrayList<>();
-        users.add(new User("김경한", "pw"));
-        users.add(new User("이진용", "pw"));
-        users.add(new User("김수라", "pw"));
-    }
+    private final List<User> users = new ArrayList<>();
+
     /// Create
     @Override
-    public void createUser(Scanner sc, List<User> users) {
+    public void createUser(Scanner sc) {
         String name;
         String pw;
         System.out.println("회원가입에 오신 것을 환영합니다.");
         System.out.print("먼저, 사용할 이름을 작성해주세요 : ");
-        name = sc.next();
+        name = sc.nextLine();
 
         users.forEach(user -> {
             if(Objects.equals(user.getName(), name)) {
@@ -33,42 +28,50 @@ public class JCFUserService implements UserService {
         });
 
         System.out.print("사용할 비밀번호를 입력해주세요 : ");
-        pw = sc.next();
+        pw = sc.nextLine();
+        users.add(new User(name, pw));
+    }
+
+    ///  테스트 코드 작성용
+    public void createUser(String name, String pw) {
         users.add(new User(name, pw));
     }
 
     /// Update
     @Override
-    public void updateUser(Scanner sc, List<User> users) {
+    public void updateUser(Scanner sc) {
         System.out.println("1. 이름 변경");
         System.out.println("2. 비밀번호 변경");
         System.out.println("3. 이메일 변경");
         System.out.println("4. 전화번호 변경");
         int n = sc.nextInt();
+        sc.nextLine();
 
         switch(n){
             case 1:
-                updateUserName(sc, users);
+                updateUserName(sc);
                 break;
             case 2:
-                updateUserPw(sc, users);
+                updateUserPw(sc);
                 break;
             case 3:
-                updateUserEmail(sc, users);
+                updateUserEmail(sc);
                 break;
             case 4:
-                updateUserPhonenumber(sc, users);
+                updateUserPhonenumber(sc);
                 break;
             default:
                 break;
         }
     }
-    public void updateUserName(Scanner sc, List<User> users){
+    private void updateUserName(Scanner sc){
         System.out.println("변경하고자 하는 사용자명을 입력해주세요");
         String name = sc.nextLine();
+
         System.out.println("해당 사용자의 비밀번호를 입력해주세요");
         String pw = sc.nextLine();
-        if(check(users, name, pw) != null) {
+
+        if(check(name, pw) != null) {
             System.out.println("변경하고자 하는 이름을 입력해주세요");
             String rename = sc.nextLine();
             for (User u : users) {
@@ -82,12 +85,12 @@ public class JCFUserService implements UserService {
             System.out.println("맞는 계정이 없습니다.");
         }
     }
-    public void updateUserPw(Scanner sc, List<User> users){
+    private void updateUserPw(Scanner sc){
         System.out.println("변경하고자 하는 사용자명을 입력해주세요");
         String name = sc.nextLine();
         System.out.println("해당 사용자의 비밀번호를 입력해주세요");
         String pw = sc.nextLine();
-        if(check(users, name, pw) != null) {
+        if(check(name, pw) != null) {
             System.out.println("변경하고자 하는 비밀번호를 입력해주세요");
             String repw = sc.nextLine();
             for (User u : users) {
@@ -101,12 +104,12 @@ public class JCFUserService implements UserService {
             System.out.println("맞는 계정이 없습니다.");
         }
     }
-    public void updateUserEmail(Scanner sc, List<User> users){
+    private void updateUserEmail(Scanner sc){
         System.out.println("변경하고자 하는 사용자명을 입력해주세요");
         String name = sc.nextLine();
         System.out.println("해당 사용자의 비밀번호를 입력해주세요");
         String pw = sc.nextLine();
-        if(check(users, name, pw) != null) {
+        if(check(name, pw) != null) {
             System.out.println("변경하고자 하는 이메일을 입력해주세요");
             String remail = sc.nextLine();
             for (User u : users) {
@@ -120,12 +123,12 @@ public class JCFUserService implements UserService {
             System.out.println("맞는 계정이 없습니다.");
         }
     }
-    public void updateUserPhonenumber(Scanner sc, List<User> users){
+    private void updateUserPhonenumber(Scanner sc){
         System.out.println("변경하고자 하는 사용자명을 입력해주세요");
         String name = sc.nextLine();
         System.out.println("해당 사용자의 비밀번호를 입력해주세요");
         String pw = sc.nextLine();
-        if(check(users, name, pw) != null) {
+        if(check(name, pw) != null) {
             System.out.println("변경하고자 하는 연락처를 입력해주세요");
             String repn = sc.nextLine();
             for (User u : users) {
@@ -146,7 +149,7 @@ public class JCFUserService implements UserService {
         System.out.println(user.getId() + " " + user.getName());
     }
     @Override
-    public void getAllUserName(List<User> users) {
+    public void getAllUserName() {
         users.forEach(u -> {
             System.out.println(u.getId() + " : " + u.getName());
         });
@@ -154,7 +157,7 @@ public class JCFUserService implements UserService {
 
     /// Delete
     @Override
-    public void deleteUser(Scanner sc, List<User> users) {
+    public void deleteUser(Scanner sc) {
         String name;
         String pw;
         int n;
@@ -162,6 +165,7 @@ public class JCFUserService implements UserService {
         System.out.println("[Warning!] 만약 잘못 들어오신 경우, 0을 눌러주시기 바랍니다.");
 
         n = sc.nextInt();
+        sc.nextLine();
         if(n == 0) {
             System.out.println("처음으로 돌아갑니다.");
             return;
@@ -172,7 +176,7 @@ public class JCFUserService implements UserService {
         System.out.print("삭제하려는 계정의 비밀번호를 알려주세요: ");
         pw = sc.next();
 
-        User target = check(users, name, pw);
+        User target = check(name, pw);
 
         if (target != null) {
             users.remove(target);
@@ -182,7 +186,7 @@ public class JCFUserService implements UserService {
         }
     }
 
-    public User check(List<User> users, String name, String pw) {
+    public User check(String name, String pw) {
         User target = null;
         for (User u : users) {
             if (u.getName().equals(name) && u.getPw().equals(pw)) {
