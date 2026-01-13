@@ -13,8 +13,23 @@ public class JCFChannelService implements ChannelService {
     private final List<Channel> channels = new ArrayList<>();
 
     /// create
-        public void createServer(String name) {
-        channels.add(new Channel(name));
+    public void createServer(String name) {
+        if (check(name) != null) {
+            channels.add(new Channel(name));
+            System.out.println("잘 들어갔어요!");
+            return;
+        }
+        System.out.println("이미 존재하는 채널명이에요!");
+    }
+    public void createServer(Scanner sc) {
+        System.out.println("사용하려는 서버명이 무엇인가요?");
+        String name = sc.nextLine();
+        if (check(name) == null) {
+            channels.add(new Channel(name));
+            System.out.println("잘 들어갔어요!");
+            return;
+        }
+        System.out.println("이미 존재하는 채널명이에요!");
     }
 
     public void updateServer(Scanner sc) {
@@ -54,6 +69,16 @@ public class JCFChannelService implements ChannelService {
         System.out.println("채널생성일 : " + result.getCreateAt());
         System.out.println("채널수정일 : " + result.getUpdateAt());
         System.out.println("===================");
+    }
+
+public Channel readServer(String name) {
+        Channel result =  check(name);
+
+        if(result == null) {
+            System.out.println("해당 채널이 존재하지 않습니다.");
+            return null;
+        }
+        return result;
     }
 
     public void readAllServer() {

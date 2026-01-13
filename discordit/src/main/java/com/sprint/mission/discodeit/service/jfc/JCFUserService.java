@@ -20,12 +20,20 @@ public class JCFUserService implements UserService {
         System.out.print("먼저, 사용할 이름을 작성해주세요 : ");
         name = sc.nextLine();
 
-        users.forEach(user -> {
+        /// forEach 안에서 return은 forEach문을 종료하는 것으로 끝남...
+//        users.forEach(user -> {
+//            if(Objects.equals(user.getName(), name)) {
+//                System.out.println("이미 존재하는 사용자명입니다.");
+//                return;
+//            }
+//        });
+
+        for(User user : users) {
             if(Objects.equals(user.getName(), name)) {
                 System.out.println("이미 존재하는 사용자명입니다.");
                 return;
             }
-        });
+        }
 
         System.out.print("사용할 비밀번호를 입력해주세요 : ");
         pw = sc.nextLine();
@@ -40,10 +48,12 @@ public class JCFUserService implements UserService {
     /// Update
     @Override
     public void updateUser(Scanner sc) {
+        System.out.println("====================");
         System.out.println("1. 이름 변경");
         System.out.println("2. 비밀번호 변경");
         System.out.println("3. 이메일 변경");
         System.out.println("4. 전화번호 변경");
+        System.out.println("====================");
         int n = sc.nextInt();
         sc.nextLine();
 
@@ -145,13 +155,44 @@ public class JCFUserService implements UserService {
 
     /// Read
     @Override
-    public void getUserName(User user) {
-        System.out.println(user.getId() + " " + user.getName());
+    public void getUserName(Scanner sc) {
+        System.out.println("조회하고자 하는 사용자명을 입력해주세요");
+        String name = sc.nextLine();
+
+        for (User u : users) {
+            if (u.getName().equals(name)) {
+                System.out.println("====================");
+                System.out.println("사용자ID : " + u.getId());
+                System.out.println("사용자명 : " + u.getName());
+                System.out.println("이메일 : " + u.getEmail());
+                System.out.println("전화번호 : " + u.getPhonenumber());
+                System.out.println("생성일 : " + u.getCreateAt());
+                System.out.println("수정일 : " + u.getUpdateAt());
+                System.out.println("====================");
+                return;
+            }
+        }
+        System.out.println("조회하고자 하는 사용자가 없습니다.");
+    }
+    public User getUserName(String name) {
+        for (User u : users) {
+            if (u.getName().equals(name)) {
+                return u;
+            }
+        }
+        return null;
     }
     @Override
     public void getAllUserName() {
         users.forEach(u -> {
-            System.out.println(u.getId() + " : " + u.getName());
+            System.out.println("====================");
+            System.out.println("사용자ID : " + u.getId());
+            System.out.println("사용자명 : " + u.getName());
+            System.out.println("이메일 : " + u.getEmail());
+            System.out.println("전화번호 : " + u.getPhonenumber());
+            System.out.println("생성일 : " + u.getCreateAt());
+            System.out.println("수정일 : " + u.getUpdateAt());
+            System.out.println("====================");
         });
     }
 

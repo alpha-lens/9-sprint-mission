@@ -9,7 +9,7 @@ public interface UserService {
 //    void data();
     void createUser(Scanner sc);
     void updateUser(Scanner sc);
-    void getUserName(User user);
+    void getUserName(Scanner sc);
     void getAllUserName();
     void deleteUser(Scanner sc);
 }
