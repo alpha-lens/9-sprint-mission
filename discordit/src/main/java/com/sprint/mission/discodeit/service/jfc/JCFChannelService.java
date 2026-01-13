@@ -71,7 +71,7 @@ public class JCFChannelService implements ChannelService {
         System.out.println("===================");
     }
 
-public Channel readServer(String name) {
+    public Channel readServer(String name) {
         Channel result =  check(name);
 
         if(result == null) {
@@ -79,6 +79,16 @@ public Channel readServer(String name) {
             return null;
         }
         return result;
+    }
+
+    public String readServer(UUID id) {
+        Channel result = check(id);
+
+        if(result == null) {
+            System.out.println("해당 채널이 존재하지 않습니다.");
+            return null;
+        }
+        return result.getName();
     }
 
     public void readAllServer() {
@@ -122,6 +132,15 @@ public Channel readServer(String name) {
     public Channel check(String name) {
         for (Channel u : channels) {
             if (u.getName().equals(name)) {
+                return u;
+            }
+        }
+        return null;
+    }
+
+    public Channel check(UUID id) {
+        for (Channel u : channels) {
+            if (u.getId().equals(id)) {
                 return u;
             }
         }

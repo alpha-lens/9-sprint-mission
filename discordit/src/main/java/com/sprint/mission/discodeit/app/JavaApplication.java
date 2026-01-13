@@ -209,7 +209,7 @@ public class JavaApplication {
                     System.out.println("존재하지 않는 사용자입니다.");
                     return;
                 }
-                ms.updateMessage(sc, nowUser);
+                ms.updateMessage(sc, nowUser, cs, us);
                 break;
             case 3:
                 /// read
@@ -227,7 +227,7 @@ public class JavaApplication {
                         System.out.println("존재하지 않는 사용자입니다.");
                         return;
                     }
-                    ms.readMsgForUser(nowUser);
+                    ms.readMsgForUser(nowUser, cs, us);
                 } else if (m == 2) {
                     System.out.println("어디로 메시지인가요?");
                     cName = sc.nextLine();
@@ -236,7 +236,7 @@ public class JavaApplication {
                         System.out.println("존재하지 않는 채널입니다.");
                         return;
                     }
-                    ms.readMsgInChannel(nowChannel.getId());
+                    ms.readMsgInChannel(nowChannel.getId(), us);
                 }
                 break;
             case 4:
@@ -249,10 +249,20 @@ public class JavaApplication {
                     System.out.println("존재하지 않는 사용자입니다.");
                     return;
                 }
-                ms.deleteMsg(sc, nowUser);
+                ms.deleteMsg(sc, nowUser, cs, us);
                 break;
             default:
                 return;
+        }
+    }
+
+    public static void chIdToName(){
+
+    }
+    public static void uIdToName(JCFUserService us, UUID id){
+        User nowUser = us.getUserId(id);
+        if(nowUser == null) {
+            System.out.println("존재하지 않는 사용자입니다.");
         }
     }
 }

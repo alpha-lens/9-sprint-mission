@@ -3,10 +3,7 @@ package com.sprint.mission.discodeit.service.jfc;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.UserService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
 
 public class JCFUserService implements UserService {
     private final List<User> users = new ArrayList<>();
@@ -154,6 +151,13 @@ public class JCFUserService implements UserService {
     }
 
     /// Read
+    public User getUserId(UUID id) {
+        for (User u : users) {
+            if (u.getId().equals(id)) return u;
+        }
+        return null;
+    }
+
     @Override
     public void getUserName(Scanner sc) {
         System.out.println("조회하고자 하는 사용자명을 입력해주세요");
@@ -178,6 +182,14 @@ public class JCFUserService implements UserService {
         for (User u : users) {
             if (u.getName().equals(name)) {
                 return u;
+            }
+        }
+        return null;
+    }
+    public String getUserName(UUID id) {
+        for (User u : users) {
+            if (u.getId().equals(id)) {
+                return u.getName();
             }
         }
         return null;

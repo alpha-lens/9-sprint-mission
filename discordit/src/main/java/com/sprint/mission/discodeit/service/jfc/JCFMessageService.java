@@ -7,6 +7,9 @@ import com.sprint.mission.discodeit.service.MessageService;
 
 import java.util.*;
 
+/// TODO: 채널 메시지 조회헤엇
+/// 구분자, 전체 메시지 개수 넣어주기
+
 public class JCFMessageService {
     private final List<Message> msgs = new ArrayList<>();
 
@@ -32,8 +35,8 @@ public class JCFMessageService {
     }
 
     /// update logic
-    public void updateMessage(Scanner sc, User user) {
-        readMsgForUser(user);
+    public void updateMessage(Scanner sc, User user, JCFChannelService cs, JCFUserService us) {
+        readMsgForUser(user, cs, us);
 
         System.out.println("어떤 것을 수정하고 싶나요?");
         String id = sc.nextLine();
@@ -68,12 +71,12 @@ public class JCFMessageService {
         }
     }
 
-    public void readMsgInChannel(UUID chId) {
+    public void readMsgInChannel(UUID chId, JCFUserService us) {
         boolean capture = false;
 
         for(Message msg : msgs) {
             if(msg.getSendChannel().equals(chId)) {
-                System.out.println("보낸 사용자 : " + msg.getSendUserId());
+                System.out.println("보낸 사용자 : " + us.getUserName(msg.getSendUserId()));
                 System.out.println("보낸 내용 : " + msg.getContent());
                 capture = true;
             }
@@ -84,7 +87,7 @@ public class JCFMessageService {
         }
     }
 
-    public void readMsgForUser(User user) {
+    public void readMsgForUser(User user, JCFChannelService cs, JCFUserService us) {
         System.out.println("당신이 보낸 메시지는 아래와 같습니다.");
         UUID uid = user.getId();
         List<Message> msgList = new ArrayList<>();
@@ -101,14 +104,15 @@ public class JCFMessageService {
 
         for(Message msg : msgList) {
             System.out.println("ID : " + msg.getId());
-            System.out.println("ChannelID : " + msg.getSendChannel());
-            System.out.println("Context : " + msg.getContent());
+            System.out.println("보낸 사용자 : " + us.getUserName(msg.getSendUserId()));
+            System.out.println("보낸 채널명 : " + cs.readServer(msg.getSendChannel()));
+            System.out.println("내용 : " + msg.getContent());
             System.out.println("===============");
         }
     }
 
-    public void deleteMsg(Scanner sc, User user) {
-        readMsgForUser(user);
+    public void deleteMsg(Scanner sc, User user, JCFChannelService cs, JCFUserService us) {
+        readMsgForUser(user, cs, us);
         System.out.println("어떤 메시지를 삭제하고 싶나요? ID로 입력해주세요.");
         String id = sc.nextLine();
 
@@ -118,9 +122,10 @@ public class JCFMessageService {
                 System.out.println("해당 메시지를 삭제합니까? : Y or any Key");
                 String ins = sc.nextLine();
 
-                if (ins.toUpperCase().equals("Y")) {
+                if (ins.equalsIgnoreCase("Y")) {
                     msgs.remove(msg);
                     System.out.println("성공!");
+                    return;
                 } else {
                     System.out.println("초기로 돌아갑니다");
                     return;
