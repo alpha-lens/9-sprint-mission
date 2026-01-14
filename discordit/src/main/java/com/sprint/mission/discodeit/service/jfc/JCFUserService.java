@@ -7,6 +7,8 @@ import java.util.*;
 
 public class JCFUserService implements UserService {
     private final List<User> users = new ArrayList<>();
+//    private final Map<UUID, User> users = new HashMap<>();
+//    private final Map<UUID, String> usersName = new HashMap<>();
 
     /// Create
     @Override
@@ -24,12 +26,9 @@ public class JCFUserService implements UserService {
 //                return;
 //            }
 //        });
-
-        for(User user : users) {
-            if(Objects.equals(user.getName(), name)) {
-                System.out.println("이미 존재하는 사용자명입니다.");
-                return;
-            }
+        if(users.stream().noneMatch(e -> Objects.equals(e.getName(), name))) {
+            System.out.println("이미 존재하는 사용자명입니다.");
+            return;
         }
 
         System.out.print("사용할 비밀번호를 입력해주세요 : ");

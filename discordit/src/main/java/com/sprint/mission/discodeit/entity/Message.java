@@ -1,11 +1,14 @@
 package com.sprint.mission.discodeit.entity;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 public class Message {
     /// Test:
     /// HashMap을 이용해서 {mId, chId}, {mId, uId}를 묶고
     /// {mId : 나머지 내용} 형태로 묶어볼까?
+    private final HashMap<UUID, UUID> mchId = new HashMap<>();
+    private final HashMap<UUID, UUID> muId = new HashMap<>();
     private final UUID id;
     private final Long createAt;
     private UUID channelId;
