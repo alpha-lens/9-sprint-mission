@@ -3,27 +3,32 @@ package com.sprint.mission.discodeit.entity;
 import java.util.UUID;
 
 public class Message {
-    private UUID id;
+    /// Test:
+    /// HashMap을 이용해서 {mId, chId}, {mId, uId}를 묶고
+    /// {mId : 나머지 내용} 형태로 묶어볼까?
+    private final UUID id;
+    private final Long createAt;
     private UUID channelId;
     private UUID userId;
-    private long createAt;
-    private long updateAt;
+    private Long updateAt;
     private String content;
 
     public Message(UUID channelId, UUID userId, String content){
+        long n = System.currentTimeMillis();
         this.id = UUID.randomUUID();
         this.channelId = channelId;
         this.userId = userId;
         this.content = content;
-        this.createAt = System.currentTimeMillis();
-        this.updateAt = System.currentTimeMillis();
+        this.createAt = n;
+        this.updateAt = n;
     }
 
     public Message(String content){
+        long n = System.currentTimeMillis();
         this.id = UUID.randomUUID();
         this.content = content;
-        this.createAt = System.currentTimeMillis();
-        this.updateAt = System.currentTimeMillis();
+        this.createAt = n;
+        this.updateAt = n;
     }
 
     public UUID getId(){return this.id;};

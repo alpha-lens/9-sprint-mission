@@ -62,6 +62,7 @@ public class JCFMessageService {
             if(msg.getSendChannel().equals(chId)) {
                 System.out.println("보낸 사용자 : " + msg.getSendUserId());
                 System.out.println("보낸 내용 : " + msg.getContent());
+                System.out.println("===============");
                 capture = true;
             }
         }

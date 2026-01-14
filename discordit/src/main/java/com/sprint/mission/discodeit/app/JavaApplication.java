@@ -37,35 +37,6 @@ public class JavaApplication {
             if (menu == 0) return;
 
             JavaApplication.route(sc, menu, us, cs, ms);
-
-//            switch (menu) {
-//                case 1:
-//                    us.createUser(sc);
-//                    break;
-//                case 2:
-//                    us.getAllUserName();
-//                    break;
-//                case 3:
-//                    System.out.println("생성하고자 하는 채널명을 알려주세요");
-//                    name = sc.nextLine();
-//                    cs.createServer(name);
-//                    break;
-//                case 4:
-//                    cs.readAllServer();
-//                    break;
-//                case 5:
-//                    System.out.println("어느 채널의 메시지를 확인할까요?");
-//                    cs.readAllServer();
-//                    System.out.println("ID 값을 복사해서 넣어주세요.");
-//                    name = sc.nextLine();
-//                    ms.readMsgInChannel(UUID.fromString(name));
-//                    break;
-//                case 6:
-//                    break;
-//                default:
-//                    System.out.println("Bye bye");
-//                    run = false;
-//            }
         }
     }
 
@@ -190,7 +161,7 @@ public class JavaApplication {
                     return;
                 }
 
-                System.out.println("어디로 메시지인가요?");
+                System.out.println("어디로 보내는 메시지인가요?");
                 cName = sc.nextLine();
                 nowChannel = cs.readServer(cName);
                 if(nowChannel == null) {
@@ -229,7 +200,7 @@ public class JavaApplication {
                     }
                     ms.readMsgForUser(nowUser, cs, us);
                 } else if (m == 2) {
-                    System.out.println("어디로 메시지인가요?");
+                    System.out.println("어디로 보내는 메시지인가요?");
                     cName = sc.nextLine();
                     nowChannel = cs.readServer(cName);
                     if(nowChannel == null) {
@@ -256,8 +227,11 @@ public class JavaApplication {
         }
     }
 
-    public static void chIdToName(){
-
+    public static void chIdToName(JCFChannelService cs, UUID id){
+        String nowChannel = cs.readServer(id);
+        if(nowChannel == null) {
+            System.out.println("존재하지 않는 사용자입니다.");
+        }
     }
     public static void uIdToName(JCFUserService us, UUID id){
         User nowUser = us.getUserId(id);

@@ -12,15 +12,7 @@ import java.util.UUID;
 public class JCFChannelService implements ChannelService {
     private final List<Channel> channels = new ArrayList<>();
 
-    /// create
-    public void createServer(String name) {
-        if (check(name) != null) {
-            channels.add(new Channel(name));
-            System.out.println("잘 들어갔어요!");
-            return;
-        }
-        System.out.println("이미 존재하는 채널명이에요!");
-    }
+    @Override
     public void createServer(Scanner sc) {
         System.out.println("사용하려는 서버명이 무엇인가요?");
         String name = sc.nextLine();
@@ -32,6 +24,7 @@ public class JCFChannelService implements ChannelService {
         System.out.println("이미 존재하는 채널명이에요!");
     }
 
+    @Override
     public void updateServer(Scanner sc) {
         System.out.println("변경하고자 하는 채널명을 알려주세요");
         String name = sc.nextLine();
@@ -53,6 +46,7 @@ public class JCFChannelService implements ChannelService {
         System.out.println("잘 변경되었어요!");
     }
 
+    @Override
     public void readServer(Scanner sc) {
         System.out.println("조회하고자 하는 채널명을 입력해주세요");
         String name = sc.nextLine();
@@ -71,6 +65,7 @@ public class JCFChannelService implements ChannelService {
         System.out.println("===================");
     }
 
+    @Override
     public Channel readServer(String name) {
         Channel result =  check(name);
 
@@ -81,6 +76,7 @@ public class JCFChannelService implements ChannelService {
         return result;
     }
 
+    @Override
     public String readServer(UUID id) {
         Channel result = check(id);
 
@@ -91,6 +87,7 @@ public class JCFChannelService implements ChannelService {
         return result.getName();
     }
 
+    @Override
     public void readAllServer() {
         for (Channel ch : channels) {
             System.out.println("채널명 : " + ch.getName());
@@ -102,6 +99,7 @@ public class JCFChannelService implements ChannelService {
         System.out.println("현재 총 채널수 : " + channels.size());
     }
 
+    @Override
     public void deleteServer(Scanner sc) {
         String name;
         int n;
@@ -129,21 +127,22 @@ public class JCFChannelService implements ChannelService {
         }
     }
 
+    @Override
     public Channel check(String name) {
-        for (Channel u : channels) {
-            if (u.getName().equals(name)) {
-                return u;
-            }
-        }
-        return null;
+//        for (Channel u : channels) {
+//            if (u.getName().equals(name)) {
+//                return u;
+//            }
+//        }
+//        return null;
+        return channels.stream().filter(u -> u.getName().equals(name)).findFirst().orElse(null);
     }
 
+    @Override
     public Channel check(UUID id) {
-        for (Channel u : channels) {
-            if (u.getId().equals(id)) {
-                return u;
-            }
-        }
-        return null;
+        return channels.stream()
+                .filter(u -> u.getId().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 }

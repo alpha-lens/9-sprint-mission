@@ -4,17 +4,17 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class Channel {
-    private UUID id;
+    private final UUID id;
+    private final Long createAt;
     private String name;
-    private long createAt;
-    private long updateAt;
-    HashMap<UUID, String> message = new HashMap<UUID, String>();
+    private Long updateAt;
 
     public Channel(String name) {
+        long n = System.currentTimeMillis();
         this.name = name;
         this.id = UUID.randomUUID();
-        this.createAt = System.currentTimeMillis();
-        this.updateAt = System.currentTimeMillis();
+        this.createAt = n;
+        this.updateAt = n;
     }
 
     /// getter
@@ -22,9 +22,6 @@ public class Channel {
     public String getName() {return this.name;}
     public long getCreateAt() {return this.createAt;}
     public long getUpdateAt() {return this.updateAt;}
-    public HashMap<UUID, String> getMessage() {
-        return this.message;
-    }
 
     /// setter
     public void setUpdateAt() {this.updateAt = System.currentTimeMillis();}
