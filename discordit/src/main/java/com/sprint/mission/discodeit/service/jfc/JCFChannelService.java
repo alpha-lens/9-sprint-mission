@@ -4,24 +4,27 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.ChannelService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class JCFChannelService implements ChannelService {
-    private final List<Channel> channels = new ArrayList<>();
+    private final Map<String, Channel> channelNameMap = new ConcurrentHashMap<>();
 
     @Override
     public void createServer(Scanner sc) {
         System.out.println("사용하려는 서버명이 무엇인가요?");
         String name = sc.nextLine();
-        if (check(name) == null) {
-            channels.add(new Channel(name));
-            System.out.println("잘 들어갔어요!");
+
+        if (check(name) != null) {
+            System.out.println("이미 존재하는 채널명이에요!");
             return;
         }
-        System.out.println("이미 존재하는 채널명이에요!");
+
+//        channels.add(new Channel(name));
+        //    private final List<Channel> channels = new ArrayList<>();
+        Channel tmp = new Channel(name);
+        channelNameMap.put(name, tmp);
+        System.out.println("잘 들어갔어요!");
     }
 
     @Override
@@ -41,13 +44,15 @@ public class JCFChannelService implements ChannelService {
 
         name = sc.nextLine();
 
+        channelNameMap.put(name, result);
+        channelNameMap.remove(result.getName());
         result.setName(name);
         System.out.println(result.getName());
         System.out.println("잘 변경되었어요!");
     }
 
     @Override
-    public void readServer(Scanner sc) {
+    public void readChannel(Scanner sc) {
         System.out.println("조회하고자 하는 채널명을 입력해주세요");
         String name = sc.nextLine();
         Channel result =  check(name);
@@ -66,7 +71,7 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
-    public Channel readServer(String name) {
+    public Channel readChannel(String name) {
         Channel result =  check(name);
 
         if(result == null) {
@@ -77,7 +82,7 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
-    public String readServer(UUID id) {
+    public String readChannel(UUID id) {
         Channel result = check(id);
 
         if(result == null) {
@@ -88,19 +93,31 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
-    public void readAllServer() {
-        for (Channel ch : channels) {
+    public void readAllChannel() {
+        if(channelNameMap.isEmpty()) {
+            System.out.println("채널이 존재하지 않습니다.");
+            return;
+        }
+
+        channelNameMap.values().forEach(ch -> {
             System.out.println("채널명 : " + ch.getName());
             System.out.println("채널ID : " + ch.getId());
             System.out.println("채널수정일 : " + ch.getUpdateAt());
             System.out.println("채널생성일 : " + ch.getCreateAt());
             System.out.println("===================");
-        }
-        System.out.println("현재 총 채널수 : " + channels.size());
+        });
+//        for (Channel ch : channels) {
+//            System.out.println("채널명 : " + ch.getName());
+//            System.out.println("채널ID : " + ch.getId());
+//            System.out.println("채널수정일 : " + ch.getUpdateAt());
+//            System.out.println("채널생성일 : " + ch.getCreateAt());
+//            System.out.println("===================");
+//        }
+        System.out.println("현재 총 채널수 : " + channelNameMap.size());
     }
 
     @Override
-    public void deleteServer(Scanner sc) {
+    public void deleteChannel(Scanner sc) {
         String name;
         int n;
         System.out.println("[Warning!] 지금 계정을 삭제하려 하고 있습니다.");
@@ -117,26 +134,31 @@ public class JCFChannelService implements ChannelService {
         System.out.print("삭제하려는 채널명을 알려주세요: ");
         name = sc.nextLine();
 
-        Channel target = check(name);
-
-        if (target != null) {
-            channels.remove(target);
-            System.out.println("채널이 삭제되었습니다.");
-        } else {
-            System.out.println("일치하는 채널을 찾을 수 없습니다.");
+        if(channelNameMap.get(name) == null) {
+            System.out.println("해당 채널을 찾을 수 없습니다.");
+            return;
         }
+
+        channelNameMap.remove(name);
+        System.out.println("해당 채널이 삭제되었습니다.");
     }
 
     @Override
     public Channel check(String name) {
-        return channels.stream().filter(u -> u.getName().equals(name)).findFirst().orElse(null);
+//        return channels.stream().filter(u -> u.getName().equals(name)).findFirst().orElse(null);
+        return channelNameMap.get(name);
     }
 
     @Override
     public Channel check(UUID id) {
-        return channels.stream()
-                .filter(u -> u.getId().equals(id))
+//        return channels.stream()
+//                .filter(u -> u.getId().equals(id))
+//                .findFirst()
+//                .orElse(null);
+        return channelNameMap.values().stream().filter(u -> u.getId().equals(id))
                 .findFirst()
                 .orElse(null);
+
+        /// 채널ID로도 관리하는 형태를 만드는게 좋을까?
     }
 }

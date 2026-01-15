@@ -1,14 +1,11 @@
 package com.sprint.mission.discodeit.app;
 
 import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.jfc.JCFChannelService;
 import com.sprint.mission.discodeit.service.jfc.JCFMessageService;
 import com.sprint.mission.discodeit.service.jfc.JCFUserService;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -133,12 +130,12 @@ public class JavaApplication {
                 m = sc.nextInt();
                 sc.nextLine();
 
-                if(m == 1) cs.readServer(sc);
-                else if(m == 2) cs.readAllServer();
+                if(m == 1) cs.readChannel(sc);
+                else if(m == 2) cs.readAllChannel();
                 break;
             case 4:
                 /// delete
-                cs.deleteServer(sc);
+                cs.deleteChannel(sc);
                 break;
             default:
                 return;
@@ -155,16 +152,18 @@ public class JavaApplication {
                 /// create
                 System.out.println("누가 보내는 메시지인가요?");
                 uName = sc.nextLine();
-                nowUser = us.getUserName(uName);
-                if(nowUser == null) {
+                try {
+                    nowUser = us.getUserName(uName);
+                } catch (Exception e) {
                     System.out.println("존재하지 않는 사용자입니다.");
                     return;
                 }
 
                 System.out.println("어디로 보내는 메시지인가요?");
                 cName = sc.nextLine();
-                nowChannel = cs.readServer(cName);
-                if(nowChannel == null) {
+                try {
+                    nowChannel = cs.readChannel(cName);
+                } catch (Exception e) {
                     System.out.println("존재하지 않는 채널입니다.");
                     return;
                 }
@@ -202,7 +201,7 @@ public class JavaApplication {
                 } else if (m == 2) {
                     System.out.println("어디로 보내는 메시지인가요?");
                     cName = sc.nextLine();
-                    nowChannel = cs.readServer(cName);
+                    nowChannel = cs.readChannel(cName);
                     if(nowChannel == null) {
                         System.out.println("존재하지 않는 채널입니다.");
                         return;
@@ -228,7 +227,7 @@ public class JavaApplication {
     }
 
     public static void chIdToName(JCFChannelService cs, UUID id){
-        String nowChannel = cs.readServer(id);
+        String nowChannel = cs.readChannel(id);
         if(nowChannel == null) {
             System.out.println("존재하지 않는 사용자입니다.");
         }

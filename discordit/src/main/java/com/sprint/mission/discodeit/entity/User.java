@@ -32,7 +32,7 @@ public class User {
         this.pw = pw;
         setUpdateAt();
     }
-    public void setEmail(String Email) {this.email = email;setUpdateAt();}
+    public void setEmail(String email) {this.email = email;setUpdateAt();}
     public void setName(String name) {this.name = name;setUpdateAt();}
     public void setPhonenumber(String phonenumber) {this.phonenumber = phonenumber;setUpdateAt();}
 }
