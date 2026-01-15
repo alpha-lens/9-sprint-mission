@@ -129,12 +129,6 @@ public class JCFChannelService implements ChannelService {
 
     @Override
     public Channel check(String name) {
-//        for (Channel u : channels) {
-//            if (u.getName().equals(name)) {
-//                return u;
-//            }
-//        }
-//        return null;
         return channels.stream().filter(u -> u.getName().equals(name)).findFirst().orElse(null);
     }
 

@@ -7,7 +7,7 @@ import java.util.*;
 
 public class JCFUserService implements UserService {
     private final List<User> users = new ArrayList<>();
-//    private final Map<UUID, User> users = new HashMap<>();
+//    private final Map<UUID, User> usersMap = new HashMap<>();
 //    private final Map<UUID, String> usersName = new HashMap<>();
 
     /// Create
@@ -20,20 +20,18 @@ public class JCFUserService implements UserService {
         name = sc.nextLine();
 
         /// forEach 안에서 return은 forEach문을 종료하는 것으로 끝남...
-//        users.forEach(user -> {
-//            if(Objects.equals(user.getName(), name)) {
-//                System.out.println("이미 존재하는 사용자명입니다.");
-//                return;
-//            }
-//        });
-        if(users.stream().noneMatch(e -> Objects.equals(e.getName(), name))) {
+        if(users.stream().anyMatch(e -> Objects.equals(e.getName(), name))) {
             System.out.println("이미 존재하는 사용자명입니다.");
             return;
         }
 
         System.out.print("사용할 비밀번호를 입력해주세요 : ");
         pw = sc.nextLine();
-        users.add(new User(name, pw));
+        User user = new User(name, pw);
+        users.add(user);
+
+//        usersName.put(user.getId(), name);
+//        usersMap.put(user.getId(), user);
     }
 
     ///  테스트 코드 작성용
@@ -71,90 +69,59 @@ public class JCFUserService implements UserService {
         }
     }
     private void updateUserName(Scanner sc){
-        System.out.println("변경하고자 하는 사용자명을 입력해주세요");
-        String name = sc.nextLine();
+        User c = check(sc, "변경");
 
-        System.out.println("해당 사용자의 비밀번호를 입력해주세요");
-        String pw = sc.nextLine();
-
-        if(check(name, pw) != null) {
-            System.out.println("변경하고자 하는 이름을 입력해주세요");
-            String rename = sc.nextLine();
-            for (User u : users) {
-                if (u.getName().equals(name) && u.getPw().equals(pw)) {
-                    u.setName(rename);
-                    System.out.println(name + "에서 " + rename + "으로 변경되었습니다.");
-                    return;
-                }
-            }
-        } else {
+        if(check(sc, "변경") == null) {
             System.out.println("맞는 계정이 없습니다.");
+            return;
         }
+
+        System.out.println("변경하고자 하는 이름을 입력해주세요");
+        String rename = sc.nextLine().trim();
+//        usersMap.keySet();
+
+        System.out.println(c.getName() + "에서 " + rename +"으로 변경되었습니다.");
+        c.setEmail(rename);
     }
     private void updateUserPw(Scanner sc){
-        System.out.println("변경하고자 하는 사용자명을 입력해주세요");
-        String name = sc.nextLine();
-        System.out.println("해당 사용자의 비밀번호를 입력해주세요");
-        String pw = sc.nextLine();
-        if(check(name, pw) != null) {
-            System.out.println("변경하고자 하는 비밀번호를 입력해주세요");
-            String repw = sc.nextLine();
-            for (User u : users) {
-                if (u.getName().equals(name) && u.getPw().equals(pw)) {
-                    u.setPw(repw);
-                    System.out.println("성공");
-                    return;
-                }
-            }
-        } else {
+        User c = check(sc, "변경");
+        if (c == null) {
             System.out.println("맞는 계정이 없습니다.");
+            return;
         }
+        System.out.println("변경하고자 하는 비밀번호를 입력해주세요");
+        String repw = sc.nextLine();
+        System.out.println("상공");
+        c.setPw(repw);
     }
     private void updateUserEmail(Scanner sc){
-        System.out.println("변경하고자 하는 사용자명을 입력해주세요");
-        String name = sc.nextLine();
-        System.out.println("해당 사용자의 비밀번호를 입력해주세요");
-        String pw = sc.nextLine();
-        if(check(name, pw) != null) {
-            System.out.println("변경하고자 하는 이메일을 입력해주세요");
-            String remail = sc.nextLine();
-            for (User u : users) {
-                if (u.getName().equals(name) && u.getPw().equals(pw)) {
-                    u.setEmail(remail);
-                    System.out.println(u.getEmail() + "에서 " + remail + "으로 변경되었습니다.");
-                    return;
-                }
-            }
-        } else {
+        User c = check(sc, "변경");
+        if (c == null) {
             System.out.println("맞는 계정이 없습니다.");
+            return;
         }
+        System.out.println("변경하고자 하는 이메일을 입력해주세요");
+        String remail = sc.nextLine();
+
+        System.out.println(c.getEmail() + "에서 " + remail +"으로 변경되었습니다.");
+        c.setEmail(remail);
     }
     private void updateUserPhonenumber(Scanner sc){
-        System.out.println("변경하고자 하는 사용자명을 입력해주세요");
-        String name = sc.nextLine();
-        System.out.println("해당 사용자의 비밀번호를 입력해주세요");
-        String pw = sc.nextLine();
-        if(check(name, pw) != null) {
-            System.out.println("변경하고자 하는 연락처를 입력해주세요");
-            String repn = sc.nextLine();
-            for (User u : users) {
-                if (u.getName().equals(name) && u.getPw().equals(pw)) {
-                    u.setPhonenumber(repn);
-                    System.out.println(u.getPhonenumber() + "에서 " + repn + "으로 변경되었습니다.");
-                    return;
-                }
-            }
-        } else {
+        User c = check(sc, "변경");
+        if (c == null) {
             System.out.println("맞는 계정이 없습니다.");
+            return;
         }
+
+        System.out.println("변경하고자 하는 연락처를 입력해주세요");
+        String repn = sc.nextLine();
+        System.out.println(c.getPhonenumber() + "에서 " + repn +"으로 변경되었습니다.");
+        c.setPhonenumber(repn);
     }
 
     /// Read
     public User getUserId(UUID id) {
-        for (User u : users) {
-            if (u.getId().equals(id)) return u;
-        }
-        return null;
+        return users.stream().filter(u -> u.getId().equals(id)).findFirst().orElse(null);
     }
 
     @Override
@@ -178,20 +145,12 @@ public class JCFUserService implements UserService {
         System.out.println("조회하고자 하는 사용자가 없습니다.");
     }
     public User getUserName(String name) {
-        for (User u : users) {
-            if (u.getName().equals(name)) {
-                return u;
-            }
-        }
-        return null;
+        return users.stream().filter(e -> e.getName().equals(name)).findFirst().orElse(null);
     }
     public String getUserName(UUID id) {
-        for (User u : users) {
-            if (u.getId().equals(id)) {
-                return u.getName();
-            }
-        }
-        return null;
+        User user = users.stream().filter(e -> e.getId().equals(id)).findFirst().orElse(null);
+        if(user == null) return null;
+        return user.getName();
     }
     @Override
     public void getAllUserName() {
@@ -210,8 +169,6 @@ public class JCFUserService implements UserService {
     /// Delete
     @Override
     public void deleteUser(Scanner sc) {
-        String name;
-        String pw;
         int n;
         System.out.println("[Warning!] 지금 계정을 삭제하려 하고 있습니다.");
         System.out.println("[Warning!] 만약 잘못 들어오신 경우, 0을 눌러주시기 바랍니다.");
@@ -223,29 +180,22 @@ public class JCFUserService implements UserService {
             return;
         };
 
-        System.out.print("삭제하려는 계정의 이름을 알려주세요: ");
-        name = sc.next();
-        System.out.print("삭제하려는 계정의 비밀번호를 알려주세요: ");
-        pw = sc.next();
+        User target = check(sc, "삭제");
 
-        User target = check(name, pw);
-
-        if (target != null) {
-            users.remove(target);
-            System.out.println("계정이 삭제되었습니다.");
-        } else {
+        if (target == null) {
             System.out.println("일치하는 계정을 찾을 수 없습니다.");
+            return;
         }
+        users.remove(target);
+        System.out.println("계정이 삭제되었습니다.");
     }
 
-    public User check(String name, String pw) {
-        User target = null;
-        for (User u : users) {
-            if (u.getName().equals(name) && u.getPw().equals(pw)) {
-                target = u;   // 리스트 안에 있는 "그 객체"
-                return target;
-            }
-        }
-        return target;
+    public User check(Scanner sc, String work) {
+        System.out.println(work+"하고자 하는 사용자명을 입력해주세요");
+        String name = sc.nextLine();
+        System.out.println("해당 사용자의 비밀번호를 입력해주세요");
+        String pw = sc.nextLine();
+
+        return users.stream().filter(u -> u.getName().equals(name) && u.getPw().equals(pw)).findFirst().orElse(null);
     }
 }
