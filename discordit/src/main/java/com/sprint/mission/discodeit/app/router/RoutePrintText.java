@@ -6,17 +6,27 @@ import java.util.List;
 public class RoutePrintText {
     static void printText(String text) {
         List<String> retouchText = new ArrayList<>();
+
         switch(text.toLowerCase()) {
             case "user":
                 retouchText.add("User");
                 retouchText.add("사용자");
+                break;
+
             case "channel":
                 retouchText.add("Channel");
                 retouchText.add("채널");
+                break;
+
             case "message":
                 retouchText.add("Message");
                 retouchText.add("메세지");
+                break;
+
+            default:
+                return;
         }
+
         System.out.println(retouchText.get(0) + " 관련 서비스입니다.");
         System.out.println("어떤 서비스를 원하시나요?");
         System.out.println("=====================");

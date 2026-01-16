@@ -27,7 +27,7 @@ public class JCFUserService implements UserService {
         String pw;
         System.out.println("회원가입에 오신 것을 환영합니다.");
         System.out.print("먼저, 사용할 이름을 작성해주세요 : ");
-        name = sc.nextLine();
+        name = sc.nextLine().trim();
 
         if (usersName.containsKey(name)) {
             System.out.println("이미 존재하는 사용자명입니다.");
@@ -61,7 +61,7 @@ public class JCFUserService implements UserService {
         System.out.println("3. 사용자 이메일 변경");
         System.out.println("4. 사용자 전화번호 변경");
         System.out.println("진행하시려면 1, 아니라면 아무 키나 입력해주세요.");
-        String input = sc.nextLine();
+        String input = sc.nextLine().trim();
         try{
             isContinue = Integer.parseInt(input.trim());
         } catch (NumberFormatException e) {
@@ -69,13 +69,11 @@ public class JCFUserService implements UserService {
             updateUser(sc);
         }
 
-        switch(isContinue) {
-            case 1:
-                updateUserInfo(sc, checkUpdateUser);
-            default:
-                System.out.println("이전 메뉴로 돌아갑니다.");
-                return;
+        if (isContinue == 1) {
+            updateUserInfo(sc, checkUpdateUser);
         }
+        System.out.println("이전 메뉴로 돌아갑니다.");
+        return;
     }
 
     /// 사실 분리할 필요가 없긴 한데, 너무 길어져서 분리함

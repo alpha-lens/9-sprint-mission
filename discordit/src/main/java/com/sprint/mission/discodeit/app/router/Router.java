@@ -3,40 +3,47 @@ package com.sprint.mission.discodeit.app.router;
 import java.util.Scanner;
 
 public class Router {
-    public static void route(Scanner sc, int n) {
-        int m;
-        switch (n) {
-            /// TODO: 중복 출력 부분 별도 로직으로 분리하기
-            case 1:
+    private static int inputChecker(Scanner sc, int routeNumber) {
+        try{
+            return Integer.parseInt(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("잘못된 입력값입니다.");
+            route(sc, routeNumber);
+        }
+        return -1;
+    }
 
-                m = sc.nextInt();
-                sc.nextLine();
-                RouteUserService.userService(sc, m);
+    public static void route(Scanner sc, int menu) {
+        int subMenu = 0;
+
+        switch (menu) {
+            case 1:
+                RoutePrintText.printText("user");
+                subMenu = inputChecker(sc, menu);
+
+                if(subMenu == -1) return;
+
+                RouteUserService.userService(sc, subMenu);
                 break;
+
             case 2:
-                System.out.println("채널 관련 서비스입니다.");
-                System.out.println("어떤 서비스를 원하시나요?");
-                System.out.println("=====================");
-                System.out.println("1. Channel Create");
-                System.out.println("2. Channel Update");
-                System.out.println("3. Channel Read");
-                System.out.println("4. Channel Delete");
-                m = sc.nextInt();
-                sc.nextLine();
-                RouteChannelService.channelService(sc, m);
+                RoutePrintText.printText("channel");
+                subMenu = inputChecker(sc, menu);
+
+                if(subMenu == -1) return;
+
+                RouteChannelService.channelService(sc, subMenu);
                 break;
+
             case 3:
-                System.out.println("메시지 관련 서비스입니다.");
-                System.out.println("어떤 서비스를 원하시나요?");
-                System.out.println("=====================");
-                System.out.println("1. Message Create");
-                System.out.println("2. Message Update");
-                System.out.println("3. Message Read");
-                System.out.println("4. Message Delete");
-                m = sc.nextInt();
-                sc.nextLine();
-                RouteMessageService.messageService(sc, m);
+                RoutePrintText.printText("message");
+                subMenu = inputChecker(sc, menu);
+
+                if(subMenu == -1) return;
+
+                RouteMessageService.messageService(sc, subMenu);
                 break;
+
             default:
                 return;
         }
