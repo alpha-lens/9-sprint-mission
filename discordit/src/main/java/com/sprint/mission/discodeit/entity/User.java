@@ -1,8 +1,5 @@
 package com.sprint.mission.discodeit.entity;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 public class User {
@@ -58,13 +55,13 @@ public class User {
         this.updateAt = System.currentTimeMillis();
     }
 
-    public void updateUser(String name, String pw, String email, String phoneNumber) {
+    public void updateUser(String name, String password, String email, String phoneNumber) {
         /// null checker
-        boolean[] argumentsList = {check(name), check(pw), check(email), check(phoneNumber)};
+        boolean[] argumentsList = {check(name), check(password), check(email), check(phoneNumber)};
         if(argumentsList[0]) setName(name);
-        if(argumentsList[1]) setName(pw);
-        if(argumentsList[2]) setName(email);
-        if(argumentsList[3]) setName(phoneNumber);
+        if(argumentsList[1]) setPassword(password);
+        if(argumentsList[2]) setEmail(email);
+        if(argumentsList[3]) setPhoneNumber(phoneNumber);
     }
 
     private boolean check(String text) {
@@ -76,8 +73,8 @@ public class User {
         setUpdateAt();
     }
 
-    private void setPw(String pw) {
-        this.pw = pw;
+    private void setPassword(String password) {
+        this.pw = password;
         setUpdateAt();
     }
 

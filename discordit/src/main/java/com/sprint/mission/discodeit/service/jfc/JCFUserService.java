@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.jfc;
 
+import com.sprint.mission.discodeit.Input;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.UserService;
 
@@ -7,18 +8,17 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class JCFUserService implements UserService {
-    private final Map<UUID, User> usersMap = new ConcurrentHashMap<>();
-    private final Map<String, UUID> usersName = new ConcurrentHashMap<>();
     private JCFUserService() {
     }
-
     private static class Holder {
         private static final JCFUserService INSTANCE = new JCFUserService();
     }
-
     public static JCFUserService getInstance() {
         return Holder.INSTANCE;
     }
+
+    private final Map<UUID, User> usersMap = new ConcurrentHashMap<>();
+    private final Map<String, UUID> usersName = new ConcurrentHashMap<>();
 
     /// Create
     @Override
@@ -46,7 +46,6 @@ public class JCFUserService implements UserService {
     /// Update
     @Override
     public void updateUser(Scanner sc) {
-        int isContinue = 0;
         System.out.println("====================");
         System.out.println("사용자 변경 메뉴입니다.");
         User checkUpdateUser = check(sc, "변경");
@@ -55,25 +54,7 @@ public class JCFUserService implements UserService {
             return;
         }
 
-        System.out.println("현재 사용자 변경은 다음과 같은 순서로 입렵받게 됩니다.");
-        System.out.println("1. 사용자 이름 변경");
-        System.out.println("2. 사용자 비밀번호 변경");
-        System.out.println("3. 사용자 이메일 변경");
-        System.out.println("4. 사용자 전화번호 변경");
-        System.out.println("진행하시려면 1, 아니라면 아무 키나 입력해주세요.");
-        String input = sc.nextLine().trim();
-        try{
-            isContinue = Integer.parseInt(input.trim());
-        } catch (NumberFormatException e) {
-            System.out.println("잘못 입력하셨습니다.");
-            updateUser(sc);
-        }
-
-        if (isContinue == 1) {
-            updateUserInfo(sc, checkUpdateUser);
-        }
-        System.out.println("이전 메뉴로 돌아갑니다.");
-        return;
+        updateUserInfo(sc, checkUpdateUser);
     }
 
     /// 사실 분리할 필요가 없긴 한데, 너무 길어져서 분리함
@@ -84,84 +65,31 @@ public class JCFUserService implements UserService {
         String reMail;
         String rePhoneNumber;
 
+        while(true) {
+        /// 정규식은 있다는건 알아도 어떤 규칙인지 몰라서 GPT에게 물어봤습니다.
         System.out.println("변경하지 않으시려면 엔터를 눌러주시기 바랍니다.");
-        System.out.println("현재 사용자명 : " + checkUpdateUser.getName());
-        System.out.print("변경하실 사용자명 : ");
-        while(true) {
-            reName = sc.nextLine().trim();
-            /// regex rule
-            /// \\S+ => 공백이 없을 때 true
-            /// !rePassword.matches("\\S+")기에 공백이 포함되어 있으면 true를 반환
-            if (!reName.matches("\\S+")) {
-                System.out.println("사용자명은 공백 없이 입력해주세요.");
-                continue;
-            }
-            if (reName.isEmpty()) reName = null;
-            break;
-        }
-        System.out.println();
 
-        System.out.print("변경하실 비밀번호 : ");
-        while(true) {
-            rePassword = sc.nextLine().trim();
-            if (!rePassword.matches("\\S+")) {
-                System.out.println("비밀번호에 공백을 포함할 수 없습니다.");
-                continue;
-            }
-            if (rePassword.isEmpty()) rePassword = null;
-            break;
-        }
-        System.out.println();
-
-        System.out.println("현재 이메일 : " + checkUpdateUser.getEmail());
-        System.out.print("변경하실 이메일 : ");
-        while(true) {
-            reMail = sc.nextLine().trim();
-            /// regex rule
-            /// 앞뒤로 공백이 없어야 하며 중간에 @와 .이 있어야 한다는 형식
-            if (reMail.isEmpty() || !reMail.matches("\\S+@\\S+\\.\\S+")) {
-                System.out.println("이메일 형식이 맞지 않습니다.");
-                continue;
-            }
-            break;
-        }
-        System.out.println();
-
-        System.out.println("현재 전화번호 : " + checkUpdateUser.getPhoneNumber());
-        System.out.print("변경하실 전화번호 : ");
-
-        while(true) {
-            rePhoneNumber = sc.nextLine().trim();
-            if (!rePhoneNumber.matches("\\S+") && (rePhoneNumber.length() == 10 || rePhoneNumber.length() == 11)) {
-                System.out.println("잘못된 입력 형식입니다.");
-                continue;
-            }
-            if(rePhoneNumber.isEmpty()) rePhoneNumber = null;
-            break;
-        }
+        reName = Input.inputUpdateField(sc, "사용자명", "\\S+", checkUpdateUser.getName());
+        rePassword = Input.inputUpdateField(sc, "비밀번호", "\\S+", null);
+        reMail = Input.inputUpdateField(sc, "이메일", "\\S+@\\S+\\.\\S+", checkUpdateUser.getEmail());
+        rePhoneNumber = Input.inputUpdateField(sc, "전화번호", "^\\\\d{10,11}$", checkUpdateUser.getPhoneNumber());
 
         System.out.println("이대로 진행하시겠습니까?");
-        System.out.println("맞으면 y, 취소하려면 n");
-        System.out.println("다시 입력하시려면 re를 입력해주세요.");
+        System.out.println("맞으면 y, 다시 입력하려면 re");
+        System.out.println("취소하려면 아무 키나 입력해주시기 바랍니다.");
 
-        while(true) {
             String finalCheckIsContinue = sc.nextLine();
             switch (finalCheckIsContinue.toLowerCase()){
                 case "y":
                     checkUpdateUser.updateUser(reName, rePassword, reMail, rePhoneNumber);
                     return;
-                case "n":
-                    return;
                 case "re":
-                    updateUserInfo(sc, checkUpdateUser);
-                    return;
-                default:
                     continue;
+                default:
+                    return;
             }
         }
     }
-
-
 
     /// Read
     public User getUserId(UUID id) {
@@ -175,17 +103,18 @@ public class JCFUserService implements UserService {
 
         if (usersName.get(name) == null) {
             System.out.println("조회하고자 하는 사용자가 없습니다.");
+            return;
         }
 
-        User u = usersMap.get(usersName.get(name));
+        User user = usersMap.get(usersName.get(name));
 
         System.out.println("====================");
-        System.out.println("사용자ID : " + u.getId());
-        System.out.println("사용자명 : " + u.getName());
-        System.out.println("이메일 : " + u.getEmail());
-        System.out.println("전화번호 : " + u.getPhoneNumber());
-        System.out.println("생성일 : " + u.getCreateAt());
-        System.out.println("수정일 : " + u.getUpdateAt());
+        System.out.println("사용자ID : " + user.getId());
+        System.out.println("사용자명 : " + user.getName());
+        System.out.println("이메일 : " + user.getEmail());
+        System.out.println("전화번호 : " + user.getPhoneNumber());
+        System.out.println("생성일 : " + user.getCreateAt());
+        System.out.println("수정일 : " + user.getUpdateAt());
         System.out.println("====================");
     }
 
@@ -195,7 +124,6 @@ public class JCFUserService implements UserService {
         } catch (Exception e) {
             return null;
         }
-        /// null일 때 반환하는 로직 추가
     }
 
     public String getUserByName(UUID id) {
@@ -209,16 +137,17 @@ public class JCFUserService implements UserService {
             return;
         }
 
-        usersMap.values().stream().sorted(Comparator.comparing(User::getName)).forEach(u -> {
+        usersMap.values().stream().sorted(Comparator.comparing(User::getName)).forEach(user -> {
             System.out.println("====================");
-            System.out.println("사용자ID : " + u.getId());
-            System.out.println("사용자명 : " + u.getName());
-            System.out.println("이메일 : " + u.getEmail());
-            System.out.println("전화번호 : " + u.getPhoneNumber());
-            System.out.println("생성일 : " + u.getCreateAt());
-            System.out.println("수정일 : " + u.getUpdateAt());
+            System.out.println("사용자ID : " + user.getId());
+            System.out.println("사용자명 : " + user.getName());
+            System.out.println("이메일 : " + user.getEmail());
+            System.out.println("전화번호 : " + user.getPhoneNumber());
+            System.out.println("생성일 : " + user.getCreateAt());
+            System.out.println("수정일 : " + user.getUpdateAt());
             System.out.println("====================");
         });
+        System.out.println("현재 총 사용자 : " + usersMap.size());
     }
 
     /// Delete

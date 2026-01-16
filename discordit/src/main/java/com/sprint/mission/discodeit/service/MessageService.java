@@ -1,20 +1,23 @@
 package com.sprint.mission.discodeit.service;
 
+import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
+import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.service.jfc.JCFUserService;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.UUID;
 
 public interface MessageService {
-    void data();
 
-    void createMessage(Scanner sc, List<Message> messages);
+    void createMessage(Scanner sc, Channel channel, User user);
 
-    void updateMessage(Scanner sc, List<Message> messages);
+    void updateMessage(Scanner sc, User user);
 
-    void getMessageName(Message user);
+    void getMessageForSender(User sender);
 
-    void getAllMessageName(List<Message> users);
+    void getMessageInChannel(UUID channelId, JCFUserService userService);
 
-    void deleteMessage(Scanner sc, List<Message> messages);
+    void deleteMessage(Scanner sc, User user);
 }

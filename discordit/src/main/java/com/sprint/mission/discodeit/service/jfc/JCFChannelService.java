@@ -27,7 +27,7 @@ public class JCFChannelService implements ChannelService {
 
     @Override
     public void createServer(Scanner sc) {
-        System.out.println("사용하려는 서버명이 무엇인가요?");
+        System.out.println("사용하려는 채널명이 무엇인가요?");
         String name = sc.nextLine();
 
         if (check(name) != null) {
@@ -48,7 +48,7 @@ public class JCFChannelService implements ChannelService {
         Channel result = check(name);
 
         if (result == null) {
-            System.out.println("해당 서버가 존재하지 않습니다.");
+            System.out.println("해당 채널이 존재하지 않습니다.");
             return;
         }
 

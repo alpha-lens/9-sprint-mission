@@ -71,7 +71,7 @@ public class RouteMessageService {
                         System.out.println("존재하지 않는 사용자입니다.");
                         return;
                     }
-                    messageService.readMsgForUser(nowUser);
+                    messageService.getMessageForSender(nowUser);
                 } else if (m == 2) {
                     System.out.println("어디로 보내는 메시지인가요?");
                     sendeeChannelName = sc.nextLine();
@@ -80,7 +80,7 @@ public class RouteMessageService {
                         System.out.println("존재하지 않는 채널입니다.");
                         return;
                     }
-                    messageService.readMsgInChannel(nowChannel.getId(), userService);
+                    messageService.getMessageInChannel(nowChannel.getId(), userService);
                 }
                 break;
             case 4:
@@ -93,7 +93,7 @@ public class RouteMessageService {
                     System.out.println("존재하지 않는 사용자입니다.");
                     return;
                 }
-                messageService.deleteMsg(sc, nowUser);
+                messageService.deleteMessage(sc, nowUser);
                 break;
             default:
                 return;
