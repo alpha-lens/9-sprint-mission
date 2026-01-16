@@ -1,6 +1,5 @@
 package com.sprint.mission.discodeit.entity;
 
-import java.util.HashMap;
 import java.util.UUID;
 
 public class Channel {
@@ -18,13 +17,27 @@ public class Channel {
     }
 
     /// getter
-    public UUID getId() {return this.id;}
-    public String getName() {return this.name;}
-    public long getCreateAt() {return this.createAt;}
-    public long getUpdateAt() {return this.updateAt;}
+    public UUID getId() {
+        return this.id;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public long getCreateAt() {
+        return this.createAt;
+    }
+
+    public long getUpdateAt() {
+        return this.updateAt;
+    }
 
     /// setter
-    public void setUpdateAt() {this.updateAt = System.currentTimeMillis();}
+    public void setUpdateAt() {
+        this.updateAt = System.currentTimeMillis();
+    }
+
     public void setName(String name) {
         this.name = name;
         setUpdateAt();

@@ -1,14 +1,28 @@
 package com.sprint.mission.discodeit.service.jfc;
 
 import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.ChannelService;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class JCFChannelService implements ChannelService {
     private final Map<String, Channel> channelNameMap = new ConcurrentHashMap<>();
+
+    /// 20260115 멘토링 때, 싱글톤 패턴이 적용되지 않았다고 해서 넣어봄
+    /// 아직은 왜 싱글톤인지, 왜 필요한지를 잘 모르겠다.
+    private JCFChannelService() {
+    }
+
+    private static class Holder {
+        private static final JCFChannelService INSTANCE = new JCFChannelService();
+    }
+
+    public static JCFChannelService getInstance() {
+        return Holder.INSTANCE;
+    }
 
     @Override
     public void createServer(Scanner sc) {
@@ -34,7 +48,7 @@ public class JCFChannelService implements ChannelService {
 
         Channel result = check(name);
 
-        if(result == null) {
+        if (result == null) {
             System.out.println("해당 서버가 존재하지 않습니다.");
             return;
         }
@@ -55,9 +69,9 @@ public class JCFChannelService implements ChannelService {
     public void readChannel(Scanner sc) {
         System.out.println("조회하고자 하는 채널명을 입력해주세요");
         String name = sc.nextLine();
-        Channel result =  check(name);
+        Channel result = check(name);
 
-        if(result == null) {
+        if (result == null) {
             System.out.println("해당 채널이 존재하지 않습니다.");
             return;
         }
@@ -70,22 +84,24 @@ public class JCFChannelService implements ChannelService {
         System.out.println("===================");
     }
 
+    /// 메시지 발송용
     @Override
     public Channel readChannel(String name) {
-        Channel result =  check(name);
+        Channel result = check(name);
 
-        if(result == null) {
+        if (result == null) {
             System.out.println("해당 채널이 존재하지 않습니다.");
             return null;
         }
         return result;
     }
 
+    /// UUID to Name
     @Override
     public String readChannel(UUID id) {
         Channel result = check(id);
 
-        if(result == null) {
+        if (result == null) {
             System.out.println("해당 채널이 존재하지 않습니다.");
             return null;
         }
@@ -94,7 +110,7 @@ public class JCFChannelService implements ChannelService {
 
     @Override
     public void readAllChannel() {
-        if(channelNameMap.isEmpty()) {
+        if (channelNameMap.isEmpty()) {
             System.out.println("채널이 존재하지 않습니다.");
             return;
         }
@@ -126,15 +142,16 @@ public class JCFChannelService implements ChannelService {
 
         n = sc.nextInt();
         sc.nextLine();
-        if(n == 0) {
+        if (n == 0) {
             System.out.println("처음으로 돌아갑니다.");
             return;
-        };
+        }
+        ;
 
         System.out.print("삭제하려는 채널명을 알려주세요: ");
         name = sc.nextLine();
 
-        if(channelNameMap.get(name) == null) {
+        if (channelNameMap.get(name) == null) {
             System.out.println("해당 채널을 찾을 수 없습니다.");
             return;
         }

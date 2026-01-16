@@ -11,13 +11,25 @@ import java.util.concurrent.ConcurrentHashMap;
 /// 구분자, 전체 메시지 개수 넣어주기
 
 public class JCFMessageService {
-    private final List<Message> msgs = new ArrayList<>();
-    private Message message = null;
+//    private final List<Message> msgs = new ArrayList<>();
     private final Map<UUID, List<Message>> channelIdMessageMap = new ConcurrentHashMap<>();
     private final Map<UUID, List<Message>> userIdMessageMap = new ConcurrentHashMap<>();
 
+    /// 20260115 멘토링 때, 싱글톤 패턴이 적용되지 않았다고 해서 넣어봄
+    /// 아직은 왜 싱글톤인지, 왜 필요한지를 잘 모르겠다.
+    private JCFMessageService() {
+    }
+
+    private static class Holder {
+        private static final JCFMessageService INSTANCE = new JCFMessageService();
+    }
+
+    public static JCFMessageService getInstance() {
+        return JCFMessageService.Holder.INSTANCE;
+    }
+
     public void createMessage(Scanner sc, Channel ch, User user) {
-        if(ch == null) return;
+        if (ch == null) return;
         System.out.println("현재 메시지를 보낼 채널은 " + ch.getName() + "입니다.");
         System.out.println("현재 메시지를 보낼 사람은 " + user.getName() + "입니다.");
         System.out.println("무어라 보내고 싶으신가요?");
@@ -31,7 +43,7 @@ public class JCFMessageService {
             System.out.println("처음으로 돌아갑니다.");
         } else if (Objects.equals(n, "1")) {
 //            msgs.add(new Message(ch.getId(), user.getId(), text));
-            message = new Message(ch.getId(), user.getId(), text);
+            Message message = new Message(ch.getId(), user.getId(), text);
             channelIdMessageMap.computeIfAbsent(ch.getId(), m -> new ArrayList<Message>()).add(message);
             userIdMessageMap.computeIfAbsent(user.getId(), m -> new ArrayList<Message>()).add(message);
 
@@ -73,8 +85,10 @@ public class JCFMessageService {
         }
 
         flag.forEach(m -> {
-            System.out.println("보낸 사용자: " + us.getUserName(m.getSendUserId()));
+            System.out.println("보낸 사용자: " + us.getUserByName(m.getSendUserId()));
             System.out.println("보낸 내용: " + m.getContent());
+            System.out.println("보낸일시 : " + m.getCreateAt());
+            System.out.println("수정일시 : " + m.getUpdateAt());
             System.out.println("===============");
         });
     }
@@ -90,9 +104,11 @@ public class JCFMessageService {
         System.out.println("당신이 보낸 메시지는 아래와 같습니다.");
         for (Message msg : msgList) {
             System.out.println("ID : " + msg.getId());
-            System.out.println("보낸 사용자 : " + us.getUserName(msg.getSendUserId()));
+            System.out.println("보낸 사용자 : " + us.getUserByName(msg.getSendUserId()));
             System.out.println("보낸 채널명 : " + cs.readChannel(msg.getSendChannel()));
             System.out.println("내용 : " + msg.getContent());
+            System.out.println("보낸일시 : " + msg.getCreateAt());
+            System.out.println("수정일시 : " + msg.getUpdateAt());
             System.out.println("===============");
         }
     }
@@ -103,7 +119,7 @@ public class JCFMessageService {
         String id = sc.nextLine();
 
         Message msg = /// msgs.stream().filter(e -> e.getId().equals(targetId)).findFirst().orElse(null);
-                    userIdMessageMap.get(user.getId()).stream().filter(e -> e.getId().equals(UUID.fromString(id))).findFirst().orElse(null);
+                userIdMessageMap.get(user.getId()).stream().filter(e -> e.getId().equals(UUID.fromString(id))).findFirst().orElse(null);
         if (msg == null) {
             System.out.println("해당 ID를 가진 메시지를 찾을 수 없습니다.");
             return;

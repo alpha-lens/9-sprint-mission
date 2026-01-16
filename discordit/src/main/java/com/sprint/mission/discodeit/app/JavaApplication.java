@@ -7,18 +7,19 @@ import com.sprint.mission.discodeit.service.jfc.JCFMessageService;
 import com.sprint.mission.discodeit.service.jfc.JCFUserService;
 
 import java.util.Scanner;
-import java.util.UUID;
 
 public class JavaApplication {
     public static void main(String[] args) {
         System.out.println("프로그램을 실행합니다.");
         boolean run = true;
-        int menu = 0;
+        int menu;
         Scanner sc = new Scanner(System.in);
 
-        JCFUserService us = new JCFUserService();
-        JCFChannelService cs = new JCFChannelService();
-        JCFMessageService ms = new JCFMessageService();
+        /// 20260115 멘토링 때, 싱글톤 패턴이 적용되지 않았다고 해서 수정함
+        /// 아직은 왜 싱글톤인지, 왜 필요한지를 잘 모르겠다.
+        JCFUserService us = JCFUserService.getInstance();
+        JCFChannelService cs = JCFChannelService.getInstance();
+        JCFMessageService ms = JCFMessageService.getInstance();
 
         /// Test Code
         while (run) {
@@ -37,9 +38,10 @@ public class JavaApplication {
         }
     }
 
-    private static void route(Scanner sc, int n, JCFUserService us, JCFChannelService cs, JCFMessageService ms){
+    private static void route(Scanner sc, int n, JCFUserService us, JCFChannelService cs, JCFMessageService ms) {
         int m;
-        switch(n) {
+        switch (n) {
+            /// TODO: 중복 출력 부분 별도 로직으로 분리하기
             case 1:
                 System.out.println("사용자 관련 서비스입니다.");
                 System.out.println("어떤 서비스를 원하시나요?");
@@ -74,7 +76,7 @@ public class JavaApplication {
                 System.out.println("4. Message Delete");
                 m = sc.nextInt();
                 sc.nextLine();
-                messageService(sc, m, us,cs,ms);
+                messageService(sc, m, us, cs, ms);
                 break;
             default:
                 return;
@@ -83,7 +85,7 @@ public class JavaApplication {
 
     private static void userService(Scanner sc, int n, JCFUserService us) {
         int m;
-        switch(n) {
+        switch (n) {
             case 1:
                 /// create
                 us.createUser(sc);
@@ -100,8 +102,8 @@ public class JavaApplication {
                 m = sc.nextInt();
                 sc.nextLine();
 
-                if(m == 1) us.getUserName(sc);
-                else if(m == 2) us.getAllUserName();
+                if (m == 1) us.getUserName(sc);
+                else if (m == 2) us.getAllUserName();
                 break;
             case 4:
                 /// delete
@@ -111,9 +113,10 @@ public class JavaApplication {
                 return;
         }
     }
+
     private static void channelService(Scanner sc, int n, JCFChannelService cs) {
         int m;
-        switch(n) {
+        switch (n) {
             case 1:
                 /// create
                 cs.createServer(sc);
@@ -130,8 +133,8 @@ public class JavaApplication {
                 m = sc.nextInt();
                 sc.nextLine();
 
-                if(m == 1) cs.readChannel(sc);
-                else if(m == 2) cs.readAllChannel();
+                if (m == 1) cs.readChannel(sc);
+                else if (m == 2) cs.readAllChannel();
                 break;
             case 4:
                 /// delete
@@ -141,19 +144,20 @@ public class JavaApplication {
                 return;
         }
     }
+
     private static void messageService(Scanner sc, int n, JCFUserService us, JCFChannelService cs, JCFMessageService ms) {
         int m;
         String uName;
         User nowUser;
         String cName;
         Channel nowChannel;
-        switch(n) {
+        switch (n) {
             case 1:
                 /// create
                 System.out.println("누가 보내는 메시지인가요?");
                 uName = sc.nextLine();
                 try {
-                    nowUser = us.getUserName(uName);
+                    nowUser = us.getUserByName(uName);
                 } catch (Exception e) {
                     System.out.println("존재하지 않는 사용자입니다.");
                     return;
@@ -174,8 +178,8 @@ public class JavaApplication {
                 /// update
                 System.out.println("누가 보낸 메시지인가요?");
                 uName = sc.nextLine();
-                nowUser = us.getUserName(uName);
-                if(nowUser == null) {
+                nowUser = us.getUserByName(uName);
+                if (nowUser == null) {
                     System.out.println("존재하지 않는 사용자입니다.");
                     return;
                 }
@@ -189,11 +193,11 @@ public class JavaApplication {
                 m = sc.nextInt();
                 sc.nextLine();
 
-                if(m == 1) {
+                if (m == 1) {
                     System.out.println("누가 보낸 메시지인가요?");
                     uName = sc.nextLine();
-                    nowUser = us.getUserName(uName);
-                    if(nowUser == null) {
+                    nowUser = us.getUserByName(uName); /// TODO: 직관적 이름 선정하기
+                    if (nowUser == null) {
                         System.out.println("존재하지 않는 사용자입니다.");
                         return;
                     }
@@ -202,7 +206,7 @@ public class JavaApplication {
                     System.out.println("어디로 보내는 메시지인가요?");
                     cName = sc.nextLine();
                     nowChannel = cs.readChannel(cName);
-                    if(nowChannel == null) {
+                    if (nowChannel == null) {
                         System.out.println("존재하지 않는 채널입니다.");
                         return;
                     }
@@ -214,8 +218,8 @@ public class JavaApplication {
                 System.out.println("현재는 내가 보낸 메시지를 삭제하는 기능만 지원하고 있습니다.");
                 System.out.println("사용자명은 어떻게 되나요?");
                 uName = sc.nextLine();
-                nowUser = us.getUserName(uName);
-                if(nowUser == null) {
+                nowUser = us.getUserByName(uName);
+                if (nowUser == null) {
                     System.out.println("존재하지 않는 사용자입니다.");
                     return;
                 }
@@ -226,16 +230,18 @@ public class JavaApplication {
         }
     }
 
-    public static void chIdToName(JCFChannelService cs, UUID id){
-        String nowChannel = cs.readChannel(id);
-        if(nowChannel == null) {
-            System.out.println("존재하지 않는 사용자입니다.");
-        }
-    }
-    public static void uIdToName(JCFUserService us, UUID id){
-        User nowUser = us.getUserId(id);
-        if(nowUser == null) {
-            System.out.println("존재하지 않는 사용자입니다.");
-        }
-    }
+///    뭔가 하려고 넣었는데 왜 넣었는지 기억이 안 남.. 지금은 미사용.
+//    public static void chIdToName(JCFChannelService cs, UUID id) {
+//        String nowChannel = cs.readChannel(id);
+//        if (nowChannel == null) {
+//            System.out.println("존재하지 않는 채널입니다.");
+//        }
+//    }
+//
+//    public static void uIdToName(JCFUserService us, UUID id) {
+//        User nowUser = us.getUserId(id);
+//        if (nowUser == null) {
+//            System.out.println("존재하지 않는 사용자입니다.");
+//        }
+//    }
 }

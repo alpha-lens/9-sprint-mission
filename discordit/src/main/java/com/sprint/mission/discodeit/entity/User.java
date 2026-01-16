@@ -1,5 +1,8 @@
 package com.sprint.mission.discodeit.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class User {
@@ -8,7 +11,7 @@ public class User {
     private String name;
     private String pw;
     private String email;
-    private String phonenumber;
+    private String phoneNumber;
     private Long updateAt;
 
     public User(String name, String pw) {
@@ -20,19 +23,71 @@ public class User {
         this.updateAt = n;
     }
 
-    public UUID getId() {return this.id;}
-    public String getName() {return this.name;}
-    public String getPw() {return this.pw;}
-    public String getEmail() {return this.email;}
-    public String getPhonenumber() {return this.phonenumber;}
-    public long getCreateAt() {return this.createAt;}
-    public long getUpdateAt() {return this.updateAt;}
-    public void setUpdateAt() {this.updateAt = System.currentTimeMillis();}
-    public void setPw(String pw) {
+    public UUID getId() {
+        return this.id;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getPw() {
+        return this.pw;
+    }
+
+    public String getEmail() {
+        return this.email;
+    }
+
+    public String getPhoneNumber() {
+        return this.phoneNumber;
+    }
+
+    public long getCreateAt() {
+        return this.createAt;
+    }
+
+    public long getUpdateAt() {
+        return this.updateAt;
+    }
+
+    /// set부분 수정하기
+    /// sdf
+
+    public void setUpdateAt() {
+        this.updateAt = System.currentTimeMillis();
+    }
+
+    public void updateUser(String name, String pw, String email, String phoneNumber) {
+        /// null checker
+        boolean[] argumentsList = {check(name), check(pw), check(email), check(phoneNumber)};
+        if(argumentsList[0]) setName(name);
+        if(argumentsList[1]) setName(pw);
+        if(argumentsList[2]) setName(email);
+        if(argumentsList[3]) setName(phoneNumber);
+    }
+
+    private boolean check(String text) {
+        return text != null && !text.trim().isEmpty();
+    }
+
+    private void setName(String name) {
+        this.name = name;
+        setUpdateAt();
+    }
+
+    private void setPw(String pw) {
         this.pw = pw;
         setUpdateAt();
     }
-    public void setEmail(String email) {this.email = email;setUpdateAt();}
-    public void setName(String name) {this.name = name;setUpdateAt();}
-    public void setPhonenumber(String phonenumber) {this.phonenumber = phonenumber;setUpdateAt();}
+
+    private void setEmail(String email) {
+        this.email = email;
+        setUpdateAt();
+    }
+
+    private void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+        setUpdateAt();
+    }
 }
