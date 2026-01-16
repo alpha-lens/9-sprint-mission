@@ -3,20 +3,12 @@ package com.sprint.mission.discodeit.service.jfc;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.UserService;
 
-import java.util.Map;
-import java.util.Scanner;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class JCFUserService implements UserService {
-    //    private final List<User> users = new ArrayList<>();
     private final Map<UUID, User> usersMap = new ConcurrentHashMap<>();
     private final Map<String, UUID> usersName = new ConcurrentHashMap<>();
-
-    /// 20260115 멘토링 때, 싱글톤 패턴이 적용되지 않았다고 해서 넣어봄
-    /// 아직은 왜 싱글톤인지, 왜 필요한지를 잘 모르겠다.
-    /// 메모리 최적화, DB객체를 공유해서 쓰는 방식.
-    /// 동일요소를 불러와서 재사용하도록 하기 위함.
     private JCFUserService() {
     }
 
@@ -25,7 +17,7 @@ public class JCFUserService implements UserService {
     }
 
     public static JCFUserService getInstance() {
-        return JCFUserService.Holder.INSTANCE;
+        return Holder.INSTANCE;
     }
 
     /// Create
@@ -37,18 +29,14 @@ public class JCFUserService implements UserService {
         System.out.print("먼저, 사용할 이름을 작성해주세요 : ");
         name = sc.nextLine();
 
-        /// forEach 안에서 return은 forEach문을 종료하는 것으로 끝남...
-//        if(users.stream().anyMatch(e -> Objects.equals(e.getName(), name))) {
         if (usersName.containsKey(name)) {
             System.out.println("이미 존재하는 사용자명입니다.");
             return;
         }
 
-
         System.out.print("사용할 비밀번호를 입력해주세요 : ");
         pw = sc.nextLine();
         User user = new User(name, pw);
-//        users.add(user);
 
         usersName.put(name, user.getId());
         usersMap.put(user.getId(), user);
@@ -58,91 +46,127 @@ public class JCFUserService implements UserService {
     /// Update
     @Override
     public void updateUser(Scanner sc) {
+        int isContinue = 0;
         System.out.println("====================");
-        System.out.println("1. 이름 변경");
-        System.out.println("2. 비밀번호 변경");
-        System.out.println("3. 이메일 변경");
-        System.out.println("4. 전화번호 변경");
-        System.out.println("====================");
-        int n = sc.nextInt();
-        sc.nextLine();
+        System.out.println("사용자 변경 메뉴입니다.");
+        User checkUpdateUser = check(sc, "변경");
+        if(checkUpdateUser == null) {
+            System.out.println("일치하는 사용자가 없습니다.");
+            return;
+        }
 
-        switch (n) {
+        System.out.println("현재 사용자 변경은 다음과 같은 순서로 입렵받게 됩니다.");
+        System.out.println("1. 사용자 이름 변경");
+        System.out.println("2. 사용자 비밀번호 변경");
+        System.out.println("3. 사용자 이메일 변경");
+        System.out.println("4. 사용자 전화번호 변경");
+        System.out.println("진행하시려면 1, 아니라면 아무 키나 입력해주세요.");
+        String input = sc.nextLine();
+        try{
+            isContinue = Integer.parseInt(input.trim());
+        } catch (NumberFormatException e) {
+            System.out.println("잘못 입력하셨습니다.");
+            updateUser(sc);
+        }
+
+        switch(isContinue) {
             case 1:
-                updateUserName(sc);
-                break;
-            case 2:
-                updateUserPw(sc);
-                break;
-            case 3:
-                updateUserEmail(sc);
-                break;
-            case 4:
-                updateUserPhoneNumber(sc);
-                break;
+                updateUserInfo(sc, checkUpdateUser);
             default:
-                break;
+                System.out.println("이전 메뉴로 돌아갑니다.");
+                return;
         }
     }
 
-    private void updateUserName(Scanner sc) {
-        User userCheck = check(sc, "변경");
+    /// 사실 분리할 필요가 없긴 한데, 너무 길어져서 분리함
+    /// FIXME: 더 좋은 리팩터링 방법이 필요
+    private void updateUserInfo(Scanner sc, User checkUpdateUser) {
+        String reName;
+        String rePassword;
+        String reMail;
+        String rePhoneNumber;
 
-        if (userCheck == null) {
-            System.out.println("맞는 계정이 없습니다.");
-            return;
+        System.out.println("변경하지 않으시려면 엔터를 눌러주시기 바랍니다.");
+        System.out.println("현재 사용자명 : " + checkUpdateUser.getName());
+        System.out.print("변경하실 사용자명 : ");
+        while(true) {
+            reName = sc.nextLine().trim();
+            /// regex rule
+            /// \\S+ => 공백이 없을 때 true
+            /// !rePassword.matches("\\S+")기에 공백이 포함되어 있으면 true를 반환
+            if (!reName.matches("\\S+")) {
+                System.out.println("사용자명은 공백 없이 입력해주세요.");
+                continue;
+            }
+            if (reName.isEmpty()) reName = null;
+            break;
+        }
+        System.out.println();
+
+        System.out.print("변경하실 비밀번호 : ");
+        while(true) {
+            rePassword = sc.nextLine().trim();
+            if (!rePassword.matches("\\S+")) {
+                System.out.println("비밀번호에 공백을 포함할 수 없습니다.");
+                continue;
+            }
+            if (rePassword.isEmpty()) rePassword = null;
+            break;
+        }
+        System.out.println();
+
+        System.out.println("현재 이메일 : " + checkUpdateUser.getEmail());
+        System.out.print("변경하실 이메일 : ");
+        while(true) {
+            reMail = sc.nextLine().trim();
+            /// regex rule
+            /// 앞뒤로 공백이 없어야 하며 중간에 @와 .이 있어야 한다는 형식
+            if (reMail.isEmpty() || !reMail.matches("\\S+@\\S+\\.\\S+")) {
+                System.out.println("이메일 형식이 맞지 않습니다.");
+                continue;
+            }
+            break;
+        }
+        System.out.println();
+
+        System.out.println("현재 전화번호 : " + checkUpdateUser.getPhoneNumber());
+        System.out.print("변경하실 전화번호 : ");
+
+        while(true) {
+            rePhoneNumber = sc.nextLine().trim();
+            if (!rePhoneNumber.matches("\\S+") && (rePhoneNumber.length() == 10 || rePhoneNumber.length() == 11)) {
+                System.out.println("잘못된 입력 형식입니다.");
+                continue;
+            }
+            if(rePhoneNumber.isEmpty()) rePhoneNumber = null;
+            break;
         }
 
-        System.out.println("변경하고자 하는 이름을 입력해주세요");
-        String rename = sc.nextLine().trim();
+        System.out.println("이대로 진행하시겠습니까?");
+        System.out.println("맞으면 y, 취소하려면 n");
+        System.out.println("다시 입력하시려면 re를 입력해주세요.");
 
-        System.out.println(userCheck.getName() + "에서 " + rename + "으로 변경되었습니다.");
-        userCheck.setName(rename);
-        usersName.put(rename, userCheck.getId());
-        usersName.remove(userCheck.getName());
-    }
-
-    private void updateUserPw(Scanner sc) {
-        User c = check(sc, "변경");
-        if (c == null) {
-            System.out.println("맞는 계정이 없습니다.");
-            return;
+        while(true) {
+            String finalCheckIsContinue = sc.nextLine();
+            switch (finalCheckIsContinue.toLowerCase()){
+                case "y":
+                    checkUpdateUser.updateUser(reName, rePassword, reMail, rePhoneNumber);
+                    return;
+                case "n":
+                    return;
+                case "re":
+                    updateUserInfo(sc, checkUpdateUser);
+                    return;
+                default:
+                    continue;
+            }
         }
-        System.out.println("변경하고자 하는 비밀번호를 입력해주세요");
-        String repw = sc.nextLine();
-        System.out.println("성공");
-        c.setPw(repw);
     }
 
-    private void updateUserEmail(Scanner sc) {
-        User c = check(sc, "변경");
-        if (c == null) {
-            System.out.println("맞는 계정이 없습니다.");
-            return;
-        }
-        System.out.println("변경하고자 하는 이메일을 입력해주세요");
-        String remail = sc.nextLine();
 
-        System.out.println(c.getEmail() + "에서 " + remail + "으로 변경되었습니다.");
-        c.setEmail(remail);
-    }
-
-    private void updateUserPhoneNumber(Scanner sc) {
-        User c = check(sc, "변경");
-        if (c == null) {
-            System.out.println("맞는 계정이 없습니다.");
-            return;
-        }
-
-        System.out.println("변경하고자 하는 연락처를 입력해주세요");
-        String repn = sc.nextLine();
-        System.out.println(c.getPhoneNumber() + "에서 " + repn + "으로 변경되었습니다.");
-        c.setPhoneNumber(repn);
-    }
 
     /// Read
     public User getUserId(UUID id) {
-//        return users.stream().filter(u -> u.getId().equals(id)).findFirst().orElse(null);
         return usersMap.get(id);
     }
 
@@ -168,37 +192,26 @@ public class JCFUserService implements UserService {
     }
 
     public User getUserByName(String name) {
-//        return users.stream().filter(e -> e.getName().equals(name)).findFirst().orElse(null);
-        return usersMap.get(usersName.get(name));
-        /// TODO: null일 때 반환하는 로직 추가
+        try {
+            return usersMap.get(usersName.get(name));
+        } catch (Exception e) {
+            return null;
+        }
+        /// null일 때 반환하는 로직 추가
     }
 
     public String getUserByName(UUID id) {
-//        User user = users.stream().filter(e -> e.getId().equals(id)).findFirst().orElse(null);
-//        if(user == null) return null;
-//        return user.getName();
         return usersMap.get(id).getName();
     }
 
     @Override
     public void getAllUserName() {
-//        users.forEach(u -> {
-//            System.out.println("====================");
-//            System.out.println("사용자ID : " + u.getId());
-//            System.out.println("사용자명 : " + u.getName());
-//            System.out.println("이메일 : " + u.getEmail());
-//            System.out.println("전화번호 : " + u.getPhoneNumber());
-//            System.out.println("생성일 : " + u.getCreateAt());
-//            System.out.println("수정일 : " + u.getUpdateAt());
-//            System.out.println("====================");
-//        });
-
         if (usersMap.isEmpty()) {
             System.out.println("사용자가 없습니다.");
             return;
         }
 
-        usersMap.values().stream().sorted((a, b) -> a.getName().compareTo(b.getName())).forEach(u -> {
+        usersMap.values().stream().sorted(Comparator.comparing(User::getName)).forEach(u -> {
             System.out.println("====================");
             System.out.println("사용자ID : " + u.getId());
             System.out.println("사용자명 : " + u.getName());
@@ -224,7 +237,6 @@ public class JCFUserService implements UserService {
             System.out.println("처음으로 돌아갑니다.");
             return;
         }
-        ;
 
         User target = check(sc, "삭제");
 
@@ -232,13 +244,12 @@ public class JCFUserService implements UserService {
             System.out.println("일치하는 계정을 찾을 수 없습니다.");
             return;
         }
-//        users.remove(target);
         usersMap.remove(target.getId());
         usersName.remove(target.getName());
         System.out.println("계정이 삭제되었습니다.");
     }
 
-    public User check(Scanner sc, String work) {
+    private User check(Scanner sc, String work) {
         System.out.println(work + "하고자 하는 사용자명을 입력해주세요");
         String name = sc.nextLine();
 
@@ -252,7 +263,5 @@ public class JCFUserService implements UserService {
         if (!user.getPw().equals(pw)) return null;
 
         return user;
-
-//        return users.stream().filter(u -> u.getName().equals(name) && u.getPw().equals(pw)).findFirst().orElse(null);
     }
 }

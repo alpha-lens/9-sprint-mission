@@ -10,11 +10,11 @@ public interface ChannelService {
 
     void updateServer(Scanner sc);
 
-    void readChannel(Scanner sc);
+    void isChannelName(Scanner sc);
 
-    Channel readChannel(String name);
+    Channel isChannelName(String name);
 
-    String readChannel(UUID id);
+    String isChannelName(UUID id);
 
     void readAllChannel();
 

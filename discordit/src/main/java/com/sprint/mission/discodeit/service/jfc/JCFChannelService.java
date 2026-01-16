@@ -3,16 +3,17 @@ package com.sprint.mission.discodeit.service.jfc;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.service.ChannelService;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class JCFChannelService implements ChannelService {
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private final Map<String, Channel> channelNameMap = new ConcurrentHashMap<>();
 
-    /// 20260115 멘토링 때, 싱글톤 패턴이 적용되지 않았다고 해서 넣어봄
-    /// 아직은 왜 싱글톤인지, 왜 필요한지를 잘 모르겠다.
     private JCFChannelService() {
     }
 
@@ -34,8 +35,6 @@ public class JCFChannelService implements ChannelService {
             return;
         }
 
-//        channels.add(new Channel(name));
-        //    private final List<Channel> channels = new ArrayList<>();
         Channel tmp = new Channel(name);
         channelNameMap.put(name, tmp);
         System.out.println("잘 들어갔어요!");
@@ -66,7 +65,7 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
-    public void readChannel(Scanner sc) {
+    public void isChannelName(Scanner sc) {
         System.out.println("조회하고자 하는 채널명을 입력해주세요");
         String name = sc.nextLine();
         Channel result = check(name);
@@ -77,16 +76,17 @@ public class JCFChannelService implements ChannelService {
         }
 
         System.out.println("해당 채널에 대한 정보를 알려드립니다.");
+        System.out.println("===================");
         System.out.println("채널명 : " + result.getName());
         System.out.println("채널ID : " + result.getId());
-        System.out.println("채널생성일 : " + result.getCreateAt());
-        System.out.println("채널수정일 : " + result.getUpdateAt());
+        System.out.println("채널생성일 : " + sdf.format(new Date(result.getCreateAt())));
+        System.out.println("채널수정일 : " + sdf.format(new Date(result.getUpdateAt())));
         System.out.println("===================");
     }
 
     /// 메시지 발송용
     @Override
-    public Channel readChannel(String name) {
+    public Channel isChannelName(String name) {
         Channel result = check(name);
 
         if (result == null) {
@@ -98,7 +98,7 @@ public class JCFChannelService implements ChannelService {
 
     /// UUID to Name
     @Override
-    public String readChannel(UUID id) {
+    public String isChannelName(UUID id) {
         Channel result = check(id);
 
         if (result == null) {
@@ -115,26 +115,20 @@ public class JCFChannelService implements ChannelService {
             return;
         }
 
-        channelNameMap.values().forEach(ch -> {
-            System.out.println("채널명 : " + ch.getName());
-            System.out.println("채널ID : " + ch.getId());
-            System.out.println("채널수정일 : " + ch.getUpdateAt());
-            System.out.println("채널생성일 : " + ch.getCreateAt());
+        channelNameMap.values().forEach(channel -> {
+            System.out.println("채널명 : " + channel.getName());
+            System.out.println("채널ID : " + channel.getId());
+            System.out.println("채널수정일 : " + sdf.format(new Date(channel.getUpdateAt())));
+            System.out.println("채널생성일 : " + sdf.format(new Date(channel.getCreateAt())));
             System.out.println("===================");
         });
-//        for (Channel ch : channels) {
-//            System.out.println("채널명 : " + ch.getName());
-//            System.out.println("채널ID : " + ch.getId());
-//            System.out.println("채널수정일 : " + ch.getUpdateAt());
-//            System.out.println("채널생성일 : " + ch.getCreateAt());
-//            System.out.println("===================");
-//        }
+
         System.out.println("현재 총 채널수 : " + channelNameMap.size());
     }
 
     @Override
     public void deleteChannel(Scanner sc) {
-        String name;
+        String inputChannelName;
         int n;
         System.out.println("[Warning!] 지금 계정을 삭제하려 하고 있습니다.");
         System.out.println("[Warning!] 만약 잘못 들어오신 경우, 0을 눌러주시기 바랍니다.");
@@ -146,36 +140,31 @@ public class JCFChannelService implements ChannelService {
             System.out.println("처음으로 돌아갑니다.");
             return;
         }
-        ;
 
         System.out.print("삭제하려는 채널명을 알려주세요: ");
-        name = sc.nextLine();
+        inputChannelName = sc.nextLine();
 
-        if (channelNameMap.get(name) == null) {
+        if (channelNameMap.get(inputChannelName) == null) {
             System.out.println("해당 채널을 찾을 수 없습니다.");
             return;
         }
 
-        channelNameMap.remove(name);
+        channelNameMap.remove(inputChannelName);
         System.out.println("해당 채널이 삭제되었습니다.");
     }
 
     @Override
     public Channel check(String name) {
-//        return channels.stream().filter(u -> u.getName().equals(name)).findFirst().orElse(null);
-        return channelNameMap.get(name);
+        try {
+            return channelNameMap.get(name);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
+    /// 채널ID로도 관리하는 형태를 만드는게 좋을까?
     @Override
     public Channel check(UUID id) {
-//        return channels.stream()
-//                .filter(u -> u.getId().equals(id))
-//                .findFirst()
-//                .orElse(null);
-        return channelNameMap.values().stream().filter(u -> u.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-
-        /// 채널ID로도 관리하는 형태를 만드는게 좋을까?
+        return channelNameMap.values().stream().filter(u -> u.getId().equals(id)).findFirst().orElse(null);
     }
 }

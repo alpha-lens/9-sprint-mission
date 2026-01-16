@@ -55,8 +55,8 @@ public class JCFMessageService {
     }
 
     /// update logic
-    public void updateMessage(Scanner sc, User user, JCFChannelService cs, JCFUserService us) {
-        readMsgForUser(user, cs, us);
+    public void updateMessage(Scanner sc, User user) {
+        readMsgForUser(user);
 
         System.out.println("어떤 것을 수정하고 싶나요?");
         String id = sc.nextLine();
@@ -93,9 +93,10 @@ public class JCFMessageService {
         });
     }
 
-    public void readMsgForUser(User user, JCFChannelService cs, JCFUserService us) {
-        List<Message> msgList = /// msgs.stream().filter(e -> e.getSendUserId().equals(user.getId())).toList();
-                userIdMessageMap.get(user.getId());
+    public void readMsgForUser(User user) {
+        List<Message> msgList = userIdMessageMap.get(user.getId());
+        JCFUserService userService = JCFUserService.getInstance();
+        JCFChannelService channelService = JCFChannelService.getInstance();
         if (msgList.isEmpty()) {
             System.out.println("아쉽지만 아무것도 없네요!");
             return;
@@ -104,8 +105,8 @@ public class JCFMessageService {
         System.out.println("당신이 보낸 메시지는 아래와 같습니다.");
         for (Message msg : msgList) {
             System.out.println("ID : " + msg.getId());
-            System.out.println("보낸 사용자 : " + us.getUserByName(msg.getSendUserId()));
-            System.out.println("보낸 채널명 : " + cs.readChannel(msg.getSendChannel()));
+            System.out.println("보낸 사용자 : " + userService.getUserByName(msg.getSendUserId()));
+            System.out.println("보낸 채널명 : " + channelService.isChannelName(msg.getSendChannel()));
             System.out.println("내용 : " + msg.getContent());
             System.out.println("보낸일시 : " + msg.getCreateAt());
             System.out.println("수정일시 : " + msg.getUpdateAt());
@@ -113,8 +114,8 @@ public class JCFMessageService {
         }
     }
 
-    public void deleteMsg(Scanner sc, User user, JCFChannelService cs, JCFUserService us) {
-        readMsgForUser(user, cs, us);
+    public void deleteMsg(Scanner sc, User user) {
+        readMsgForUser(user);
         System.out.println("어떤 메시지를 삭제하고 싶나요? ID로 입력해주세요.");
         String id = sc.nextLine();
 
