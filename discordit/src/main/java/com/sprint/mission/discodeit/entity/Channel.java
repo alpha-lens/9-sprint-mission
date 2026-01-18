@@ -1,8 +1,12 @@
 package com.sprint.mission.discodeit.entity;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
 public class Channel {
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     private final UUID id;
     private final Long createAt;
     private String name;
@@ -34,12 +38,26 @@ public class Channel {
     }
 
     /// setter
-    public void setUpdateAt() {
+    private void setUpdateAt() {
         this.updateAt = System.currentTimeMillis();
     }
 
-    public void setName(String name) {
+    private void setName(String name) {
         this.name = name;
         setUpdateAt();
+    }
+
+    public void channelUpdater(String name) {
+        setName(name);
+    }
+
+    @Override
+    public String toString() {
+        return "====================\n" +
+                "채널명 : " + this.getName() + "\n" +
+                "채널ID : " + this.getId() + "\n" +
+                "채널수정일 : " + sdf.format(new Date(this.getUpdateAt())) + "\n" +
+                "채널생성일 : " + sdf.format(new Date(this.getCreateAt())) + "\n" +
+                "====================\n";
     }
 }

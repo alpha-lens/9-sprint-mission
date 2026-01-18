@@ -4,10 +4,13 @@ import com.sprint.mission.discodeit.Input;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.UserService;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class JCFUserService implements UserService {
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     private JCFUserService() {
     }
     private static class Holder {
@@ -72,7 +75,7 @@ public class JCFUserService implements UserService {
         reName = Input.inputUpdateField(sc, "사용자명", "\\S+", checkUpdateUser.getName());
         rePassword = Input.inputUpdateField(sc, "비밀번호", "\\S+", null);
         reMail = Input.inputUpdateField(sc, "이메일", "\\S+@\\S+\\.\\S+", checkUpdateUser.getEmail());
-        rePhoneNumber = Input.inputUpdateField(sc, "전화번호", "^\\\\d{10,11}$", checkUpdateUser.getPhoneNumber());
+        rePhoneNumber = Input.inputUpdateField(sc, "전화번호", "^\\d{10,11}$", checkUpdateUser.getPhoneNumber());
 
         System.out.println("이대로 진행하시겠습니까?");
         System.out.println("맞으면 y, 다시 입력하려면 re");
@@ -82,20 +85,18 @@ public class JCFUserService implements UserService {
             switch (finalCheckIsContinue.toLowerCase()){
                 case "y":
                     checkUpdateUser.updateUser(reName, rePassword, reMail, rePhoneNumber);
+                    System.out.println("성공");
                     return;
                 case "re":
                     continue;
                 default:
+                    System.out.println("처음으로 돌아갑니다.");
                     return;
             }
         }
     }
 
     /// Read
-    public User getUserId(UUID id) {
-        return usersMap.get(id);
-    }
-
     @Override
     public void getUserName(Scanner sc) {
         System.out.println("조회하고자 하는 사용자명을 입력해주세요");
@@ -108,22 +109,11 @@ public class JCFUserService implements UserService {
 
         User user = usersMap.get(usersName.get(name));
 
-        System.out.println("====================");
-        System.out.println("사용자ID : " + user.getId());
-        System.out.println("사용자명 : " + user.getName());
-        System.out.println("이메일 : " + user.getEmail());
-        System.out.println("전화번호 : " + user.getPhoneNumber());
-        System.out.println("생성일 : " + user.getCreateAt());
-        System.out.println("수정일 : " + user.getUpdateAt());
-        System.out.println("====================");
+        System.out.println(user);
     }
 
     public User getUserByName(String name) {
-        try {
-            return usersMap.get(usersName.get(name));
-        } catch (Exception e) {
-            return null;
-        }
+        return usersMap.get(usersName.get(name));
     }
 
     public String getUserByName(UUID id) {
@@ -137,16 +127,7 @@ public class JCFUserService implements UserService {
             return;
         }
 
-        usersMap.values().stream().sorted(Comparator.comparing(User::getName)).forEach(user -> {
-            System.out.println("====================");
-            System.out.println("사용자ID : " + user.getId());
-            System.out.println("사용자명 : " + user.getName());
-            System.out.println("이메일 : " + user.getEmail());
-            System.out.println("전화번호 : " + user.getPhoneNumber());
-            System.out.println("생성일 : " + user.getCreateAt());
-            System.out.println("수정일 : " + user.getUpdateAt());
-            System.out.println("====================");
-        });
+        usersMap.values().stream().sorted(Comparator.comparing(User::getName)).forEach(System.out::println);
         System.out.println("현재 총 사용자 : " + usersMap.size());
     }
 
@@ -173,6 +154,7 @@ public class JCFUserService implements UserService {
         }
         usersMap.remove(target.getId());
         usersName.remove(target.getName());
+        JCFMessageService.getInstance().deleteAllMessagesSentByUser(target);
         System.out.println("계정이 삭제되었습니다.");
     }
 

@@ -1,8 +1,12 @@
 package com.sprint.mission.discodeit.entity;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
 public class User {
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     private final UUID id;
     private final Long createAt;
     private String name;
@@ -86,5 +90,16 @@ public class User {
     private void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
         setUpdateAt();
+    }
+
+    @Override
+    public String toString() {
+        return "====================\n"
+                + "사용자ID : " + this.getId()
+                + "사용자명 : " + this.getName()
+                + "이메일 : " + this.getEmail()
+                + "전화번호 : " + this.getPhoneNumber()
+                + "생성일 : " + sdf.format(new Date(this.getCreateAt()))
+                + "수정일 : " + sdf.format(new Date(this.getUpdateAt()));
     }
 }

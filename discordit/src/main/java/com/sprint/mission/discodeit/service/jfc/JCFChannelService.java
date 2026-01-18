@@ -11,11 +11,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class JCFChannelService implements ChannelService {
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private final Map<String, Channel> channelNameMap = new ConcurrentHashMap<>();
 
-    private JCFChannelService() {
-    }
+    private JCFChannelService() {}
 
     private static class Holder {
         private static final JCFChannelService INSTANCE = new JCFChannelService();
@@ -59,7 +57,7 @@ public class JCFChannelService implements ChannelService {
 
         channelNameMap.put(name, result);
         channelNameMap.remove(result.getName());
-        result.setName(name);
+        result.channelUpdater(name);
         System.out.println(result.getName());
         System.out.println("잘 변경되었어요!");
     }
@@ -76,12 +74,7 @@ public class JCFChannelService implements ChannelService {
         }
 
         System.out.println("해당 채널에 대한 정보를 알려드립니다.");
-        System.out.println("===================");
-        System.out.println("채널명 : " + result.getName());
-        System.out.println("채널ID : " + result.getId());
-        System.out.println("채널생성일 : " + sdf.format(new Date(result.getCreateAt())));
-        System.out.println("채널수정일 : " + sdf.format(new Date(result.getUpdateAt())));
-        System.out.println("===================");
+        System.out.println(result);
     }
 
     /// 메시지 발송용
@@ -115,13 +108,7 @@ public class JCFChannelService implements ChannelService {
             return;
         }
 
-        channelNameMap.values().forEach(channel -> {
-            System.out.println("채널명 : " + channel.getName());
-            System.out.println("채널ID : " + channel.getId());
-            System.out.println("채널수정일 : " + sdf.format(new Date(channel.getUpdateAt())));
-            System.out.println("채널생성일 : " + sdf.format(new Date(channel.getCreateAt())));
-            System.out.println("===================");
-        });
+        channelNameMap.values().forEach(System.out::println);
 
         System.out.println("현재 총 채널수 : " + channelNameMap.size());
     }
