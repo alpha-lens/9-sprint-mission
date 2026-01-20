@@ -6,8 +6,8 @@ import java.util.Scanner;
 import java.util.UUID;
 
 public interface ChannelService {
-    void createServer(Scanner sc);
-    void updateServer(Scanner sc);
+    void createChannel(Scanner sc);
+    void updateChannel(Scanner sc);
     void readAllChannel();
     void deleteChannel(Scanner sc);
 

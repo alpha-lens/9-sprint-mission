@@ -13,12 +13,12 @@ public class RouteChannelService {
 
             /// create
             case 1:
-                channelService.createServer(sc);
+                channelService.createChannel(sc);
                 break;
 
             /// update
             case 2:
-                channelService.updateServer(sc);
+                channelService.updateChannel(sc);
                 break;
 
             /// read

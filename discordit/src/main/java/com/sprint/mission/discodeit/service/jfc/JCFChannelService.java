@@ -26,7 +26,7 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
-    public void createServer(Scanner sc) {
+    public void createChannel(Scanner sc) {
         System.out.println("사용하려는 채널명이 무엇인가요?");
         String name = sc.nextLine();
 
@@ -41,7 +41,7 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
-    public void updateServer(Scanner sc) {
+    public void updateChannel(Scanner sc) {
         System.out.println("변경하고자 하는 채널명을 알려주세요");
         String name = sc.nextLine();
 
