@@ -9,11 +9,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class FileUserService implements UserService {
-    private final Map<UUID, User> usersMap;
-    private final Map<String, UUID> usersName;
+    private final Map<UUID, User> usersMap = new ConcurrentHashMap<>();
+    private final Map<String, UUID> usersName = new ConcurrentHashMap<>();
     private final Path DIRECTORY;
     private final String EXTENSION = ".ser";
 
@@ -28,9 +29,8 @@ public class FileUserService implements UserService {
         }
 
         /// 파일에서 user값을 불러와, hashMap으로 다시 저장하는 과정
-        /// concurrentHashMap을 사용하는 방법은 모르겠다.
         try {
-            usersMap = Files.list(DIRECTORY)
+            Files.list(DIRECTORY)
                     .filter(path -> path.toString().endsWith(EXTENSION))
                     .map(path -> {
                         try (
@@ -41,19 +41,10 @@ public class FileUserService implements UserService {
                         } catch (IOException | ClassNotFoundException e) {
                             throw new RuntimeException(e);
                         }
-                    }).collect(Collectors.toMap(User::getId, user -> user));
-            usersName = Files.list(DIRECTORY)
-                    .filter(path -> path.toString().endsWith(EXTENSION))
-                    .map(path -> {
-                        try (
-                                FileInputStream fis = new FileInputStream(path.toFile());
-                                ObjectInputStream ois = new ObjectInputStream(fis)
-                        ) {
-                            return (User) ois.readObject();
-                        } catch (IOException | ClassNotFoundException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }).collect(Collectors.toMap(User::getName, User::getId));
+                    }).forEach(user -> {
+                        usersMap.put(user.getId(), user);
+                        usersName.put(user.getName(), user.getId());
+                    });
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -140,7 +131,7 @@ public class FileUserService implements UserService {
                     }
 
                     checkUpdateUser.updateUser(reName, rePassword, reMail, rePhoneNumber);
-                    user.updateUser(reName, rePassword, reMail
+                    Objects.requireNonNull(user).updateUser(reName, rePassword, reMail
                     , rePhoneNumber);
 
                     try(FileOutputStream fos = new FileOutputStream(path.toFile());
@@ -191,14 +182,14 @@ public class FileUserService implements UserService {
             return;
         }
 
-        /// 일단 되는지 확인하기 위해서 섞어서 쓰긴 했는데...
+        /// 일단 되는지 확인하기 위해서 쓰긴 했는데...
         System.out.println("====================");
         System.out.println("사용자ID : " + oisUser.getId());
         System.out.println("사용자명 : " + oisUser.getName());
         System.out.println("이메일 : " + oisUser.getEmail());
-        System.out.println("전화번호 : " + user.getPhoneNumber());
-        System.out.println("생성일 : " + user.getCreateAt());
-        System.out.println("수정일 : " + user.getUpdateAt());
+        System.out.println("전화번호 : " + oisUser.getPhoneNumber());
+        System.out.println("생성일 : " + oisUser.getCreateAt());
+        System.out.println("수정일 : " + oisUser.getUpdateAt());
         System.out.println("====================");
     }
 
@@ -221,9 +212,8 @@ public class FileUserService implements UserService {
             return;
         }
 
-//        List<User> userList = serToUserList();
-
-        usersMap.values().stream().sorted(Comparator.comparing(User::getName)).forEach(user -> {
+        List<User> userList = serToUserList();
+        userList.stream().sorted(Comparator.comparing(User::getName)).forEach(user -> {
             System.out.println("====================");
             System.out.println("사용자ID : " + user.getId());
             System.out.println("사용자명 : " + user.getName());
@@ -233,7 +223,7 @@ public class FileUserService implements UserService {
             System.out.println("수정일 : " + user.getUpdateAt());
             System.out.println("====================");
         });
-        System.out.println("현재 총 사용자 : " + usersMap.size());
+        System.out.println("현재 총 사용자 : " + userList.size());
     }
 
     /// Delete
