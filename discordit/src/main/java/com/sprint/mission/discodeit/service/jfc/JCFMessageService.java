@@ -5,19 +5,17 @@ import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.MessageService;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-/// TODO: 채널 메시지 조회헤엇
-/// 구분자, 전체 메시지 개수 넣어주기
-
 public class JCFMessageService implements MessageService {
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     private final Map<UUID, List<Message>> channelIdMessageMap = new ConcurrentHashMap<>();
     private final Map<UUID, List<Message>> userIdMessageMap = new ConcurrentHashMap<>();
 
-    /// 20260115 멘토링 때, 싱글톤 패턴이 적용되지 않았다고 해서 넣어봄
-    private JCFMessageService() {
-    }
+    private JCFMessageService() {}
 
     private static class Holder {
         private static final JCFMessageService INSTANCE = new JCFMessageService();
@@ -90,9 +88,9 @@ public class JCFMessageService implements MessageService {
         flag.forEach(message -> {
             System.out.println("보낸 사용자: " + userService.getUserByName(message.getSendUserId()));
             System.out.println("보낸 내용: " + message.getContent());
-            System.out.println("보낸일시 : " + message.getCreateAt());
-            System.out.println("수정일시 : " + message.getUpdateAt());
-            System.out.println("===============");
+            System.out.println("보낸일시 : " + sdf.format(new Date(message.getCreateAt())));
+            System.out.println("수정일시 : " + sdf.format(new Date(message.getUpdateAt())));
+            System.out.println("====================");
         });
     }
 
@@ -112,9 +110,9 @@ public class JCFMessageService implements MessageService {
             System.out.println("보낸 사용자 : " + userService.getUserByName(message.getSendUserId()));
             System.out.println("보낸 채널명 : " + channelService.isChannelName(message.getSendChannel()));
             System.out.println("내용 : " + message.getContent());
-            System.out.println("보낸일시 : " + message.getCreateAt());
-            System.out.println("수정일시 : " + message.getUpdateAt());
-            System.out.println("===============");
+            System.out.println("보낸일시 : " + sdf.format(new Date(message.getCreateAt())));
+            System.out.println("수정일시 : " + sdf.format(new Date(message.getUpdateAt())));
+            System.out.println("====================");
         }
     }
 
@@ -138,5 +136,11 @@ public class JCFMessageService implements MessageService {
         } else {
             System.out.println("초기로 돌아갑니다");
         }
+    }
+
+    /// User 삭제시 해당 User가 보낸 내용도 함께 삭제되도록 하기 위함
+    public void deleteAllMessagesSentByUser(User user) {
+        userIdMessageMap.remove(user.getId());
+        channelIdMessageMap.values().forEach(list -> list.removeIf(message -> message.getSendUserId().equals(user.getId())));
     }
 }
