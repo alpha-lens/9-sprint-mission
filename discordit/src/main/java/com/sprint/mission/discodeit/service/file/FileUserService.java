@@ -18,38 +18,37 @@ public class FileUserService implements UserService {
     private final String EXTENSION = ".ser";
 
     private FileUserService() {
-        throw new RuntimeException("🔥 FileUserService 생성자 실행됨");
-//        this.DIRECTORY = Paths.get(System.getProperty("user.dir"), "file-data-map", User.class.getSimpleName());
-//        System.out.println(">>> [DEBUG] User 저장 경로: " + this.DIRECTORY.toAbsolutePath());
-//        if (Files.notExists(DIRECTORY)) {
-//            try {
-//                Files.createDirectories(DIRECTORY);
-//                System.out.println(">>> [DEBUG] 디렉토리 생성됨!");
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
-//
-//        /// 파일에서 user값을 불러와, hashMap으로 다시 저장하는 과정
-//        try {
-//            Files.list(DIRECTORY)
-//                    .filter(path -> path.toString().endsWith(EXTENSION))
-//                    .map(path -> {
-//                        try (
-//                                FileInputStream fis = new FileInputStream(path.toFile());
-//                                ObjectInputStream ois = new ObjectInputStream(fis)
-//                        ) {
-//                            return (User) ois.readObject();
-//                        } catch (IOException | ClassNotFoundException e) {
-//                            throw new RuntimeException(e);
-//                        }
-//                    }).forEach(user -> {
-//                        usersMap.put(user.getId(), user);
-//                        usersName.put(user.getName(), user.getId());
-//                    });
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
+        this.DIRECTORY = Paths.get(System.getProperty("user.dir"), "file-data-map", User.class.getSimpleName());
+        System.out.println(">>> [DEBUG] User 저장 경로: " + this.DIRECTORY.toAbsolutePath());
+        if (Files.notExists(DIRECTORY)) {
+            try {
+                Files.createDirectories(DIRECTORY);
+                System.out.println(">>> [DEBUG] 디렉토리 생성됨!");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        /// 파일에서 user값을 불러와, hashMap으로 다시 저장하는 과정
+        try {
+            Files.list(DIRECTORY)
+                    .filter(path -> path.toString().endsWith(EXTENSION))
+                    .map(path -> {
+                        try (
+                                FileInputStream fis = new FileInputStream(path.toFile());
+                                ObjectInputStream ois = new ObjectInputStream(fis)
+                        ) {
+                            return (User) ois.readObject();
+                        } catch (IOException | ClassNotFoundException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }).forEach(user -> {
+                        usersMap.put(user.getId(), user);
+                        usersName.put(user.getName(), user.getId());
+                    });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
     private static class Holder {
         private static final FileUserService INSTANCE = new FileUserService();

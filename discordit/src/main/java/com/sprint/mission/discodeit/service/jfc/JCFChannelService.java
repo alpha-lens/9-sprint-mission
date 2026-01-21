@@ -63,6 +63,10 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
+    public void readChannel(Scanner sc) {
+
+    }
+
     public void isChannelName(Scanner sc) {
         System.out.println("조회하고자 하는 채널명을 입력해주세요");
         String name = sc.nextLine();
@@ -78,7 +82,6 @@ public class JCFChannelService implements ChannelService {
     }
 
     /// 메시지 발송용
-    @Override
     public Channel isChannelName(String name) {
         Channel result = check(name);
 
@@ -90,7 +93,6 @@ public class JCFChannelService implements ChannelService {
     }
 
     /// UUID to Name
-    @Override
     public String isChannelName(UUID id) {
         Channel result = check(id);
 
@@ -140,7 +142,6 @@ public class JCFChannelService implements ChannelService {
         System.out.println("해당 채널이 삭제되었습니다.");
     }
 
-    @Override
     public Channel check(String name) {
         try {
             return channelNameMap.get(name);
@@ -150,7 +151,6 @@ public class JCFChannelService implements ChannelService {
     }
 
     /// 채널ID로도 관리하는 형태를 만드는게 좋을까?
-    @Override
     public Channel check(UUID id) {
         return channelNameMap.values().stream().filter(u -> u.getId().equals(id)).findFirst().orElse(null);
     }
