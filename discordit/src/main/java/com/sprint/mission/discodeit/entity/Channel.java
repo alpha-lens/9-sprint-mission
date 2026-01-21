@@ -1,16 +1,18 @@
 package com.sprint.mission.discodeit.entity;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
-public class Channel {
+public class Channel implements Serializable {
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private final UUID id;
     private final Long createAt;
     private String name;
     private Long updateAt;
+    private static final long serialVersionUID = 1L;
 
     public Channel(String name) {
         long n = System.currentTimeMillis();

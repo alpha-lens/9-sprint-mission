@@ -10,7 +10,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class FileUserService implements UserService {
     private final Map<UUID, User> usersMap = new ConcurrentHashMap<>();
@@ -19,35 +18,38 @@ public class FileUserService implements UserService {
     private final String EXTENSION = ".ser";
 
     private FileUserService() {
-        this.DIRECTORY = Paths.get(System.getProperty("user.dir"), "file-data-map", User.class.getSimpleName());
-        if (Files.notExists(DIRECTORY)) {
-            try {
-                Files.createDirectories(DIRECTORY);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        /// 파일에서 user값을 불러와, hashMap으로 다시 저장하는 과정
-        try {
-            Files.list(DIRECTORY)
-                    .filter(path -> path.toString().endsWith(EXTENSION))
-                    .map(path -> {
-                        try (
-                                FileInputStream fis = new FileInputStream(path.toFile());
-                                ObjectInputStream ois = new ObjectInputStream(fis)
-                        ) {
-                            return (User) ois.readObject();
-                        } catch (IOException | ClassNotFoundException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }).forEach(user -> {
-                        usersMap.put(user.getId(), user);
-                        usersName.put(user.getName(), user.getId());
-                    });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        throw new RuntimeException("🔥 FileUserService 생성자 실행됨");
+//        this.DIRECTORY = Paths.get(System.getProperty("user.dir"), "file-data-map", User.class.getSimpleName());
+//        System.out.println(">>> [DEBUG] User 저장 경로: " + this.DIRECTORY.toAbsolutePath());
+//        if (Files.notExists(DIRECTORY)) {
+//            try {
+//                Files.createDirectories(DIRECTORY);
+//                System.out.println(">>> [DEBUG] 디렉토리 생성됨!");
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
+//
+//        /// 파일에서 user값을 불러와, hashMap으로 다시 저장하는 과정
+//        try {
+//            Files.list(DIRECTORY)
+//                    .filter(path -> path.toString().endsWith(EXTENSION))
+//                    .map(path -> {
+//                        try (
+//                                FileInputStream fis = new FileInputStream(path.toFile());
+//                                ObjectInputStream ois = new ObjectInputStream(fis)
+//                        ) {
+//                            return (User) ois.readObject();
+//                        } catch (IOException | ClassNotFoundException e) {
+//                            throw new RuntimeException(e);
+//                        }
+//                    }).forEach(user -> {
+//                        usersMap.put(user.getId(), user);
+//                        usersName.put(user.getName(), user.getId());
+//                    });
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
     private static class Holder {
         private static final FileUserService INSTANCE = new FileUserService();
@@ -117,26 +119,11 @@ public class FileUserService implements UserService {
             switch (finalCheckIsContinue.toLowerCase()){
                 case "y":
                     Path path = resolvePath(checkUpdateUser.getId());
-                    User user = null;
-
-                    if(Files.exists(path)) {
-                        try (
-                                FileInputStream fis = new FileInputStream(path.toFile());
-                                ObjectInputStream ois = new ObjectInputStream(fis)
-                        ) {
-                            user = (User) ois.readObject();
-                        } catch (IOException | ClassNotFoundException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-
-                    checkUpdateUser.updateUser(reName, rePassword, reMail, rePhoneNumber);
-                    Objects.requireNonNull(user).updateUser(reName, rePassword, reMail
-                    , rePhoneNumber);
 
                     try(FileOutputStream fos = new FileOutputStream(path.toFile());
                         ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-                        oos.writeObject(user);
+                        oos.writeObject(checkUpdateUser);
+                        checkUpdateUser.updateUser(reName, rePassword, reMail, rePhoneNumber);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -174,8 +161,6 @@ public class FileUserService implements UserService {
                 FileInputStream fis = new FileInputStream(resolvePath(user.getId()).toFile());
                 ObjectInputStream ois = new ObjectInputStream(fis);
         ) {
-            /// 당장은 안 쓰고 있긴 한데... 써야 하나?
-            /// 테스트용으로 추가해둘까?
             oisUser = (User) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             System.err.println("조회하고자 하는 사용자가 없습니다.");
@@ -212,7 +197,7 @@ public class FileUserService implements UserService {
             return;
         }
 
-        List<User> userList = serToUserList();
+        List<User> userList = readAllUserForSerFile();
         userList.stream().sorted(Comparator.comparing(User::getName)).forEach(user -> {
             System.out.println("====================");
             System.out.println("사용자ID : " + user.getId());
@@ -276,7 +261,7 @@ public class FileUserService implements UserService {
         return user;
     }
 
-    private List<User> serToUserList() {
+    private List<User> readAllUserForSerFile() {
         try {
             return Files.list(DIRECTORY)
                     .filter(path -> path.toString().endsWith(EXTENSION))

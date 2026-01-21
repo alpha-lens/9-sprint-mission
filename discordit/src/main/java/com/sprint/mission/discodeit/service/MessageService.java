@@ -17,7 +17,7 @@ public interface MessageService {
 
     void getMessageForSender(User sender);
 
-    void getMessageInChannel(UUID channelId, JCFUserService userService);
+    void getMessageInChannel(UUID channelId);
 
     void deleteMessage(Scanner sc, User user);
 }

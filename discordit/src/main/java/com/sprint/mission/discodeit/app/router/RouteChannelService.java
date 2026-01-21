@@ -1,12 +1,14 @@
 package com.sprint.mission.discodeit.app.router;
 
+import com.sprint.mission.discodeit.service.file.FileChannelService;
 import com.sprint.mission.discodeit.service.jfc.JCFChannelService;
 
 import java.util.Scanner;
 
 public class RouteChannelService {
     static void channelService(Scanner sc, int routeCRUD) {
-        JCFChannelService channelService = JCFChannelService.getInstance();
+//        JCFChannelService channelService = JCFChannelService.getInstance();
+        FileChannelService channelService = FileChannelService.getInstance();
         int menu;
 
         switch (routeCRUD) {

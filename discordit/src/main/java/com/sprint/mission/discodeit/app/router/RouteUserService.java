@@ -1,12 +1,14 @@
 package com.sprint.mission.discodeit.app.router;
 
+import com.sprint.mission.discodeit.service.file.FileUserService;
 import com.sprint.mission.discodeit.service.jfc.JCFUserService;
 
 import java.util.Scanner;
 
 public class RouteUserService {
     static void userService(Scanner sc, int routeCRUD) {
-        JCFUserService userService = JCFUserService.getInstance();
+//        JCFUserService userService = JCFUserService.getInstance();
+        FileUserService userService = FileUserService.getInstance();
         int menu;
 
         switch (routeCRUD) {

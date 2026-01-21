@@ -28,7 +28,7 @@ public class FileMessageService implements MessageService {
     }
 
     private FileMessageService() {
-        this.DIRECTORY = Paths.get(System.getProperty("message.dir"), "file-data-map", Message.class.getSimpleName());
+        this.DIRECTORY = Paths.get(System.getProperty("user.dir"), "file-data-map", Message.class.getSimpleName());
         if (Files.notExists(DIRECTORY)) {
             try {
                 Files.createDirectories(DIRECTORY);
@@ -49,13 +49,24 @@ public class FileMessageService implements MessageService {
                             throw new RuntimeException(e);
                         }
                     }).forEach(message -> {
-                        channelIdMessageMap.put(message.getSendChannel(), List.of(message));
-                        userIdMessageMap.put(message.getSendUserId(), List.of(message));
+                        channelIdMessageMap
+                                .computeIfAbsent(message.getSendChannel(), id -> new ArrayList<>())
+                                .add(message);
+
+                        userIdMessageMap
+                                .computeIfAbsent(message.getSendUserId(), id -> new ArrayList<>())
+                                .add(message);
                     });
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
+    private static class Holder {
+        private static final FileMessageService INSTANCE = new FileMessageService();
+    }
+
+    public static FileMessageService getInstance() {return FileMessageService.Holder.INSTANCE;}
 
     @Override
     public void createMessage(Scanner sc, Channel channel, User user) {
@@ -75,8 +86,8 @@ public class FileMessageService implements MessageService {
                 return;
             } else if (Objects.equals(n, "1")) {
                 Message message = new Message(channel.getId(), user.getId(), text);
-                channelIdMessageMap.computeIfAbsent(channel.getId(), m -> new ArrayList<Message>()).add(message);
-                userIdMessageMap.computeIfAbsent(user.getId(), m -> new ArrayList<Message>()).add(message);
+                channelIdMessageMap.computeIfAbsent(channel.getId(), m -> new ArrayList<>()).add(message);
+                userIdMessageMap.computeIfAbsent(user.getId(), m -> new ArrayList<>()).add(message);
                 Path path = resolvePath(message.getId());
                 try (
                         FileOutputStream fos = new FileOutputStream(path.toFile());
@@ -96,6 +107,45 @@ public class FileMessageService implements MessageService {
     }
 
     @Override
+    public void getMessageForSender(User sender) {
+        JCFChannelService channelService = JCFChannelService.getInstance();
+        List<Message> messages = userIdMessageMap.getOrDefault(sender.getId(), null);
+        if (messages.isEmpty()) {
+            System.out.println("아쉽지만 아무것도 없네요!");
+            return;
+        }
+
+        System.out.println("당신이 보낸 메시지는 아래와 같습니다.");
+        for (Message message : messages) {
+            System.out.println("ID : " + message.getId());
+            System.out.println("보낸 채널명 : " + channelService.isChannelName(message.getSendChannel()));
+            System.out.println("내용 : " + message.getContent());
+            System.out.println("보낸일시 : " + sdf.format(new Date(message.getCreateAt())));
+            System.out.println("수정일시 : " + sdf.format(new Date(message.getUpdateAt())));
+            System.out.println("====================");
+        }
+    }
+
+    @Override
+    public void getMessageInChannel(UUID channelId) {
+        FileUserService userService = FileUserService.getInstance();
+        List<Message> flag = channelIdMessageMap.getOrDefault(channelId, null);
+
+        if (flag.isEmpty()) {
+            System.out.println("해당 채널에 보낸 메시지가 없어요.");
+            return;
+        }
+
+        flag.forEach(message -> {
+            System.out.println("보낸 사용자: " + userService.getUserByName(message.getSendUserId()));
+            System.out.println("보낸 내용: " + message.getContent());
+            System.out.println("보낸일시 : " + sdf.format(new Date(message.getCreateAt())));
+            System.out.println("수정일시 : " + sdf.format(new Date(message.getUpdateAt())));
+            System.out.println("====================");
+        });
+    }
+
+    @Override
     public void updateMessage(Scanner sc, User user) {
         getMessageForSender(user);
 
@@ -109,51 +159,60 @@ public class FileMessageService implements MessageService {
             return;
         }
 
+        Path path = resolvePath(text.getId());
+        Message message = null;
+
+        if(Files.exists(path)) {
+            try(FileInputStream fis = new FileInputStream(path.toFile());
+                ObjectInputStream ois = new ObjectInputStream(fis)){
+                message = (Message) ois.readObject();
+            } catch (IOException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         System.out.println("무슨 내용으로 수정하고 싶나요?");
         String content = sc.nextLine();
         System.out.println("지금 작업중입니다.");
 
         text.updateMessage(content);
-        System.out.println("성공");
-    }
 
-    @Override
-    public void getMessageForSender(User sender) {
-        List<Message> messages = userIdMessageMap.get(sender.getId());
-        JCFUserService userService = JCFUserService.getInstance();
-        JCFChannelService channelService = JCFChannelService.getInstance();
-        if (messages.isEmpty()) {
-            System.out.println("아쉽지만 아무것도 없네요!");
-            return;
+        try(FileOutputStream fos = new FileOutputStream(path.toFile());
+        ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+            oos.writeObject(text);
+            System.out.println("성공");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
-        System.out.println("당신이 보낸 메시지는 아래와 같습니다.");
-        for (Message message : messages) {
-            System.out.println("ID : " + message.getId());
-            System.out.println("보낸 사용자 : " + userService.getUserByName(message.getSendUserId()));
-            System.out.println("보낸 채널명 : " + channelService.isChannelName(message.getSendChannel()));
-            System.out.println("내용 : " + message.getContent());
-            System.out.println("보낸일시 : " + sdf.format(new Date(message.getCreateAt())));
-            System.out.println("수정일시 : " + sdf.format(new Date(message.getUpdateAt())));
-            System.out.println("====================");
-        }
-    }
-
-    @Override
-    public void getMessageInChannel(UUID channelId, JCFUserService userService) {
-
     }
 
     @Override
     public void deleteMessage(Scanner sc, User user) {
+        getMessageForSender(user);
+        System.out.println("어떤 메시지를 삭제하고 싶나요? ID로 입력해주세요.");
+        String id = sc.nextLine();
 
+        Message message = userIdMessageMap.get(user.getId()).stream().filter(e -> e.getId().equals(UUID.fromString(id))).findFirst().orElse(null);
+        if (message == null) {
+            System.out.println("해당 ID를 가진 메시지를 찾을 수 없습니다.");
+            return;
+        }
+        System.out.println("해당 메시지를 삭제합니까? (Y or any Key)");
+        String isDelete = sc.nextLine();
+
+        Path path = resolvePath(UUID.fromString(id));
+
+        if (isDelete.equalsIgnoreCase("Y")) {
+            try {
+                Files.delete(path);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            userIdMessageMap.get(user.getId()).remove(message);
+            channelIdMessageMap.get(message.getSendChannel()).remove(message);
+            System.out.println("성공!");
+        } else {
+            System.out.println("초기로 돌아갑니다");
+        }
     }
-
-    private static class Holder {
-        private static final FileMessageService INSTANCE = new FileMessageService();
-    }
-
-    public static FileMessageService getInstance() {return FileMessageService.Holder.INSTANCE;}
-
-
 }

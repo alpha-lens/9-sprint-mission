@@ -2,6 +2,9 @@ package com.sprint.mission.discodeit.app.router;
 
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.service.file.FileChannelService;
+import com.sprint.mission.discodeit.service.file.FileMessageService;
+import com.sprint.mission.discodeit.service.file.FileUserService;
 import com.sprint.mission.discodeit.service.jfc.JCFChannelService;
 import com.sprint.mission.discodeit.service.jfc.JCFMessageService;
 import com.sprint.mission.discodeit.service.jfc.JCFUserService;
@@ -11,9 +14,12 @@ import java.util.Scanner;
 public class RouteMessageService {
     static void messageService(Scanner sc, int routeCURD) {
         /// Singleton Instance
-        JCFUserService userService = JCFUserService.getInstance();
-        JCFChannelService channelService = JCFChannelService.getInstance();
-        JCFMessageService messageService = JCFMessageService.getInstance();
+//        JCFUserService userService = JCFUserService.getInstance();
+//        JCFChannelService channelService = JCFChannelService.getInstance();
+//        JCFMessageService messageService = JCFMessageService.getInstance();
+        FileUserService userService = FileUserService.getInstance();
+        FileChannelService channelService = FileChannelService.getInstance();
+        FileMessageService messageService = FileMessageService.getInstance();
 
         int m;
         String senderUserName;
@@ -80,7 +86,7 @@ public class RouteMessageService {
                         System.out.println("존재하지 않는 채널입니다.");
                         return;
                     }
-                    messageService.getMessageInChannel(nowChannel.getId(), userService);
+                    messageService.getMessageInChannel(nowChannel.getId());
                 }
                 break;
             case 4:

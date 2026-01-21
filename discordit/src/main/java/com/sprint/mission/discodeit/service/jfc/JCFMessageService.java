@@ -78,7 +78,8 @@ public class JCFMessageService implements MessageService {
     }
 
     @Override
-    public void getMessageInChannel(UUID channelId, JCFUserService userService) {
+    public void getMessageInChannel(UUID channelId) {
+        JCFUserService userService = JCFUserService.getInstance();
         List<Message> flag = channelIdMessageMap.get(channelId);
 
         if (flag.isEmpty()) {
