@@ -63,8 +63,8 @@ public class FileChannelRepository implements ChannelRepository {
     /// interface
     @Override
     public boolean save(Channel channel) {
-        /// 입력값: 현재 채널, 변경할 이름
-        /// TODO: 채널명 변경, 기존 키 삭제 및 추가
+        // 입력값: 현재 채널, 변경할 이름
+        // TODO: 채널명 변경, 기존 키 삭제 및 추가
 
         Path path = resolvePath(channel.getId());
 
@@ -104,8 +104,12 @@ public class FileChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public Channel readChannel(String name) {
-        return channelNameMap.getOrDefault(channelNameMap.get(name).getName(), null);
+    public String readChannel(String name) {
+        try {
+            return channelNameMap.get(channelNameMap.get(name).getName()).toString();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override

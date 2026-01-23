@@ -1,8 +1,12 @@
 package com.sprint.mission.discodeit.service.file;
 
+import com.sprint.mission.discodeit.app.JavaApplication;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
+import com.sprint.mission.discodeit.repository.file.FileMessageRepository;
+import com.sprint.mission.discodeit.repository.file.FileUserRepository;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.jfc.JCFChannelService;
 import com.sprint.mission.discodeit.service.jfc.JCFUserService;
@@ -17,49 +21,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class FileMessageService implements MessageService {
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private final Map<UUID, List<Message>> channelIdMessageMap = new ConcurrentHashMap<>();
-    private final Map<UUID, List<Message>> userIdMessageMap = new ConcurrentHashMap<>();
-    private final Path DIRECTORY;
-    private final String EXTENSION = ".ser";
-
-    private Path resolvePath(UUID id) {
-        String EXTENSION = ".ser";
-        return DIRECTORY.resolve(id + EXTENSION);
-    }
+    Scanner sc = JavaApplication.scanner();
+    FileUserRepository userRepository = FileUserRepository.getInstance();
+    FileChannelRepository channelRepository = FileChannelRepository.getInstance();
+    FileMessageRepository messageRepository = FileMessageRepository.getInstance();
 
     private FileMessageService() {
-        this.DIRECTORY = Paths.get(System.getProperty("user.dir"), "file-data-map", Message.class.getSimpleName());
-        if (Files.notExists(DIRECTORY)) {
-            try {
-                Files.createDirectories(DIRECTORY);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        try {
-            Files.list(DIRECTORY).filter(path-> path.toString().endsWith(EXTENSION))
-                    .map(path->{
-                        try (
-                                FileInputStream fis = new FileInputStream(path.toFile());
-                                ObjectInputStream ois = new ObjectInputStream(fis)
-                        ) {
-                            return (Message) ois.readObject();
-                        } catch (IOException | ClassNotFoundException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }).forEach(message -> {
-                        channelIdMessageMap
-                                .computeIfAbsent(message.getSendChannel(), id -> new ArrayList<>())
-                                .add(message);
-
-                        userIdMessageMap
-                                .computeIfAbsent(message.getSendUserId(), id -> new ArrayList<>())
-                                .add(message);
-                    });
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private static class Holder {
@@ -69,11 +36,25 @@ public class FileMessageService implements MessageService {
     public static FileMessageService getInstance() {return FileMessageService.Holder.INSTANCE;}
 
     @Override
-    public void createMessage(Scanner sc, Channel channel, User user) {
+    public void createMessage() {
+        System.out.println("누가 보내는 메시지인가요?");
+        String senderUserName = sc.nextLine();
+        if(userRepository.check(senderUserName) == null){
+            System.err.println("존재하지 않는 사용자입니다.");
+            return;
+        };
+
+        System.out.println("어디로 보내는 메시지인가요?");
+        String sendeeChannelName = sc.nextLine();
+
+        if(!channelRepository.check(sendeeChannelName)) {
+            System.out.println("존재하지 않는 채널입니다.");
+            return;
+        }
+
         while(true) {
-            if (channel == null) return;
-            System.out.println("현재 메시지를 보낼 채널은 " + channel.getName() + "입니다.");
-            System.out.println("현재 메시지를 보낼 사람은 " + user.getName() + "입니다.");
+            System.out.println("현재 메시지를 보낼 채널은 " + sendeeChannelName + "입니다.");
+            System.out.println("현재 메시지를 보낼 사람은 " + senderUserName + "입니다.");
             System.out.println("무어라 보내고 싶으신가요?");
             String text = sc.nextLine();
 
@@ -85,20 +66,9 @@ public class FileMessageService implements MessageService {
                 System.out.println("처음으로 돌아갑니다.");
                 return;
             } else if (Objects.equals(n, "1")) {
-                Message message = new Message(channel.getId(), user.getId(), text);
-                channelIdMessageMap.computeIfAbsent(channel.getId(), m -> new ArrayList<>()).add(message);
-                userIdMessageMap.computeIfAbsent(user.getId(), m -> new ArrayList<>()).add(message);
-                Path path = resolvePath(message.getId());
-                try (
-                        FileOutputStream fos = new FileOutputStream(path.toFile());
-                        ObjectOutputStream oos = new ObjectOutputStream(fos)
-                ) {
-                    oos.writeObject(message);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                if(messageRepository.createMessage(text, sendeeChannelName, senderUserName)) {
+                    System.out.println("성공.");
                 }
-
-                System.out.println("성공.");
                 return;
             } else {
                 System.out.println("잘못 입력했습니다. 메시지 입력 부분으로 돌아갑니다.");

@@ -7,7 +7,7 @@ import java.util.List;
 public interface ChannelRepository {
     boolean save(Channel channel);
     boolean save(String oldName, String newName);
-    Channel readChannel(String name);
+    String readChannel(String name);
 
     List<Channel> readAllChannel();
 

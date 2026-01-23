@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.file;
 
+import com.sprint.mission.discodeit.app.JavaApplication;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
@@ -9,6 +10,7 @@ import java.util.Scanner;
 
 public class FileChannelService implements ChannelService {
     FileChannelRepository fileChannelRepository = FileChannelRepository.getInstance();
+    Scanner sc = JavaApplication.scanner();
 
     private FileChannelService() {
     }
@@ -22,7 +24,7 @@ public class FileChannelService implements ChannelService {
 
 
     @Override
-    public void createChannel(Scanner sc) {
+    public void createChannel() {
         System.out.println("사용하려는 채널명이 무엇인가요?");
         String name = sc.nextLine().trim();
 
@@ -37,7 +39,7 @@ public class FileChannelService implements ChannelService {
     }
 
     @Override
-    public void readChannel(Scanner sc) {
+    public void readChannel() {
         System.out.println("검색할 채널명을 알려주세요");
         String name = sc.nextLine().trim();
 
@@ -59,7 +61,7 @@ public class FileChannelService implements ChannelService {
     }
 
     @Override
-    public void updateChannel(Scanner sc) {
+    public void updateChannel() {
         System.out.println("변경하고자 하는 채널명을 알려주세요");
         String oldName = sc.nextLine();
 
@@ -78,7 +80,7 @@ public class FileChannelService implements ChannelService {
     }
 
     @Override
-    public void deleteChannel(Scanner sc) {
+    public void deleteChannel() {
         System.out.println("[Warning!] 지금 계정을 삭제하려 하고 있습니다.");
         System.out.println("[Warning!] 만약 잘못 들어오신 경우, 0을 눌러주시기 바랍니다.");
         System.out.println("[Warning!] 계속 진행하려면 아무 숫자나 입력해주세요");

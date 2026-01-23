@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.jfc;
 
+import com.sprint.mission.discodeit.app.JavaApplication;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.service.ChannelService;
 
@@ -12,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class JCFChannelService implements ChannelService {
     private final Map<String, Channel> channelNameMap = new ConcurrentHashMap<>();
+    Scanner sc = JavaApplication.scanner();
 
     private JCFChannelService() {}
 
@@ -24,7 +26,7 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
-    public void createChannel(Scanner sc) {
+    public void createChannel() {
         System.out.println("사용하려는 채널명이 무엇인가요?");
         String name = sc.nextLine();
 
@@ -39,7 +41,7 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
-    public void updateChannel(Scanner sc) {
+    public void updateChannel() {
         System.out.println("변경하고자 하는 채널명을 알려주세요");
         String name = sc.nextLine();
 
@@ -63,11 +65,7 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
-    public void readChannel(Scanner sc) {
-
-    }
-
-    public void isChannelName(Scanner sc) {
+    public void readChannel() {
         System.out.println("조회하고자 하는 채널명을 입력해주세요");
         String name = sc.nextLine();
         Channel result = check(name);
@@ -116,7 +114,7 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
-    public void deleteChannel(Scanner sc) {
+    public void deleteChannel() {
         String inputChannelName;
         int n;
         System.out.println("[Warning!] 지금 계정을 삭제하려 하고 있습니다.");

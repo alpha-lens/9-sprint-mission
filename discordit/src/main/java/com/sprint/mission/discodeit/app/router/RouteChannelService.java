@@ -1,26 +1,28 @@
 package com.sprint.mission.discodeit.app.router;
 
+import com.sprint.mission.discodeit.app.JavaApplication;
 import com.sprint.mission.discodeit.service.file.FileChannelService;
 import com.sprint.mission.discodeit.service.jfc.JCFChannelService;
 
 import java.util.Scanner;
 
 public class RouteChannelService {
-    static void channelService(Scanner sc, int routeCRUD) {
+    static void channelService(int routeCRUD) {
 //        JCFChannelService channelService = JCFChannelService.getInstance();
         FileChannelService channelService = FileChannelService.getInstance();
         int menu;
+        Scanner sc = JavaApplication.scanner();
 
         switch (routeCRUD) {
 
             /// create
             case 1:
-                channelService.createChannel(sc);
+                channelService.createChannel();
                 break;
 
             /// update
             case 2:
-                channelService.updateChannel(sc);
+                channelService.updateChannel();
                 break;
 
             /// read
@@ -29,16 +31,17 @@ public class RouteChannelService {
                 System.out.println("1 : 특정 채널만 가져옵니다");
                 System.out.println("2 : 전체 채널을 가져옵니다");
 
+                // TODO:try-catch로 안정성 확보하기
                 menu = sc.nextInt();
                 sc.nextLine();
 
-                if (menu == 1) channelService.isChannelName(sc);
+                if (menu == 1) channelService.readChannel();
                 else if (menu == 2) channelService.readAllChannel();
                 break;
 
             /// delete
             case 4:
-                channelService.deleteChannel(sc);
+                channelService.deleteChannel();
                 break;
 
             default:

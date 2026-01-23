@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service.jfc;
 
 import com.sprint.mission.discodeit.Input;
+import com.sprint.mission.discodeit.app.JavaApplication;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.UserService;
 
@@ -10,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class JCFUserService implements UserService {
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    Scanner sc = JavaApplication.scanner();
 
     private JCFUserService() {
     }
@@ -25,7 +27,7 @@ public class JCFUserService implements UserService {
 
     /// Create
     @Override
-    public void createUser(Scanner sc) {
+    public void createUser() {
         String name;
         String pw;
         System.out.println("회원가입에 오신 것을 환영합니다.");
@@ -48,57 +50,57 @@ public class JCFUserService implements UserService {
 
     /// Update
     @Override
-    public void updateUser(Scanner sc) {
+    public void updateUser() {
         System.out.println("====================");
         System.out.println("사용자 변경 메뉴입니다.");
-        User checkUpdateUser = check(sc, "변경");
+        User checkUpdateUser = check("변경");
         if(checkUpdateUser == null) {
             System.out.println("일치하는 사용자가 없습니다.");
             return;
         }
 
-        updateUserInfo(sc, checkUpdateUser);
+//        updateUserInfo(checkUpdateUser);
     }
 
     /// 사실 분리할 필요가 없긴 한데, 너무 길어져서 분리함
     /// FIXME: 더 좋은 리팩터링 방법이 필요
-    private void updateUserInfo(Scanner sc, User checkUpdateUser) {
-        String reName;
-        String rePassword;
-        String reMail;
-        String rePhoneNumber;
-
-        while(true) {
-        /// 정규식은 있다는건 알아도 어떤 규칙인지 몰라서 GPT에게 물어봤습니다.
-        System.out.println("변경하지 않으시려면 엔터를 눌러주시기 바랍니다.");
-
-        reName = Input.inputUpdateField(sc, "사용자명", "\\S+", checkUpdateUser.getName());
-        rePassword = Input.inputUpdateField(sc, "비밀번호", "\\S+", null);
-        reMail = Input.inputUpdateField(sc, "이메일", "\\S+@\\S+\\.\\S+", checkUpdateUser.getEmail());
-        rePhoneNumber = Input.inputUpdateField(sc, "전화번호", "^\\d{10,11}$", checkUpdateUser.getPhoneNumber());
-
-        System.out.println("이대로 진행하시겠습니까?");
-        System.out.println("맞으면 y, 다시 입력하려면 re");
-        System.out.println("취소하려면 아무 키나 입력해주시기 바랍니다.");
-
-            String finalCheckIsContinue = sc.nextLine();
-            switch (finalCheckIsContinue.toLowerCase()){
-                case "y":
-                    checkUpdateUser.updateUser(reName, rePassword, reMail, rePhoneNumber);
-                    System.out.println("성공");
-                    return;
-                case "re":
-                    continue;
-                default:
-                    System.out.println("처음으로 돌아갑니다.");
-                    return;
-            }
-        }
-    }
+//    private void updateUserInfo(User checkUpdateUser) {
+//        String reName;
+//        String rePassword;
+//        String reMail;
+//        String rePhoneNumber;
+//
+//        while(true) {
+//        /// 정규식은 있다는건 알아도 어떤 규칙인지 몰라서 GPT에게 물어봤습니다.
+//        System.out.println("변경하지 않으시려면 엔터를 눌러주시기 바랍니다.");
+//
+//        reName = Input.inputUpdateField(sc, "사용자명", "\\S+", checkUpdateUser.getName());
+//        rePassword = Input.inputUpdateField(sc, "비밀번호", "\\S+", null);
+//        reMail = Input.inputUpdateField(sc, "이메일", "\\S+@\\S+\\.\\S+", checkUpdateUser.getEmail());
+//        rePhoneNumber = Input.inputUpdateField(sc, "전화번호", "^\\d{10,11}$", checkUpdateUser.getPhoneNumber());
+//
+//        System.out.println("이대로 진행하시겠습니까?");
+//        System.out.println("맞으면 y, 다시 입력하려면 re");
+//        System.out.println("취소하려면 아무 키나 입력해주시기 바랍니다.");
+//
+//            String finalCheckIsContinue = sc.nextLine();
+//            switch (finalCheckIsContinue.toLowerCase()){
+//                case "y":
+//                    checkUpdateUser.updateUser(reName, rePassword, reMail, rePhoneNumber);
+//                    System.out.println("성공");
+//                    return;
+//                case "re":
+//                    continue;
+//                default:
+//                    System.out.println("처음으로 돌아갑니다.");
+//                    return;
+//            }
+//        }
+//    }
 
     /// Read
     @Override
-    public void getUserName(Scanner sc) {
+    public void getUserName() {
         System.out.println("조회하고자 하는 사용자명을 입력해주세요");
         String name = sc.nextLine();
 
@@ -133,7 +135,7 @@ public class JCFUserService implements UserService {
 
     /// Delete
     @Override
-    public void deleteUser(Scanner sc) {
+    public void deleteUser() {
         int n;
         System.out.println("[Warning!] 지금 계정을 삭제하려 하고 있습니다.");
         System.out.println("[Warning!] 만약 잘못 들어오신 경우, 0을 눌러주시기 바랍니다.");
@@ -146,7 +148,7 @@ public class JCFUserService implements UserService {
             return;
         }
 
-        User target = check(sc, "삭제");
+        User target = check("삭제");
 
         if (target == null) {
             System.out.println("일치하는 계정을 찾을 수 없습니다.");
@@ -158,7 +160,7 @@ public class JCFUserService implements UserService {
         System.out.println("계정이 삭제되었습니다.");
     }
 
-    private User check(Scanner sc, String work) {
+    private User check(String work) {
         System.out.println(work + "하고자 하는 사용자명을 입력해주세요");
         String name = sc.nextLine();
 

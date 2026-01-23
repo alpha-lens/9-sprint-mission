@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.app.router;
 
+import com.sprint.mission.discodeit.app.JavaApplication;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.file.FileChannelService;
@@ -12,7 +13,7 @@ import com.sprint.mission.discodeit.service.jfc.JCFUserService;
 import java.util.Scanner;
 
 public class RouteMessageService {
-    static void messageService(Scanner sc, int routeCURD) {
+    static void messageService(int routeCURD) {
         /// Singleton Instance
 //        JCFUserService userService = JCFUserService.getInstance();
 //        JCFChannelService channelService = JCFChannelService.getInstance();
@@ -26,29 +27,12 @@ public class RouteMessageService {
         User nowUser;
         String sendeeChannelName;
         Channel nowChannel;
+        Scanner sc = JavaApplication.scanner();
 
         switch (routeCURD) {
             case 1:
                 /// create
-                System.out.println("누가 보내는 메시지인가요?");
-                senderUserName = sc.nextLine();
-                try {
-                    nowUser = userService.getUserByName(senderUserName);
-                } catch (Exception e) {
-                    System.out.println("존재하지 않는 사용자입니다.");
-                    return;
-                }
-
-                System.out.println("어디로 보내는 메시지인가요?");
-                sendeeChannelName = sc.nextLine();
-                try {
-                    nowChannel = channelService.isChannelName(sendeeChannelName);
-                } catch (Exception e) {
-                    System.out.println("존재하지 않는 채널입니다.");
-                    return;
-                }
-
-                messageService.createMessage(sc, nowChannel, nowUser);
+                messageService.createMessage();
                 break;
             case 2:
                 /// update

@@ -1,25 +1,27 @@
 package com.sprint.mission.discodeit.app.router;
 
+import com.sprint.mission.discodeit.app.JavaApplication;
 import com.sprint.mission.discodeit.service.file.FileUserService;
 import com.sprint.mission.discodeit.service.jfc.JCFUserService;
 
 import java.util.Scanner;
 
 public class RouteUserService {
-    static void userService(Scanner sc, int routeCRUD) {
+    static void userService(int routeCRUD) {
 //        JCFUserService userService = JCFUserService.getInstance();
         FileUserService userService = FileUserService.getInstance();
         int menu;
+        Scanner sc = JavaApplication.scanner();
 
         switch (routeCRUD) {
             /// create
             case 1:
-                userService.createUser(sc);
+                userService.createUser();
                 break;
 
             /// update
             case 2:
-                userService.updateUser(sc);
+                userService.updateUser();
                 break;
 
             /// read
@@ -31,13 +33,13 @@ public class RouteUserService {
                 menu = sc.nextInt();
                 sc.nextLine();
 
-                if (menu == 1) userService.getUserName(sc);
+                if (menu == 1) userService.getUserName();
                 else if (menu == 2) userService.getAllUserName();
                 break;
 
             /// delete
             case 4:
-                userService.deleteUser(sc);
+                userService.deleteUser();
                 break;
 
             default:

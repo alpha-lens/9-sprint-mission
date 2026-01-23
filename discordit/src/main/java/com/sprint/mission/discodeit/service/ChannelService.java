@@ -6,16 +6,16 @@ import java.util.Scanner;
 import java.util.UUID;
 
 public interface ChannelService {
-    void createChannel(Scanner sc);
-    void updateChannel(Scanner sc);
+    void createChannel();
+    void updateChannel();
 
-    void readChannel(Scanner sc);
+    void readChannel();
 
     void readAllChannel();
-    void deleteChannel(Scanner sc);
+    void deleteChannel();
 
     /// check
-//    void isChannelName(Scanner sc);
+//    void isChannelName();
 //    Channel isChannelName(String name);
 //    String isChannelName(UUID id);
 //    Channel check(String name);

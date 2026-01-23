@@ -13,11 +13,11 @@ import java.util.Scanner;
 /// Question: 자바 스타일을 배우기 위해 좋은 가이드라인 / 책이 있을지
 
 public interface UserService {
-    void createUser(Scanner sc);
-    void updateUser(Scanner sc);
-    void getUserName(Scanner sc);
+    void createUser();
+    void updateUser();
+    void getUserName();
     void getAllUserName();
-    void deleteUser(Scanner sc);
+    void deleteUser();
 }
 
 /// 네 맞아요

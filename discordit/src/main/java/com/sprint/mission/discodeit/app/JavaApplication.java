@@ -1,19 +1,23 @@
 package com.sprint.mission.discodeit.app;
 
 import com.sprint.mission.discodeit.app.router.Router;
-import com.sprint.mission.discodeit.service.file.FileUserService;
-import com.sprint.mission.discodeit.service.jfc.JCFUserService;
 
 import java.util.Scanner;
 
 public class JavaApplication {
-    public static void main(String[] args) {
-        FileUserService service = FileUserService.getInstance();
-        System.out.println(service);
+    private static class sc {
+        private static final Scanner sc = new Scanner(System.in);
+    }
 
+    public static Scanner scanner() {
+        return sc.sc;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = scanner();
         System.out.println("프로그램을 실행합니다.");
         int menu;
-        Scanner sc = new Scanner(System.in);
+
 
         while (true) {
             System.out.println("====================");
