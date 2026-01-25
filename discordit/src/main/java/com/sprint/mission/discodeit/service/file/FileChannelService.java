@@ -28,7 +28,7 @@ public class FileChannelService implements ChannelService {
         System.out.println("사용하려는 채널명이 무엇인가요?");
         String name = sc.nextLine().trim();
 
-        if (fileChannelRepository.check(name)) {
+        if (fileChannelRepository.isPresentChannel(name)) {
             System.out.println("이미 존재하는 채널명이에요!");
             return;
         }
@@ -65,7 +65,7 @@ public class FileChannelService implements ChannelService {
         System.out.println("변경하고자 하는 채널명을 알려주세요");
         String oldName = sc.nextLine();
 
-        if(!fileChannelRepository.check(oldName)) {
+        if(!fileChannelRepository.isPresentChannel(oldName)) {
             System.out.println("해당 채널이 존재하지 않습니다.");
             return;
         }
@@ -95,7 +95,7 @@ public class FileChannelService implements ChannelService {
         System.out.print("삭제하려는 채널명을 알려주세요: ");
         String inputChannelName = sc.nextLine();
 
-        if(!fileChannelRepository.check(inputChannelName)) {
+        if(!fileChannelRepository.isPresentChannel(inputChannelName)) {
             System.out.println("해당 채널을 찾을 수 없습니다.");
             return;
         }

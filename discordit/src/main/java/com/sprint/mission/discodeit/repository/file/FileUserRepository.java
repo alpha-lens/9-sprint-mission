@@ -85,7 +85,7 @@ public class FileUserRepository implements UserRepository {
 
         try(FileOutputStream fos = new FileOutputStream(path.toFile());
             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-            oos.writeObject(userId);
+            oos.writeObject(usersMap.get(userId));
             usersMap.get(userId).updateUser(reName, rePassword, reMail, rePhoneNumber);
             return true;
         } catch (IOException e) {
@@ -98,16 +98,21 @@ public class FileUserRepository implements UserRepository {
         return usersMap.get(usersName.get(name)).toString();
     }
 
-    public UUID getUserId(String name) {
-        try{
-            return usersName.get(name);
+    /// 더 좋은 방법이 있는지는 모르겠지만 당장은 이렇게...;
+    /// 사실 오버라이딩해서 썼는데 하나로 줄일 수 없을까 해서.. 고쳐봤습니다.
+    public boolean isPresentUser(Object arg) {
+        try {
+            if(arg instanceof String) {
+                usersMap.get(usersName.get((String) arg));
+            } else if(arg instanceof UUID){
+                usersMap.get((UUID) arg);
+            } else {
+                return true;
+            }
+            return false;
         } catch (Exception e) {
-            return null;
+            return true;
         }
-    }
-
-    public boolean isPresentUser(String name) {
-        return usersName.get(name) != null;
     }
 
     @Override
@@ -137,16 +142,19 @@ public class FileUserRepository implements UserRepository {
         }
     }
 
-    public boolean check(UUID id) {
+    public String userIdToName(UUID id) {
         try {
-            usersMap.get(id);
-            return true;
+            return usersMap.get(id).getName();
         } catch (Exception e) {
-            return false;
+            return null;
         }
     }
 
     public boolean check(UUID id, String pw) {
-        return usersMap.get(id).getPw().equals(pw);
+        try {
+            return usersMap.get(id).getPw().equals(pw);
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

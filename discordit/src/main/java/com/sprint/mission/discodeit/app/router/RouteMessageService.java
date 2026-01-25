@@ -1,9 +1,8 @@
 package com.sprint.mission.discodeit.app.router;
 
 import com.sprint.mission.discodeit.app.JavaApplication;
-import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
 import com.sprint.mission.discodeit.repository.file.FileUserRepository;
-import com.sprint.mission.discodeit.service.file.FileChannelService;
 import com.sprint.mission.discodeit.service.file.FileMessageService;
 
 import java.util.Scanner;
@@ -15,14 +14,13 @@ public class RouteMessageService {
 //        JCFChannelService channelService = JCFChannelService.getInstance();
 //        JCFMessageService messageService = JCFMessageService.getInstance();
         FileUserRepository userRepository = FileUserRepository.getInstance();
-        FileChannelService channelService = FileChannelService.getInstance();
+        FileChannelRepository channelRepository = FileChannelRepository.getInstance();
         FileMessageService messageService = FileMessageService.getInstance();
 
         int m;
+//        String nowUser;
         String senderUserName;
-        String nowUser;
         String sendeeChannelName;
-        Channel nowChannel;
         Scanner sc = JavaApplication.scanner();
 
         switch (routeCURD) {
@@ -60,12 +58,11 @@ public class RouteMessageService {
                 } else if (m == 2) {
                     System.out.println("어디로 보내는 메시지인가요?");
                     sendeeChannelName = sc.nextLine();
-                    nowChannel = channelService.isChannelName(sendeeChannelName);
-                    if (nowChannel == null) {
+                    if (channelRepository.isPresentChannel(sendeeChannelName)) {
                         System.out.println("존재하지 않는 채널입니다.");
                         return;
                     }
-                    messageService.getMessageInChannel(nowChannel.getId());
+                    messageService.getMessageInChannel(sendeeChannelName);
                 }
                 break;
             case 4:

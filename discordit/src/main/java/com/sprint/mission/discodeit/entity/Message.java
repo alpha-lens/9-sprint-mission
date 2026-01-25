@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.entity;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ public class Message implements Serializable {
     private final UUID userId;
     private Long updateAt;
     private String content;
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public Message(UUID channelId, UUID userId, String content) {
@@ -26,7 +28,7 @@ public class Message implements Serializable {
         return this.id;
     }
 
-    public UUID getSendChannel() {
+    public UUID getSendChannelId() {
         return this.channelId;
     }
 

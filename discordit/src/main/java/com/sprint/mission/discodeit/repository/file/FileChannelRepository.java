@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class FileChannelRepository implements ChannelRepository {
     private final Map<String, Channel> channelNameMap = new ConcurrentHashMap<>();
+    private final Map<UUID, Channel> channelIdMap = new ConcurrentHashMap<>();
     private final Path DIRECTORY;
     private final String EXTENSION = ".ser";
     private Path resolvePath(UUID id) {
@@ -47,6 +48,7 @@ public class FileChannelRepository implements ChannelRepository {
                         }
                     }).forEach(channel -> {
                         channelNameMap.put(channel.getName(), channel);
+                        channelIdMap.put(channel.getId(), channel);
                     });
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -136,6 +138,7 @@ public class FileChannelRepository implements ChannelRepository {
         try {
             Files.delete(path);
             channelNameMap.remove(name);
+            channelIdMap.remove(id);
             return true;
         } catch (IOException e) {
             return false;
@@ -143,13 +146,21 @@ public class FileChannelRepository implements ChannelRepository {
     }
 
     ///
-    public boolean check(String name) {
+    public boolean isPresentChannel(String name) {
         return channelNameMap.getOrDefault(channelNameMap.get(name).getName(), null) == null;
     }
 
     public UUID channelNameToId(String name) {
         try {
             return channelNameMap.get(name).getId();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public String channelIdToName(UUID id) {
+        try {
+            return channelIdMap.get(id).getName();
         } catch (Exception e) {
             return null;
         }

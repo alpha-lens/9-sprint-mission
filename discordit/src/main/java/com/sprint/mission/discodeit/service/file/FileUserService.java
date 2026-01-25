@@ -68,6 +68,7 @@ public class FileUserService implements UserService {
                 case "y":
                     if(fileUserRepository.updateUser(userId, reName, rePassword, reMail, rePhoneNumber)) {
                         System.out.println("완료");
+                        return;
                     }
                     System.out.println("실패");
                     return;
@@ -142,7 +143,7 @@ public class FileUserService implements UserService {
         System.out.println("해당 사용자의 비밀번호를 입력해주세요");
         String pw = sc.nextLine();
 
-        if (fileUserRepository.check(userId, pw)) return null;
+        if (!fileUserRepository.check(userId, pw)) return null;
 
         return userId;
     }

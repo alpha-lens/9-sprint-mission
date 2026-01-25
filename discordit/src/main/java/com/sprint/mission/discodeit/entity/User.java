@@ -53,8 +53,6 @@ public class User implements Serializable {
         return this.updateAt;
     }
 
-    /// set부분 수정하기
-    /// sdf
 
     public void setUpdateAt() {
         this.updateAt = System.currentTimeMillis();
@@ -95,12 +93,12 @@ public class User implements Serializable {
 
     @Override
     public String toString() {
-        return "====================\n"
-                + "사용자ID : " + this.getId()
-                + "사용자명 : " + this.getName()
-                + "이메일 : " + this.getEmail()
-                + "전화번호 : " + this.getPhoneNumber()
-                + "생성일 : " + sdf.format(new Date(this.getCreateAt()))
-                + "수정일 : " + sdf.format(new Date(this.getUpdateAt()));
+        return "===================="
+                + "\n사용자ID : " + this.getId()
+                + "\n사용자명 : " + this.getName()
+                + "\n이메일 : " + this.getEmail()
+                + "\n전화번호 : " + this.getPhoneNumber()
+                + "\n생성일 : " + sdf.format(new Date(this.getCreateAt()))
+                + "\n수정일 : " + sdf.format(new Date(this.getUpdateAt()));
     }
 }
