@@ -87,7 +87,7 @@ public class JCFMessageService implements MessageService {
         }
 
         flag.forEach(message -> {
-            System.out.println("보낸 사용자: " + userService.getUserByName(message.getSendUserId()));
+            System.out.println("보낸 사용자: " + userService.getUserByName(message.getSenderUserId()));
             System.out.println("보낸 내용: " + message.getContent());
             System.out.println("보낸일시 : " + sdf.format(new Date(message.getCreateAt())));
             System.out.println("수정일시 : " + sdf.format(new Date(message.getUpdateAt())));
@@ -108,7 +108,7 @@ public class JCFMessageService implements MessageService {
         System.out.println("당신이 보낸 메시지는 아래와 같습니다.");
         for (Message message : messages) {
             System.out.println("ID : " + message.getId());
-            System.out.println("보낸 사용자 : " + userService.getUserByName(message.getSendUserId()));
+            System.out.println("보낸 사용자 : " + userService.getUserByName(message.getSenderUserId()));
             System.out.println("보낸 채널명 : " + channelService.isChannelName(message.getSendChannel()));
             System.out.println("내용 : " + message.getContent());
             System.out.println("보낸일시 : " + sdf.format(new Date(message.getCreateAt())));
@@ -142,6 +142,6 @@ public class JCFMessageService implements MessageService {
     /// User 삭제시 해당 User가 보낸 내용도 함께 삭제되도록 하기 위함
     public void deleteAllMessagesSentByUser(User user) {
         userIdMessageMap.remove(user.getId());
-        channelIdMessageMap.values().forEach(list -> list.removeIf(message -> message.getSendUserId().equals(user.getId())));
+        channelIdMessageMap.values().forEach(list -> list.removeIf(message -> message.getSenderUserId().equals(user.getId())));
     }
 }

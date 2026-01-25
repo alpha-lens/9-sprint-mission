@@ -54,7 +54,7 @@ public class FileMessageRepository implements MessageRepository {
                                 .add(message);
 
                         userIdMessageMap
-                                .computeIfAbsent(message.getSendUserId(), id -> new ArrayList<>())
+                                .computeIfAbsent(message.getSenderUserId(), id -> new ArrayList<>())
                                 .add(message);
                     });
         } catch (Exception e) {
@@ -71,24 +71,45 @@ public class FileMessageRepository implements MessageRepository {
     }
 
     public boolean createMessage(String content, String sendeeChannelName, String senderUser) {
-        channelRepository.readChannel(sendeeChannelName)
-        Message message = new Message(channel.getId(), user.getId(), text);
-        channelIdMessageMap.computeIfAbsent(channel.getId(), m -> new ArrayList<>()).add(message);
-        userIdMessageMap.computeIfAbsent(user.getId(), m -> new ArrayList<>()).add(message);
+        UUID channelId = channelRepository.readChannelId(sendeeChannelName);
+        UUID userId = userRepository.getUserId(senderUser);
+
+        Message message = new Message(channelId, userId, content);
+        channelIdMessageMap.computeIfAbsent(channelId, m -> new ArrayList<>()).add(message);
+        userIdMessageMap.computeIfAbsent(userId, m -> new ArrayList<>()).add(message);
         Path path = resolvePath(message.getId());
         try (
                 FileOutputStream fos = new FileOutputStream(path.toFile());
                 ObjectOutputStream oos = new ObjectOutputStream(fos)
         ) {
             oos.writeObject(message);
+            return true;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return false;
         }
     }
 
-    public boolean readInChannelMessage() {}
+    public List<String> readInChannelMessage(String channelName) {
+        List<String> result = new ArrayList<>();
+        try{
+            channelIdMessageMap.get(channelRepository.channelNameToId(channelName))
+                    .forEach(message -> result.add(message.toString()));
+        } catch (Exception e) {
+            return null;
+        }
+        return result;
+    }
 
-    public boolean readForSenderMessage() {}
+    public List<String> readForSenderMessage(String senderName) {
+        List<String> result = new ArrayList<>();
+        try{
+            userIdMessageMap.get(userRepository.channelNameToId(channelName))
+                    .forEach(message -> result.add(message.toString()));
+        } catch (Exception e) {
+            return null;
+        }
+        return result;
+    }
 
     public boolean updateMessage() {}
 

@@ -106,7 +106,15 @@ public class FileChannelRepository implements ChannelRepository {
     @Override
     public String readChannel(String name) {
         try {
-            return channelNameMap.get(channelNameMap.get(name).getName()).toString();
+            return channelNameMap.get(name).toString();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public UUID readChannelId(String name) {
+        try {
+            return channelNameMap.get(name).getId();
         } catch (Exception e) {
             return null;
         }
@@ -137,5 +145,13 @@ public class FileChannelRepository implements ChannelRepository {
     ///
     public boolean check(String name) {
         return channelNameMap.getOrDefault(channelNameMap.get(name).getName(), null) == null;
+    }
+
+    public UUID channelNameToId(String name) {
+        try {
+            return channelNameMap.get(name).getId();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

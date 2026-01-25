@@ -4,10 +4,7 @@ import com.sprint.mission.discodeit.Input;
 import com.sprint.mission.discodeit.app.JavaApplication;
 import com.sprint.mission.discodeit.repository.file.FileUserRepository;
 import com.sprint.mission.discodeit.service.UserService;
-import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
 
-import java.io.*;
 import java.util.*;
 
 public class FileUserService implements UserService {
@@ -28,7 +25,7 @@ public class FileUserService implements UserService {
         System.out.print("먼저, 사용할 이름을 작성해주세요 : ");
         String name = sc.nextLine().trim();
 
-        if (fileUserRepository.check(name) != null) {
+        if (fileUserRepository.userNameToId(name) != null) {
             System.out.println("이미 존재하는 사용자명입니다.");
             return;
         }
@@ -88,7 +85,7 @@ public class FileUserService implements UserService {
         System.out.println("조회하고자 하는 사용자명을 입력해주세요");
         String name = sc.nextLine();
 
-        if (fileUserRepository.check(name) == null) {
+        if (fileUserRepository.userNameToId(name) == null) {
             System.out.println("조회하고자 하는 사용자가 없습니다.");
             return;
         }
@@ -138,7 +135,7 @@ public class FileUserService implements UserService {
     private UUID workRoute(String work) {
         System.out.println(work + "하고자 하는 사용자명을 입력해주세요");
         String name = sc.nextLine();
-        UUID userId = fileUserRepository.check(name);
+        UUID userId = fileUserRepository.userNameToId(name);
 
         if (userId == null) return null;
 

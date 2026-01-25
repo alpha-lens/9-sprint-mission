@@ -1,23 +1,18 @@
 package com.sprint.mission.discodeit.service.file;
 
 import com.sprint.mission.discodeit.app.JavaApplication;
-import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
 import com.sprint.mission.discodeit.repository.file.FileMessageRepository;
 import com.sprint.mission.discodeit.repository.file.FileUserRepository;
 import com.sprint.mission.discodeit.service.MessageService;
-import com.sprint.mission.discodeit.service.jfc.JCFChannelService;
-import com.sprint.mission.discodeit.service.jfc.JCFUserService;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class FileMessageService implements MessageService {
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -39,7 +34,7 @@ public class FileMessageService implements MessageService {
     public void createMessage() {
         System.out.println("누가 보내는 메시지인가요?");
         String senderUserName = sc.nextLine();
-        if(userRepository.check(senderUserName) == null){
+        if(userRepository.userNameToId(senderUserName) == null){
             System.err.println("존재하지 않는 사용자입니다.");
             return;
         };
@@ -77,9 +72,8 @@ public class FileMessageService implements MessageService {
     }
 
     @Override
-    public void getMessageForSender(User sender) {
-        JCFChannelService channelService = JCFChannelService.getInstance();
-        List<Message> messages = userIdMessageMap.getOrDefault(sender.getId(), null);
+    public void getMessageForSender(String senderName) {
+        List<String> messages = messageRepository.readInChannelMessage(senderName);
         if (messages.isEmpty()) {
             System.out.println("아쉽지만 아무것도 없네요!");
             return;
@@ -107,7 +101,7 @@ public class FileMessageService implements MessageService {
         }
 
         flag.forEach(message -> {
-            System.out.println("보낸 사용자: " + userService.getUserByName(message.getSendUserId()));
+            System.out.println("보낸 사용자: " + userService.getUserByName(message.getSenderUserId()));
             System.out.println("보낸 내용: " + message.getContent());
             System.out.println("보낸일시 : " + sdf.format(new Date(message.getCreateAt())));
             System.out.println("수정일시 : " + sdf.format(new Date(message.getUpdateAt())));
@@ -116,13 +110,13 @@ public class FileMessageService implements MessageService {
     }
 
     @Override
-    public void updateMessage(Scanner sc, User user) {
-        getMessageForSender(user);
+    public void updateMessage(String userName) {
+        getMessageForSender(userName);
 
         System.out.println("어떤 것을 수정하고 싶나요?");
         String id = sc.nextLine();
 
-        Message text = userIdMessageMap.get(user.getId()).stream().filter(m -> m.getId().equals(UUID.fromString(id))).findFirst().orElse(null);
+        Message text = userIdMessageMap.get(userName.getId()).stream().filter(m -> m.getId().equals(UUID.fromString(id))).findFirst().orElse(null);
 
         if (text == null) {
             System.out.println("실패. 해당 ID를 찾지 못했습니다.");

@@ -30,7 +30,7 @@ public class Message implements Serializable {
         return this.channelId;
     }
 
-    public UUID getSendUserId() {
+    public UUID getSenderUserId() {
         return this.userId;
     }
 

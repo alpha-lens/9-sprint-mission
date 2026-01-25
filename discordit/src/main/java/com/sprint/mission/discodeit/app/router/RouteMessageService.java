@@ -2,13 +2,9 @@ package com.sprint.mission.discodeit.app.router;
 
 import com.sprint.mission.discodeit.app.JavaApplication;
 import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.repository.file.FileUserRepository;
 import com.sprint.mission.discodeit.service.file.FileChannelService;
 import com.sprint.mission.discodeit.service.file.FileMessageService;
-import com.sprint.mission.discodeit.service.file.FileUserService;
-import com.sprint.mission.discodeit.service.jfc.JCFChannelService;
-import com.sprint.mission.discodeit.service.jfc.JCFMessageService;
-import com.sprint.mission.discodeit.service.jfc.JCFUserService;
 
 import java.util.Scanner;
 
@@ -18,13 +14,13 @@ public class RouteMessageService {
 //        JCFUserService userService = JCFUserService.getInstance();
 //        JCFChannelService channelService = JCFChannelService.getInstance();
 //        JCFMessageService messageService = JCFMessageService.getInstance();
-        FileUserService userService = FileUserService.getInstance();
+        FileUserRepository userRepository = FileUserRepository.getInstance();
         FileChannelService channelService = FileChannelService.getInstance();
         FileMessageService messageService = FileMessageService.getInstance();
 
         int m;
         String senderUserName;
-        User nowUser;
+        String nowUser;
         String sendeeChannelName;
         Channel nowChannel;
         Scanner sc = JavaApplication.scanner();
@@ -38,12 +34,12 @@ public class RouteMessageService {
                 /// update
                 System.out.println("누가 보낸 메시지인가요?");
                 senderUserName = sc.nextLine();
-                nowUser = userService.getUserByName(senderUserName);
-                if (nowUser == null) {
+//                nowUser = userService.getUserByName(senderUserName);
+                if (userRepository.isPresentUser(senderUserName)) {
                     System.out.println("존재하지 않는 사용자입니다.");
                     return;
                 }
-                messageService.updateMessage(sc, nowUser);
+                messageService.updateMessage(senderUserName);
                 break;
             case 3:
                 /// read
@@ -56,12 +52,11 @@ public class RouteMessageService {
                 if (m == 1) {
                     System.out.println("누가 보낸 메시지인가요?");
                     senderUserName = sc.nextLine();
-                    nowUser = userService.getUserByName(senderUserName);
-                    if (nowUser == null) {
+                    if (userRepository.isPresentUser(senderUserName)) {
                         System.out.println("존재하지 않는 사용자입니다.");
                         return;
                     }
-                    messageService.getMessageForSender(nowUser);
+                    messageService.getMessageForSender(senderUserName);
                 } else if (m == 2) {
                     System.out.println("어디로 보내는 메시지인가요?");
                     sendeeChannelName = sc.nextLine();
@@ -78,12 +73,11 @@ public class RouteMessageService {
                 System.out.println("현재는 내가 보낸 메시지를 삭제하는 기능만 지원하고 있습니다.");
                 System.out.println("사용자명은 어떻게 되나요?");
                 senderUserName = sc.nextLine();
-                nowUser = userService.getUserByName(senderUserName);
-                if (nowUser == null) {
+                if (userRepository.isPresentUser(senderUserName)) {
                     System.out.println("존재하지 않는 사용자입니다.");
                     return;
                 }
-                messageService.deleteMessage(sc, nowUser);
+                messageService.deleteMessage(senderUserName);
                 break;
             default:
                 return;

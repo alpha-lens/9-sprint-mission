@@ -98,10 +98,17 @@ public class FileUserRepository implements UserRepository {
         return usersMap.get(usersName.get(name)).toString();
     }
 
-//    @Override
-//    public void getUserName() {
-//
-//    }
+    public UUID getUserId(String name) {
+        try{
+            return usersName.get(name);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public boolean isPresentUser(String name) {
+        return usersName.get(name) != null;
+    }
 
     @Override
     public List<String> getAllUser() {
@@ -122,7 +129,7 @@ public class FileUserRepository implements UserRepository {
         usersMap.remove(id);
     }
 
-    public UUID check(String name) {
+    public UUID userNameToId(String name) {
         try {
             return usersName.get(name);
         } catch (Exception e) {
