@@ -12,5 +12,5 @@ public interface UserRepository {
 
     List<String> getAllUser();
 
-    void deleteUser(UUID id);
+    boolean deleteUser(UUID id);
 }

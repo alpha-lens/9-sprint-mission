@@ -4,6 +4,7 @@ import com.sprint.mission.discodeit.app.JavaApplication;
 import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
 import com.sprint.mission.discodeit.repository.file.FileUserRepository;
 import com.sprint.mission.discodeit.service.file.FileMessageService;
+import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
 
 import java.util.Scanner;
 
@@ -56,7 +57,7 @@ public class RouteMessageService {
                     }
                     messageService.getMessageForSender(senderUserName);
                 } else if (m == 2) {
-                    System.out.println("어디로 보내는 메시지인가요?");
+                    System.out.println("어디로 보낸 메시지인가요?");
                     sendeeChannelName = sc.nextLine();
                     if (channelRepository.isPresentChannel(sendeeChannelName)) {
                         System.out.println("존재하지 않는 채널입니다.");

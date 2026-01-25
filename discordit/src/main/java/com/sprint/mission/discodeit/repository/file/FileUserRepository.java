@@ -98,23 +98,6 @@ public class FileUserRepository implements UserRepository {
         return usersMap.get(usersName.get(name)).toString();
     }
 
-    /// 더 좋은 방법이 있는지는 모르겠지만 당장은 이렇게...;
-    /// 사실 오버라이딩해서 썼는데 하나로 줄일 수 없을까 해서.. 고쳐봤습니다.
-    public boolean isPresentUser(Object arg) {
-        try {
-            if(arg instanceof String) {
-                usersMap.get(usersName.get((String) arg));
-            } else if(arg instanceof UUID){
-                usersMap.get((UUID) arg);
-            } else {
-                return true;
-            }
-            return false;
-        } catch (Exception e) {
-            return true;
-        }
-    }
-
     @Override
     public List<String> getAllUser() {
         List<String> result = new ArrayList<>();
@@ -123,15 +106,16 @@ public class FileUserRepository implements UserRepository {
     }
 
     @Override
-    public void deleteUser(UUID id) {
+    public boolean deleteUser(UUID id) {
         Path path = resolvePath(id);
         try {
             Files.delete(path);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return false;
         }
         usersName.remove(usersMap.get(id).getName());
         usersMap.remove(id);
+        return true;
     }
 
     public UUID userNameToId(String name) {
@@ -152,9 +136,24 @@ public class FileUserRepository implements UserRepository {
 
     public boolean check(UUID id, String pw) {
         try {
-            return usersMap.get(id).getPw().equals(pw);
+            return !usersMap.get(id).getPw().equals(pw);
         } catch (Exception e) {
-            return false;
+            return true;
         }
+    }
+
+    /// 더 좋은 방법이 있는지는 모르겠지만 당장은 이렇게...;
+    /// 사실 오버라이딩해서 썼는데 하나로 줄일 수 없을까 해서.. 고쳐봤습니다.
+    public boolean isPresentUser(Object arg) {
+        try {
+            if(arg instanceof String) {
+                usersMap.get(usersName.get((String) arg));
+            } else if(arg instanceof UUID){
+                usersMap.get((UUID) arg);
+            } else {
+                return true;
+            }
+        } catch (Exception ignored) {}
+        return false;
     }
 }

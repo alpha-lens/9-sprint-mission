@@ -75,7 +75,7 @@ public class FileChannelRepository implements ChannelRepository {
             oos.writeObject(channel);
             oos.flush();
             channelNameMap.getOrDefault(channel.getName(),
-                    channelNameMap.put(channel.getName(), channel));
+            channelNameMap.put(channel.getName(), channel));
 
             return true;
         } catch (IOException e) {

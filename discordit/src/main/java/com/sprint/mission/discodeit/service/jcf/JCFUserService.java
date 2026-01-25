@@ -7,15 +7,15 @@ import com.sprint.mission.discodeit.service.UserService;
 
 import java.util.*;
 
-public class FileUserService implements UserService {
+public class JCFUserService implements UserService {
     Scanner sc = JavaApplication.scanner();
 
-    private FileUserService() {
+    private JCFUserService() {
     }
     private static class Holder {
-        private static final FileUserService INSTANCE = new FileUserService();
+        private static final JCFUserService INSTANCE = new JCFUserService();
     }
-    public static FileUserService getInstance() {return Holder.INSTANCE;}
+    public static JCFUserService getInstance() {return Holder.INSTANCE;}
 
     FileUserRepository fileUserRepository = FileUserRepository.getInstance();
 

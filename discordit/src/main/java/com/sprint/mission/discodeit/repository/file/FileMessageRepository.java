@@ -16,11 +16,12 @@ public class FileMessageRepository implements MessageRepository {
     private final Map<UUID, List<Message>> channelIdMessageMap = new ConcurrentHashMap<>();
     private final Map<UUID, List<Message>> userIdMessageMap = new ConcurrentHashMap<>();
     private final Map<UUID, Message> messageIdMap = new ConcurrentHashMap<>(128);
-    private final Path DIRECTORY;
-    private final String EXTENSION = ".ser";
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     FileChannelRepository channelRepository = FileChannelRepository.getInstance();
     FileUserRepository userRepository = FileUserRepository.getInstance();
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    private final Path DIRECTORY;
+    private final String EXTENSION = ".ser";
 
     private Path resolvePath(UUID id) {
         String EXTENSION = ".ser";
@@ -69,9 +70,10 @@ public class FileMessageRepository implements MessageRepository {
     }
 
     public static FileMessageRepository getInstance() {
-        return FileMessageRepository.Holder.INSTANCE;
+        return Holder.INSTANCE;
     }
 
+    @Override
     public boolean createMessage(String content, String sendeeChannelName, String senderUser) {
         UUID channelId = channelRepository.readChannelId(sendeeChannelName);
         UUID userId = userRepository.userNameToId(senderUser);
@@ -91,6 +93,7 @@ public class FileMessageRepository implements MessageRepository {
         }
     }
 
+    @Override
     public List<String> getInChannelMessage(String channelName) {
         List<String> result = new ArrayList<>();
         try{
@@ -103,6 +106,7 @@ public class FileMessageRepository implements MessageRepository {
         }
     }
 
+    @Override
     public List<String> getMessageForSender(String senderName) {
         List<String> result = new ArrayList<>();
         try{
@@ -114,6 +118,7 @@ public class FileMessageRepository implements MessageRepository {
         return result;
     }
 
+    @Override
     public boolean updateMessage(UUID id, String content) {
         Path path = resolvePath(id);
         try(FileOutputStream fos = new FileOutputStream(path.toFile());
@@ -127,6 +132,7 @@ public class FileMessageRepository implements MessageRepository {
         }
     }
 
+    @Override
     public boolean deleteMessage(String userName, UUID id) {
         UUID userId = userRepository.userNameToId(userName);
         Message message = userIdMessageMap.get(userId).stream().filter(e -> e.getId().equals(id)).findFirst().orElse(null);
