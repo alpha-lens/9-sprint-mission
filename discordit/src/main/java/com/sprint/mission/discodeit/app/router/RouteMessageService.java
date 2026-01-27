@@ -1,28 +1,25 @@
 package com.sprint.mission.discodeit.app.router;
 
-import com.sprint.mission.discodeit.app.JavaApplication;
 import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
 import com.sprint.mission.discodeit.repository.file.FileUserRepository;
-import com.sprint.mission.discodeit.service.file.FileMessageService;
-import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
+import com.sprint.mission.discodeit.service.basic.BasicMessageService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.Scanner;
 
+@Component
+@RequiredArgsConstructor
 public class RouteMessageService {
-    static void messageService(int routeCURD) {
-        /// Singleton Instance
-//        JCFUserService userService = JCFUserService.getInstance();
-//        JCFChannelService channelService = JCFChannelService.getInstance();
-//        JCFMessageService messageService = JCFMessageService.getInstance();
-        FileUserRepository userRepository = FileUserRepository.getInstance();
-        FileChannelRepository channelRepository = FileChannelRepository.getInstance();
-        FileMessageService messageService = FileMessageService.getInstance();
+    private final FileUserRepository userRepository;
+    private final FileChannelRepository channelRepository;
+    private final BasicMessageService messageService;
+    private final Scanner sc;
 
+    public void messageService(int routeCURD) {
         int m;
-//        String nowUser;
         String senderUserName;
         String sendeeChannelName;
-        Scanner sc = JavaApplication.scanner();
 
         switch (routeCURD) {
             case 1:
@@ -33,7 +30,6 @@ public class RouteMessageService {
                 /// update
                 System.out.println("누가 보낸 메시지인가요?");
                 senderUserName = sc.nextLine();
-//                nowUser = userService.getUserByName(senderUserName);
                 if (userRepository.isPresentUser(senderUserName)) {
                     System.out.println("존재하지 않는 사용자입니다.");
                     return;

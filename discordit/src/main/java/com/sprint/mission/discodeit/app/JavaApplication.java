@@ -32,7 +32,7 @@ public class JavaApplication {
 
             if (menu == 0) return;
 
-            Router.route(menu);
+//            Router.route(menu);
         }
     }
 }

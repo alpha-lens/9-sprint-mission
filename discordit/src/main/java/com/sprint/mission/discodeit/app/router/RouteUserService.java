@@ -1,17 +1,22 @@
 package com.sprint.mission.discodeit.app.router;
 
 import com.sprint.mission.discodeit.app.JavaApplication;
+import com.sprint.mission.discodeit.service.basic.BasicUserService;
 import com.sprint.mission.discodeit.service.file.JCFUserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 //import com.sprint.mission.discodeit.service.jfc.JCFUserService;
 
 import java.util.Scanner;
 
+@Component
+@RequiredArgsConstructor
 public class RouteUserService {
-    static void userService(int routeCRUD) {
-//        JCFUserService userService = JCFUserService.getInstance();
-        JCFUserService userService = JCFUserService.getInstance();
+    private final BasicUserService userService;
+    private final Scanner sc;
+
+    public void userService(int routeCRUD) {
         int menu;
-        Scanner sc = JavaApplication.scanner();
 
         switch (routeCRUD) {
             /// create

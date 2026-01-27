@@ -1,17 +1,20 @@
 package com.sprint.mission.discodeit.app.router;
 
 import com.sprint.mission.discodeit.app.JavaApplication;
-import com.sprint.mission.discodeit.service.file.FileChannelService;
-//import com.sprint.mission.discodeit.service.jfc.JCFChannelService;
+import com.sprint.mission.discodeit.service.basic.BasicChannelService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.Scanner;
 
+@Component
+@RequiredArgsConstructor
 public class RouteChannelService {
-    static void channelService(int routeCRUD) {
-//        JCFChannelService channelService = JCFChannelService.getInstance();
-        FileChannelService channelService = FileChannelService.getInstance();
+    private final BasicChannelService channelService;
+    private final Scanner sc;
+
+    public void channelService(int routeCRUD) {
         int menu;
-        Scanner sc = JavaApplication.scanner();
 
         switch (routeCRUD) {
 

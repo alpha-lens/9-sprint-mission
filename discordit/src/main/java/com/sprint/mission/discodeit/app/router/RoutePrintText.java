@@ -1,8 +1,11 @@
 package com.sprint.mission.discodeit.app.router;
 
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class RoutePrintText {
     static void printText(String text) {
         List<String> retouchText = new ArrayList<>();

@@ -1,61 +1,42 @@
 package com.sprint.mission.discodeit.entity;
 
+import lombok.Getter;
+
+import java.io.Serial;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.io.Serializable;
 import java.util.UUID;
 
+@Getter
 public class User implements Serializable {
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분 ss초")
+            .withZone(ZoneId.of("Asia/Seoul"));
     private final UUID id;
-    private final Long createAt;
+    private final Instant createAt;
     private String name;
     private String pw;
     private String email;
     private String phoneNumber;
-    private Long updateAt;
+    private Instant updateAt;
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public User(String name, String pw) {
-        long n = System.currentTimeMillis();
+        Instant now = Instant.now();
         this.id = UUID.randomUUID();
         this.name = name;
         this.pw = pw;
-        this.createAt = n;
-        this.updateAt = n;
-    }
-
-    public UUID getId() {
-        return this.id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String getPw() {
-        return this.pw;
-    }
-
-    public String getEmail() {
-        return this.email;
-    }
-
-    public String getPhoneNumber() {
-        return this.phoneNumber;
-    }
-
-    public long getCreateAt() {
-        return this.createAt;
-    }
-
-    public long getUpdateAt() {
-        return this.updateAt;
+        this.createAt = now;
+        this.updateAt = now;
     }
 
 
     public void setUpdateAt() {
-        this.updateAt = System.currentTimeMillis();
+        this.updateAt = Instant.now();
     }
 
     public void updateUser(String name, String password, String email, String phoneNumber) {
@@ -98,7 +79,7 @@ public class User implements Serializable {
                 + "\n사용자명 : " + this.getName()
                 + "\n이메일 : " + this.getEmail()
                 + "\n전화번호 : " + this.getPhoneNumber()
-                + "\n생성일 : " + sdf.format(new Date(this.getCreateAt()))
-                + "\n수정일 : " + sdf.format(new Date(this.getUpdateAt()));
+                + "\n생성일 : " + formatter.format(this.getCreateAt())
+                + "\n수정일 : " + formatter.format(this.getUpdateAt());
     }
 }

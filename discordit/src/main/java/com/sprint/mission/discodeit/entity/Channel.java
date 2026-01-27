@@ -1,47 +1,39 @@
 package com.sprint.mission.discodeit.entity;
 
+import lombok.Getter;
+
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.UUID;
 
+@Getter
 public class Channel implements Serializable {
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분 ss초")
+            .withZone(ZoneId.of("Asia/Seoul"));
 
     private final UUID id;
-    private final Long createAt;
+    private final Instant createAt;
     private String name;
-    private Long updateAt;
+    private Instant updateAt;
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public Channel(String name) {
-        long n = System.currentTimeMillis();
+        Instant n = Instant.now();
         this.name = name;
         this.id = UUID.randomUUID();
         this.createAt = n;
         this.updateAt = n;
     }
 
-    /// getter
-    public UUID getId() {
-        return this.id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public long getCreateAt() {
-        return this.createAt;
-    }
-
-    public long getUpdateAt() {
-        return this.updateAt;
-    }
-
     /// setter
     private void setUpdateAt() {
-        this.updateAt = System.currentTimeMillis();
+        this.updateAt = Instant.now();
     }
 
     private void setName(String name) {
@@ -58,8 +50,8 @@ public class Channel implements Serializable {
         return "====================\n" +
                 "채널명 : " + this.getName() + "\n" +
                 "채널ID : " + this.getId() + "\n" +
-                "채널수정일 : " + sdf.format(new Date(this.getUpdateAt())) + "\n" +
-                "채널생성일 : " + sdf.format(new Date(this.getCreateAt())) + "\n" +
+                "채널수정일 : " + formatter.format(this.getUpdateAt()) + "\n" +
+                "채널생성일 : " + formatter.format(this.getCreateAt()) + "\n" +
                 "====================\n";
     }
 }
