@@ -22,7 +22,7 @@ public class FileUserRepository implements UserRepository {
     private final Path DIRECTORY;
     private final String EXTENSION = ".ser";
 
-    private FileUserRepository() {
+    public FileUserRepository() {
         this.DIRECTORY = Paths.get(System.getProperty("user.dir"), "file-data-map", User.class.getSimpleName());
         if (Files.notExists(DIRECTORY)) {
             try {
@@ -52,14 +52,6 @@ public class FileUserRepository implements UserRepository {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static class Holder {
-        private static final FileUserRepository INSTANCE = new FileUserRepository();
-    }
-
-    public static FileUserRepository getInstance() {
-        return Holder.INSTANCE;
     }
 
     private Path resolvePath(UUID id) {

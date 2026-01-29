@@ -5,6 +5,9 @@ import com.sprint.mission.discodeit.entity.UserStatus;
 
 public record UserFinder() {
     public static String from(User user, UserStatus userStatus) {
-        return user.toString() + userStatus.toString() + "\n====================";
+        if(userStatus == null ) {
+            return user.toString() + "\n오프라인\n====================";
+        }
+        return user.toString() + "\n" + userStatus.toString() + "\n====================";
     }
 }

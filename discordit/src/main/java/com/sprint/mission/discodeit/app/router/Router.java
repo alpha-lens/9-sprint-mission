@@ -1,7 +1,7 @@
 package com.sprint.mission.discodeit.app.router;
 
-import com.sprint.mission.discodeit.DiscodeitApplication;
-import com.sprint.mission.discodeit.app.JavaApplication;
+import com.sprint.mission.discodeit.UserState;
+import com.sprint.mission.discodeit.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +14,8 @@ public class Router {
     private final RouteUserService routeUserService;
     private final RouteChannelService routeChannelService;
     private final Scanner sc;
+    private final AuthService authService;
+    private final UserState userState;
 
     private int inputChecker() {
         try{
@@ -29,11 +31,14 @@ public class Router {
         int menu;
 
         while(true) {
+            boolean isLogin = userState.getUsername().isEmpty();
             System.out.println("====================");
             System.out.println("0. 프로그램 종료하기");
-            System.out.println("1. 사용자 관련 서비스");
-            System.out.println("2. 채널 관련 서비스");
-            System.out.println("3. 메시지 관련 서비스");
+            System.out.println(isLogin ? "1. 로그인하기" :
+                    "1. 로그아웃하기 (현재 사용자 : " + userState.getUsername() + ")");
+            System.out.println("2. 사용자 관련 서비스");
+            System.out.println("3. 채널 관련 서비스");
+            System.out.println("4. 메시지 관련 서비스");
             System.out.println("====================");
 
             menu = sc.nextInt();
@@ -43,6 +48,14 @@ public class Router {
 
             switch (menu) {
                 case 1:
+                    if (isLogin) {
+                        authService.login();
+                    } else {
+                        authService.logout();
+                    }
+                    break;
+
+                case 2:
                     RoutePrintText.printText("user");
                     subMenu = inputChecker();
 
@@ -51,7 +64,7 @@ public class Router {
                     routeUserService.userService(subMenu);
                     break;
 
-                case 2:
+                case 3:
                     RoutePrintText.printText("channel");
                     subMenu = inputChecker();
 
@@ -60,7 +73,7 @@ public class Router {
                     routeChannelService.channelService(subMenu);
                     break;
 
-                case 3:
+                case 4:
                     RoutePrintText.printText("message");
                     subMenu = inputChecker();
 

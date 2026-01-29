@@ -3,6 +3,9 @@ package com.sprint.mission.discodeit.repository.file;
 
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.MessageRepository;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.io.*;
@@ -14,15 +17,16 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
+@RequiredArgsConstructor
 public class FileMessageRepository implements MessageRepository {
     private final Map<UUID, List<Message>> channelIdMessageMap = new ConcurrentHashMap<>();
     private final Map<UUID, List<Message>> userIdMessageMap = new ConcurrentHashMap<>();
     private final Map<UUID, Message> messageIdMap = new ConcurrentHashMap<>(128);
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    FileChannelRepository channelRepository = FileChannelRepository.getInstance();
-    FileUserRepository userRepository = FileUserRepository.getInstance();
+    private final FileChannelRepository channelRepository;
+    private final FileUserRepository userRepository;
 
-    private final Path DIRECTORY;
+    private Path DIRECTORY;
     private final String EXTENSION = ".ser";
 
     private Path resolvePath(UUID id) {
@@ -30,7 +34,8 @@ public class FileMessageRepository implements MessageRepository {
         return DIRECTORY.resolve(id + EXTENSION);
     }
 
-    private FileMessageRepository() {
+    @PostConstruct
+    public void init() {
         this.DIRECTORY = Paths.get(System.getProperty("user.dir"), "file-data-map", Message.class.getSimpleName());
         if (Files.notExists(DIRECTORY)) {
             try {
@@ -65,14 +70,6 @@ public class FileMessageRepository implements MessageRepository {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static class Holder {
-        private static final FileMessageRepository INSTANCE = new FileMessageRepository();
-    }
-
-    public static FileMessageRepository getInstance() {
-        return Holder.INSTANCE;
     }
 
     @Override

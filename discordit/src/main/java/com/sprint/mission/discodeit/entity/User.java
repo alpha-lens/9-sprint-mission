@@ -11,9 +11,7 @@ import java.util.UUID;
 
 @Getter
 public class User implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분 ss초")
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분 ss초")
             .withZone(ZoneId.of("Asia/Seoul"));
     private final UUID id;
     private UUID profileId;
@@ -23,6 +21,8 @@ public class User implements Serializable {
     private String password;
     private String email;
     private String phoneNumber;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public User(String name, String password) {
         Instant now = Instant.now();
@@ -87,7 +87,7 @@ public class User implements Serializable {
                 + "\n사용자명 : " + this.getName()
                 + "\n이메일 : " + this.getEmail()
                 + "\n전화번호 : " + this.getPhoneNumber()
-                + "\n생성일 : " + formatter.format(this.getCreateAt())
-                + "\n수정일 : " + formatter.format(this.getUpdateAt());
+                + "\n생성일 : " + FORMATTER.format(this.getCreateAt())
+                + "\n수정일 : " + FORMATTER.format(this.getUpdateAt());
     }
 }

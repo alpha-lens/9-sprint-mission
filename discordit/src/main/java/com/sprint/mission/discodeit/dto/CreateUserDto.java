@@ -12,7 +12,7 @@ public record CreateUserDto(
         String profileImage
 ) {
     public List<Object> toEntity() {
-        BinaryContent binaryContent = binaryContent();
+        BinaryContent binaryContent = binaryContent(profileImage);
         if(binaryContent == null) {
             User user = new User(username, password);
             return List.of(user, new UserStatus(user.getId()));
@@ -22,8 +22,8 @@ public record CreateUserDto(
         return List.of(user,new UserStatus(user.getId()));
     }
 
-    private BinaryContent binaryContent() {
-        if(profileImage == null) return null;
+    private BinaryContent binaryContent(String profileImage) {
+        if(profileImage.trim().isEmpty()) return null;
         return new BinaryContent(profileImage);
     }
 }

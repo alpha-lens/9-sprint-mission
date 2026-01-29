@@ -1,11 +1,8 @@
 package com.sprint.mission.discodeit.app.router;
 
-import com.sprint.mission.discodeit.app.JavaApplication;
 import com.sprint.mission.discodeit.service.basic.BasicUserService;
-import com.sprint.mission.discodeit.service.jcf.JCFUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-//import com.sprint.mission.discodeit.service.jfc.JCFUserService;
 
 import java.util.Scanner;
 

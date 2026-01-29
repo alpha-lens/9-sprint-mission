@@ -4,6 +4,8 @@ import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
 import com.sprint.mission.discodeit.repository.file.FileUserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,22 +13,15 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Repository
+@RequiredArgsConstructor
 public class JCFMessageRepository implements MessageRepository {
     private final Map<UUID, List<Message>> channelIdMessageMap = new ConcurrentHashMap<>();
     private final Map<UUID, List<Message>> userIdMessageMap = new ConcurrentHashMap<>();
     private final Map<UUID, Message> messageIdMap = new ConcurrentHashMap<>(128);
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    FileChannelRepository channelRepository = FileChannelRepository.getInstance();
-    FileUserRepository userRepository = FileUserRepository.getInstance();
-
-    private JCFMessageRepository(){}
-
-    private static class Holder{
-        private static final JCFMessageRepository INSTANCE = new JCFMessageRepository();
-    }
-    public static JCFMessageRepository getInstance() {
-        return Holder.INSTANCE;
-    }
+    private final FileChannelRepository channelRepository;
+    private final FileUserRepository userRepository;
 
     @Override
     public boolean createMessage(String content, String sendeeChannelName, String senderUser) {

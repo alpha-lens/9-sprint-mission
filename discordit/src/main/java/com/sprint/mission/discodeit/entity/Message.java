@@ -28,6 +28,14 @@ public class Message implements Serializable {
         this.updateAt = n;
     }
 
+    public UUID getSenderUserId() {
+        return userId;
+    }
+
+    public UUID getSendChannelId() {
+        return channelId;
+    }
+
     public void updateMessage(String content) {
         setContent(content);
     }
