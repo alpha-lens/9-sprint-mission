@@ -1,20 +1,25 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.UserState;
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
+import com.sprint.mission.discodeit.repository.file.FileUserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class BasicChannelService implements ChannelService {
     private final Scanner scanner;
     private final FileChannelRepository channelRepository;
-
+    private final FileUserRepository userRepository;
+    private final UserState userState;
 
     @Override
     public void createChannel() {
@@ -26,7 +31,21 @@ public class BasicChannelService implements ChannelService {
             return;
         }
 
-        channelRepository.save(new Channel(name));
+        String createUserName = userState.getUsername();
+        UUID createUserId = userRepository.userNameToId(createUserName);
+
+        System.out.println("해당 채널의 성격을 알려주세요. (숫자 혹은 뒤의 영어를 입력해주시면 됩니다.)");
+        System.out.println("1. PUBLIC");
+        System.out.println("2. PRIVATE");
+        String type = scanner.nextLine().trim();
+
+        if(type.equalsIgnoreCase("public") || type.equals("1")) {
+            channelRepository.save(new Channel(name, createUserName, createUserId));
+        } else if (type.equalsIgnoreCase("private") || type.equals("2")) {
+            channelRepository.save(new Channel(name, createUserName, createUserId, ChannelType.PUBLIC));
+        } else {
+            System.err.println("잘못된 입력값입니다. 처음으로 돌아갑니다.");
+        }
 
         System.out.println("잘 들어갔어요!");
     }
@@ -70,6 +89,12 @@ public class BasicChannelService implements ChannelService {
 
         if(channelRepository.save(oldName, newName))
             System.out.println("잘 변경되었어요!");
+    }
+
+    @Override
+    public void inviteUserInPrivateChannel() {
+        System.out.println("현재 당신이 참여하고 있는 PRIVATE 채널은 다음과 같습니다.");
+
     }
 
     @Override

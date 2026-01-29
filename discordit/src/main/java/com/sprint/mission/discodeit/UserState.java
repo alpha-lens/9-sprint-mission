@@ -8,10 +8,7 @@ import org.springframework.stereotype.Component;
 public class UserState {
 	private String username = "";
 
-	public void userState(boolean isLogin, String username) {
-		if(isLogin) {
-			this.username = "";
-		}
+	public void userState(String username) {
 		this.username = username;
 	}
 }

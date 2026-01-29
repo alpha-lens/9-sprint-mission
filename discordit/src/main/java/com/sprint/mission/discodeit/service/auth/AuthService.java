@@ -26,7 +26,7 @@ public class AuthService {
         UUID id = userRepository.userNameToId(name);
 
         if(!userRepository.check(id, password)) {
-            userState.userState(false, name);
+            userState.userState(name);
             System.out.println("성공!");
             return true;
         } else {
@@ -36,6 +36,6 @@ public class AuthService {
     }
 
     public void logout() {
-        userState.userState(true, "");
+        userState.userState("");
     }
 }

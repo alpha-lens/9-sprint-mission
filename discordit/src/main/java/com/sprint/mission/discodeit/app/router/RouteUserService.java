@@ -10,10 +10,15 @@ import java.util.Scanner;
 @RequiredArgsConstructor
 public class RouteUserService {
     private final BasicUserService userService;
-    private final Scanner sc;
+    private final Scanner scanner;
+    private final IsLogin isLogin;
 
     public void userService(int routeCRUD) {
         int menu;
+        if(!isLogin.check("User", routeCRUD)) {
+            System.err.println("해당 기능은 로그인한 후 이용 가능합니다.");
+            return;
+        }
 
         switch (routeCRUD) {
             /// create
@@ -32,8 +37,8 @@ public class RouteUserService {
                 System.out.println("1 : 특정 사용자만 가져옵니다");
                 System.out.println("2 : 전체 사용자를 가져옵니다");
 
-                menu = sc.nextInt();
-                sc.nextLine();
+                menu = scanner.nextInt();
+                scanner.nextLine();
 
                 if (menu == 1) userService.getUserName();
                 else if (menu == 2) userService.getAllUserName();

@@ -1,6 +1,5 @@
 package com.sprint.mission.discodeit.app.router;
 
-import com.sprint.mission.discodeit.app.JavaApplication;
 import com.sprint.mission.discodeit.service.basic.BasicChannelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -11,10 +10,15 @@ import java.util.Scanner;
 @RequiredArgsConstructor
 public class RouteChannelService {
     private final BasicChannelService channelService;
-    private final Scanner sc;
+    private final IsLogin isLogin;
+    private final Scanner scanner;
 
     public void channelService(int routeCRUD) {
         int menu;
+        if(!isLogin.check("Channel", routeCRUD)) {
+            System.err.println("해당 기능은 로그인한 후 이용 가능합니다.");
+            return;
+        }
 
         switch (routeCRUD) {
 
@@ -35,8 +39,8 @@ public class RouteChannelService {
                 System.out.println("2 : 전체 채널을 가져옵니다");
 
                 // TODO:try-catch로 안정성 확보하기
-                menu = sc.nextInt();
-                sc.nextLine();
+                menu = scanner.nextInt();
+                scanner.nextLine();
 
                 if (menu == 1) channelService.readChannel();
                 else if (menu == 2) channelService.readAllChannel();
@@ -48,7 +52,7 @@ public class RouteChannelService {
                 break;
 
             default:
-                return;
+                System.err.println("잘못된 입력값입니다.");
         }
     }
 }

@@ -56,13 +56,6 @@ public class FileChannelRepository implements ChannelRepository {
             throw new RuntimeException(e);
         }
     }
-    private static class Holder {
-        private static final FileChannelRepository INSTANCE = new FileChannelRepository();
-    }
-    public static FileChannelRepository getInstance() {
-        return Holder.INSTANCE;
-    }
-
 
     /// interface
     @Override
