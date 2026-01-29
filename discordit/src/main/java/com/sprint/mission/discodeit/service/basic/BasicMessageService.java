@@ -1,35 +1,25 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.app.JavaApplication;
 import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
 import com.sprint.mission.discodeit.repository.file.FileMessageRepository;
 import com.sprint.mission.discodeit.repository.file.FileUserRepository;
 import com.sprint.mission.discodeit.service.MessageService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class BasicMessageService implements MessageService
 {
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    Scanner sc = JavaApplication.scanner();
-    FileUserRepository userRepository = FileUserRepository.getInstance();
-    FileChannelRepository channelRepository = FileChannelRepository.getInstance();
-    FileMessageRepository messageRepository = FileMessageRepository.getInstance();
-
-    private BasicMessageService() {
-    }
-
-    private static class Holder {
-        private static final BasicMessageService INSTANCE = new BasicMessageService();
-    }
-
-    public static BasicMessageService getInstance() {return Holder.INSTANCE;}
+    private final Scanner sc;
+    private final FileUserRepository userRepository;
+    private final FileChannelRepository channelRepository;
+    private final FileMessageRepository messageRepository;
 
     @Override
     public void createMessage() {

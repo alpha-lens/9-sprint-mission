@@ -1,6 +1,8 @@
 package com.sprint.mission.discodeit.repository.jcf;
 
+import com.sprint.mission.discodeit.dto.CreateUserDto;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserRepository;
 
 import java.util.*;
@@ -19,10 +21,13 @@ public class JCFUserRepository implements UserRepository {
     }
 
     @Override
-    public boolean createUser(String name, String pw) {
-        if(isDuplicateName(name)) return false;
-        User user = new User(name, pw);
-        usersName.put(name, user.getId());
+    public boolean createUser(CreateUserDto dto) {
+        List<Object> userSet = dto.toEntity();
+        User user = (User) userSet.get(0);
+        UserStatus userStatus = (UserStatus) userSet.get(1);
+
+        if(isDuplicateName(user.getName())) return false;
+        usersName.put(user.getName(), user.getId());
         usersMap.put(user.getId(), user);
         return true;
     }
@@ -93,7 +98,7 @@ public class JCFUserRepository implements UserRepository {
 
     public boolean check(UUID id, String pw) {
         try {
-            return !usersMap.get(id).getPw().equals(pw);
+            return !usersMap.get(id).getPassword().equals(pw);
         } catch (Exception e) {
             return true;
         }

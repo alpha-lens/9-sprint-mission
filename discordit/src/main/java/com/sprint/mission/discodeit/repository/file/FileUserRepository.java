@@ -1,6 +1,9 @@
 package com.sprint.mission.discodeit.repository.file;
 
+import com.sprint.mission.discodeit.dto.CreateUserDto;
+import com.sprint.mission.discodeit.dto.UserFinder;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,8 +16,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
 public class FileUserRepository implements UserRepository {
-    private final Map<UUID, User> usersMap = new ConcurrentHashMap<>();
-    private final Map<String, UUID> usersName = new ConcurrentHashMap<>();
+    private final Map<UUID, User> idUserMap = new ConcurrentHashMap<>();
+    private final Map<String, UUID> userNameIdMap = new ConcurrentHashMap<>();
+    private final Map<UUID, UserStatus> userStatusMap = new ConcurrentHashMap<>();
     private final Path DIRECTORY;
     private final String EXTENSION = ".ser";
 
@@ -42,8 +46,8 @@ public class FileUserRepository implements UserRepository {
                             throw new RuntimeException(e);
                         }
                     }).forEach(user -> {
-                        usersMap.put(user.getId(), user);
-                        usersName.put(user.getName(), user.getId());
+                        idUserMap.put(user.getId(), user);
+                        userNameIdMap.put(user.getName(), user.getId());
                     });
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -64,10 +68,13 @@ public class FileUserRepository implements UserRepository {
     }
 
     @Override
-    public boolean createUser(String name, String pw) {
-        User user = new User(name, pw);
-        usersName.put(name, user.getId());
-        usersMap.put(user.getId(), user);
+    public boolean createUser(CreateUserDto dto) {
+        List<Object> userSet = dto.toEntity();
+        User user = (User) userSet.get(0);
+        UserStatus userStatus = (UserStatus) userSet.get(1);
+        userNameIdMap.put(user.getName(), user.getId());
+        idUserMap.put(user.getId(), user);
+        userStatusMap.put(user.getId(), userStatus);
         Path path = resolvePath(user.getId());
 
         try (
@@ -87,8 +94,8 @@ public class FileUserRepository implements UserRepository {
 
         try(FileOutputStream fos = new FileOutputStream(path.toFile());
             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-            oos.writeObject(usersMap.get(userId));
-            usersMap.get(userId).updateUser(reName, rePassword, reMail, rePhoneNumber);
+            oos.writeObject(idUserMap.get(userId));
+            idUserMap.get(userId).updateUser(reName, rePassword, reMail, rePhoneNumber);
             return true;
         } catch (IOException e) {
             return false;
@@ -97,13 +104,14 @@ public class FileUserRepository implements UserRepository {
 
     @Override
     public String getUser(String name) {
-        return usersMap.get(usersName.get(name)).toString();
+        User user = idUserMap.get(userNameIdMap.get(name));
+        return UserFinder.from(user, userStatusMap.get(user.getId()));
     }
 
     @Override
     public List<String> getAllUser() {
         List<String> result = new ArrayList<>();
-        usersMap.values().stream().sorted(Comparator.comparing(User::getName)).forEach(user -> result.add(user.toString()));
+        idUserMap.values().stream().sorted(Comparator.comparing(User::getName)).forEach(user -> result.add(UserFinder.from(user, userStatusMap.get(user.getId()))));
         return result;
     }
 
@@ -115,14 +123,15 @@ public class FileUserRepository implements UserRepository {
         } catch (IOException e) {
             return false;
         }
-        usersName.remove(usersMap.get(id).getName());
-        usersMap.remove(id);
+        userStatusMap.remove(id);
+        userNameIdMap.remove(idUserMap.get(id).getName());
+        idUserMap.remove(id);
         return true;
     }
 
     public UUID userNameToId(String name) {
         try {
-            return usersName.get(name);
+            return userNameIdMap.get(name);
         } catch (Exception e) {
             return null;
         }
@@ -130,7 +139,7 @@ public class FileUserRepository implements UserRepository {
 
     public String userIdToName(UUID id) {
         try {
-            return usersMap.get(id).getName();
+            return idUserMap.get(id).getName();
         } catch (Exception e) {
             return null;
         }
@@ -138,20 +147,27 @@ public class FileUserRepository implements UserRepository {
 
     public boolean check(UUID id, String pw) {
         try {
-            return !usersMap.get(id).getPw().equals(pw);
+            return !idUserMap.get(id).getPassword().equals(pw);
         } catch (Exception e) {
             return true;
         }
     }
 
-    /// 더 좋은 방법이 있는지는 모르겠지만 당장은 이렇게...;
-    /// 사실 오버라이딩해서 썼는데 하나로 줄일 수 없을까 해서.. 고쳐봤습니다.
+    public boolean isPresentThis(String checkThis, String findThis) {
+        try {
+            if (checkThis.equals("이메일") && idUserMap.values().stream().anyMatch(u -> u.getEmail().equals(findThis))) return true;
+            if (checkThis.equals("전화번호") && idUserMap.values().stream().anyMatch(u -> u.getPhoneNumber().equals(findThis))) return true;
+            if (checkThis.equals("사용자명") && userNameIdMap.get(findThis) != null) return true;
+        } catch (Exception ignored) {}
+        return false;
+    }
+
     public boolean isPresentUser(Object arg) {
         try {
             if(arg instanceof String) {
-                usersMap.get(usersName.get((String) arg));
+                idUserMap.get(userNameIdMap.get((String) arg));
             } else if(arg instanceof UUID){
-                usersMap.get((UUID) arg);
+                idUserMap.get((UUID) arg);
             } else {
                 return true;
             }

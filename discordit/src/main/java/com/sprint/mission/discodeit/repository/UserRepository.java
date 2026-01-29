@@ -1,10 +1,12 @@
 package com.sprint.mission.discodeit.repository;
 
+import com.sprint.mission.discodeit.dto.CreateUserDto;
+
 import java.util.List;
 import java.util.UUID;
 
 public interface UserRepository {
-    boolean createUser(String name, String pw);
+    boolean createUser(CreateUserDto dto);
 
     boolean updateUser(UUID userId, String reName, String rePassword, String reMail, String rePhoneNumber);
 

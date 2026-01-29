@@ -24,3 +24,4 @@ public class DiscodeitApplication {
 		router.route();
 	}
 }
+

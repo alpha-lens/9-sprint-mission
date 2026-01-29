@@ -3,37 +3,45 @@ package com.sprint.mission.discodeit.entity;
 import lombok.Getter;
 
 import java.io.Serial;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.io.Serializable;
 import java.util.UUID;
 
 @Getter
 public class User implements Serializable {
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분 ss초")
-            .withZone(ZoneId.of("Asia/Seoul"));
-    private final UUID id;
-    private final Instant createAt;
-    private String name;
-    private String pw;
-    private String email;
-    private String phoneNumber;
-    private Instant updateAt;
     @Serial
     private static final long serialVersionUID = 1L;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분 ss초")
+            .withZone(ZoneId.of("Asia/Seoul"));
+    private final UUID id;
+    private UUID profileId;
+    private final Instant createAt;
+    private Instant updateAt;
+    private String name;
+    private String password;
+    private String email;
+    private String phoneNumber;
 
-    public User(String name, String pw) {
+    public User(String name, String password) {
         Instant now = Instant.now();
         this.id = UUID.randomUUID();
         this.name = name;
-        this.pw = pw;
+        this.password = password;
         this.createAt = now;
         this.updateAt = now;
     }
 
+    public User(String name, String password, UUID profileId) {
+        this.id = UUID.randomUUID();
+        this.profileId = profileId;
+        this.name = name;
+        this.password = password;
+        Instant now = Instant.now();
+        this.createAt = now;
+        this.updateAt = now;
+    }
 
     public void setUpdateAt() {
         this.updateAt = Instant.now();
@@ -58,7 +66,7 @@ public class User implements Serializable {
     }
 
     private void setPassword(String password) {
-        this.pw = password;
+        this.password = password;
         setUpdateAt();
     }
 

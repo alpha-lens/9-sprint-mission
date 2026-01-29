@@ -1,9 +1,18 @@
 package com.sprint.mission.discodeit;
 
+import com.sprint.mission.discodeit.repository.file.FileUserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
 import java.util.Scanner;
 
+@Component
+@RequiredArgsConstructor
 public class Input {
-    public static String inputChecker(Scanner scanner, String regexRule) {
+    private final Scanner scanner;
+    private final FileUserRepository userRepository;
+
+    private String inputChecker(String text, String regexRule) {
         String inputString;
         while(true) {
             inputString = scanner.nextLine().trim();
@@ -11,7 +20,17 @@ public class Input {
             if (inputString.isEmpty()) return null;
 
             if (!inputString.matches(regexRule)) {
-                System.out.println("잘못된 입력 형식입니다.");
+                System.err.println("잘못된 입력 형식입니다.");
+                continue;
+            }
+
+            if (text.equals("프로필 이미지") && inputString.matches("(?i).*\\.(jpg|png)")) {
+                System.err.println("이미지는 jpg, png만 지원합니다.");
+                continue;
+            }
+
+            if (userRepository.isPresentThis(text, inputString)) {
+                System.err.println("동일한 " + text + "은(는) 존재할 수 없습니다.");
                 continue;
             }
 
@@ -20,13 +39,11 @@ public class Input {
         return inputString;
     }
 
-    public static String inputUpdateField(Scanner sc, String text, String regexRule) {
-        if(text.equals("비밀번호")) {
-            System.out.print("변경하실 비밀번호 : ");
-            return inputChecker(sc, regexRule);
+    public String inputUpdateField(String text, String regexRule) {
+        System.out.print("변경하실 " + text + " : ");
+        if (text.equals("프로필 이미지")){
+            System.out.print("이미지 확장자는 jpg, png만 지원합니다.");
         }
-
-        System.out.print("변경하실 " + text +  " : ");
-        return inputChecker(sc, regexRule);
+        return inputChecker(text, regexRule);
     }
 }
