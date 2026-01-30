@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.repository.jcf;
 
+import com.sprint.mission.discodeit.dto.ResponseChannelDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 
@@ -62,11 +63,12 @@ public class JCFChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public List<Channel> readAllChannel() {
+    public List<ResponseChannelDto> readAllChannel() {
         if(channelNameMap.isEmpty()) {
             return null;
         }
-        return channelNameMap.values().stream().toList();
+//        return channelNameMap.values().stream().toList();
+        return null;
     }
 
     @Override

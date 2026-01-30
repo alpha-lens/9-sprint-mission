@@ -1,14 +1,18 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.UserState;
+import com.sprint.mission.discodeit.dto.FindChannelDto;
+import com.sprint.mission.discodeit.dto.ResponseChannelDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
+import com.sprint.mission.discodeit.repository.file.FileMessageRepository;
 import com.sprint.mission.discodeit.repository.file.FileUserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
@@ -20,6 +24,7 @@ public class BasicChannelService implements ChannelService {
     private final FileChannelRepository channelRepository;
     private final FileUserRepository userRepository;
     private final UserState userState;
+    private final FileMessageRepository messageRepository;
 
     @Override
     public void createChannel() {
@@ -31,7 +36,7 @@ public class BasicChannelService implements ChannelService {
             return;
         }
 
-        String createUserName = userState.getUsername();
+        String createUserName = userState.getUserName();
         UUID createUserId = userRepository.userNameToId(createUserName);
 
         System.out.println("해당 채널의 성격을 알려주세요. (숫자 혹은 뒤의 영어를 입력해주시면 됩니다.)");
@@ -42,7 +47,7 @@ public class BasicChannelService implements ChannelService {
         if(type.equalsIgnoreCase("public") || type.equals("1")) {
             channelRepository.save(new Channel(name, createUserName, createUserId));
         } else if (type.equalsIgnoreCase("private") || type.equals("2")) {
-            channelRepository.save(new Channel(name, createUserName, createUserId, ChannelType.PUBLIC));
+            channelRepository.save(new Channel(name, createUserName, createUserId, ChannelType.PRIVATE));
         } else {
             System.err.println("잘못된 입력값입니다. 처음으로 돌아갑니다.");
         }
@@ -55,12 +60,19 @@ public class BasicChannelService implements ChannelService {
         System.out.println("검색할 채널명을 알려주세요");
         String name = scanner.nextLine().trim();
 
-        channelRepository.readChannel(name);
+        UUID channelId = channelRepository.channelNameToId(name);
+
+        String channelInfo = channelRepository.readChannel(name);
+        ChannelType channelType = channelRepository.getChannelType(name);
+        Instant lastMessageTime = messageRepository.getLastMessageInChannel(channelId);
+        FindChannelDto requestChannelDto = new FindChannelDto(channelInfo, channelType, lastMessageTime);
+
+        System.out.println(requestChannelDto.getInfo());
     }
 
     @Override
     public void readAllChannel() {
-        List<Channel> allChannel = channelRepository.readAllChannel();
+        List<ResponseChannelDto> allChannel = channelRepository.readAllChannel();
 
         if (allChannel.isEmpty()) {
             System.out.println("채널이 존재하지 않습니다.");
@@ -91,7 +103,7 @@ public class BasicChannelService implements ChannelService {
             System.out.println("잘 변경되었어요!");
     }
 
-    @Override
+//    @Override
     public void inviteUserInPrivateChannel() {
         System.out.println("현재 당신이 참여하고 있는 PRIVATE 채널은 다음과 같습니다.");
 

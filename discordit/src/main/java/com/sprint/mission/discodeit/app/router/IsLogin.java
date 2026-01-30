@@ -9,8 +9,10 @@ import org.springframework.stereotype.Component;
 public class IsLogin {
     private final UserState userState;
     public boolean check(String service, int menu) {
-        boolean isLogin = !userState.getUsername().isEmpty();
-        if(service.equals("User")) return isLogin && (menu == 2 || menu == 4);
+        boolean isLogin = !userState.getUserName().isEmpty();
+        if(service.equals("User")) {
+            return isLogin || menu != 4;
+        }
         return isLogin || menu == 3;
     }
 }

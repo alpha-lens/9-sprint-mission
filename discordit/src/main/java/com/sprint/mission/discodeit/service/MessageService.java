@@ -14,7 +14,7 @@ public interface MessageService {
 
     void updateMessage(String channelName);
 
-    void getMessageForSender(String senderName);
+    void getMessageForSender(UUID userId);
 
     void getMessageInChannel(String name);
 

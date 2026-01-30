@@ -31,11 +31,11 @@ public class Router {
         int menu;
 
         while(true) {
-            boolean isLogin = userState.getUsername().isEmpty();
+            boolean isLogin = userState.getUserName().isEmpty();
             System.out.println("====================");
             System.out.println("0. 프로그램 종료하기");
             System.out.println(isLogin ? "1. 로그인하기" :
-                    "1. 로그아웃하기 (현재 사용자 : " + userState.getUsername() + ")");
+                    "1. 로그아웃하기 (현재 사용자 : " + userState.getUserName() + ")");
             System.out.println("2. 사용자 관련 서비스");
             System.out.println("3. 채널 관련 서비스");
             System.out.println("4. 메시지 관련 서비스");

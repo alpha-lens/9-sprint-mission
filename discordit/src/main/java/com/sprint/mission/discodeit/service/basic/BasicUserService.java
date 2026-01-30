@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.Input;
+import com.sprint.mission.discodeit.UserState;
 import com.sprint.mission.discodeit.dto.CreateUserDto;
 import com.sprint.mission.discodeit.repository.file.FileUserRepository;
 import com.sprint.mission.discodeit.service.UserService;
@@ -18,6 +19,7 @@ public class BasicUserService implements UserService {
     private final FileUserRepository userRepository;
     private final AttachmentRepository attachmentRepository;
     private final Input Input;
+    private final UserState userState;
 
     @Override
     public void createUser() {
@@ -49,9 +51,9 @@ public class BasicUserService implements UserService {
     public void updateUser() {
         System.out.println("====================");
         System.out.println("사용자 변경 메뉴입니다.");
-        UUID userId = workRoute("변경");
+        UUID userId = workRoute();
         if(userId == null) {
-            System.out.println("일치하는 사용자가 없습니다.");
+            System.err.println("일치하지 않습니다. 처음으로 돌아갑니다.");
             return;
         }
 
@@ -108,7 +110,7 @@ public class BasicUserService implements UserService {
     public void getAllUserName() {
         List<String> userList = userRepository.getAllUser();
         if (userList.isEmpty()) {
-            System.out.println("사용자가 없습니다.");
+            System.err.println("사용자가 없습니다.");
             return;
         }
 
@@ -119,9 +121,9 @@ public class BasicUserService implements UserService {
     /// Delete
     @Override
     public void deleteUser() {
-        System.out.println("[Warning!] 지금 계정을 삭제하려 하고 있습니다.");
-        System.out.println("[Warning!] 만약 잘못 들어오신 경우, 0을 눌러주시기 바랍니다.");
-        System.out.println("[Warning!] 계속 진행하시려면 아무 숫자나 입력해주세요.");
+        System.err.println("[Warning!] 지금 계정을 삭제하려 하고 있습니다.");
+        System.err.println("[Warning!] 만약 잘못 들어오신 경우, 0을 눌러주시기 바랍니다.");
+        System.err.println("[Warning!] 계속 진행하시려면 아무 숫자나 입력해주세요.");
 
         int n = scanner.nextInt();
         scanner.nextLine();
@@ -130,10 +132,10 @@ public class BasicUserService implements UserService {
             return;
         }
 
-        UUID userId = workRoute("삭제");
+        UUID userId = workRoute();
 
         if (userId == null) {
-            System.out.println("일치하는 계정을 찾을 수 없습니다.");
+            System.err.println("일치하는 계정을 찾을 수 없습니다.");
             return;
         }
 
@@ -142,14 +144,10 @@ public class BasicUserService implements UserService {
         System.out.println("계정이 삭제되었습니다.");
     }
 
-    private UUID workRoute(String work) {
-        System.out.println(work + "하고자 하는 사용자명을 입력해주세요");
-        String name = scanner.nextLine();
-        UUID userId = userRepository.userNameToId(name);
+    private UUID workRoute() {
+        UUID userId = userRepository.userNameToId(userState.getUserName());
 
-        if (userId == null) return null;
-
-        System.out.println("해당 사용자의 비밀번호를 입력해주세요");
+        System.out.println("현재 로그인한 " + userState.getUserName() +"의 비밀번호를 입력해주세요");
         String pw = scanner.nextLine();
 
         if (userRepository.check(userId, pw)) return null;

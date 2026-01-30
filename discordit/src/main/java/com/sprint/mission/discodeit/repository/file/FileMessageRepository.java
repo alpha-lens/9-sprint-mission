@@ -1,18 +1,20 @@
 package com.sprint.mission.discodeit.repository.file;
 
 
+import com.sprint.mission.discodeit.dto.MessageResponseDto;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,9 +24,7 @@ public class FileMessageRepository implements MessageRepository {
     private final Map<UUID, List<Message>> channelIdMessageMap = new ConcurrentHashMap<>();
     private final Map<UUID, List<Message>> userIdMessageMap = new ConcurrentHashMap<>();
     private final Map<UUID, Message> messageIdMap = new ConcurrentHashMap<>(128);
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private final FileChannelRepository channelRepository;
-    private final FileUserRepository userRepository;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분 ss초").withZone(ZoneId.of("Asia/Seoul"));
 
     private Path DIRECTORY;
     private final String EXTENSION = ".ser";
@@ -73,10 +73,7 @@ public class FileMessageRepository implements MessageRepository {
     }
 
     @Override
-    public boolean createMessage(String content, String sendeeChannelName, String senderUser) {
-        UUID channelId = channelRepository.readChannelId(sendeeChannelName);
-        UUID userId = userRepository.userNameToId(senderUser);
-
+    public boolean createMessage(String content, UUID channelId, UUID userId) {
         Message message = new Message(channelId, userId, content);
         channelIdMessageMap.computeIfAbsent(channelId, m -> new ArrayList<>()).add(message);
         userIdMessageMap.computeIfAbsent(userId, m -> new ArrayList<>()).add(message);
@@ -93,24 +90,42 @@ public class FileMessageRepository implements MessageRepository {
     }
 
     @Override
-    public List<String> getInChannelMessage(String channelName) {
-        List<String> result = new ArrayList<>();
+    public List<MessageResponseDto> getInChannelMessage(UUID channelId) {
+        List<MessageResponseDto> result = new ArrayList<>();
         try{
-            channelIdMessageMap.get(channelRepository.channelNameToId(channelName))
+            channelIdMessageMap.get(channelId)
                     .stream().sorted(Comparator.comparing(Message::getCreateAt))
-                    .forEach(message -> result.add(formatMessage(message)));
+                    .forEach(message -> {
+                        result.add(new MessageResponseDto(
+                                message.getId(), message.getChannelId(), message.getUserId(), FORMATTER.format(message.getCreateAt()), FORMATTER.format(message.getUpdateAt()), message.getContent()
+                        ));
+                    });
             return result;
         } catch (Exception e) {
             return List.of();
         }
     }
 
+    public Instant getLastMessageInChannel(UUID channelId) {
+        try {
+            return channelIdMessageMap.get(channelId)
+                    .stream().max(Comparator.comparing(Message::getCreateAt)).orElse(null).getCreateAt();
+        } catch (NullPointerException e) {
+            return null;
+        }
+    }
+
     @Override
-    public List<String> getMessageForSender(String senderName) {
-        List<String> result = new ArrayList<>();
+    public List<MessageResponseDto> getMessageForSender(UUID userId) {
+        List<MessageResponseDto> result = new ArrayList<>();
         try{
-            userIdMessageMap.get(userRepository.userNameToId(senderName))
-                    .forEach(message -> result.add(formatMessage(message)));
+            userIdMessageMap.get(userId)
+                    .stream().sorted(Comparator.comparing(Message::getCreateAt))
+                    .forEach(message -> {
+                        result.add(new MessageResponseDto(
+                                message.getId(), message.getChannelId(), message.getUserId(), FORMATTER.format(message.getCreateAt()), FORMATTER.format(message.getUpdateAt()), message.getContent()
+                        ));
+                    });
         } catch (Exception e) {
             return List.of();
         }
@@ -132,8 +147,7 @@ public class FileMessageRepository implements MessageRepository {
     }
 
     @Override
-    public boolean deleteMessage(String userName, UUID id) {
-        UUID userId = userRepository.userNameToId(userName);
+    public boolean deleteMessage(UUID userId, UUID id) {
         Message message = userIdMessageMap.get(userId).stream().filter(e -> e.getId().equals(id)).findFirst().orElse(null);
         UUID channelId = message.getSendChannelId();
 
@@ -149,20 +163,8 @@ public class FileMessageRepository implements MessageRepository {
         }
     }
 
-    public boolean check(String userName, UUID id) {
-        Object result = userIdMessageMap.get(userRepository.userNameToId(userName)).stream().filter(m -> m.getId().equals(id)).findFirst().orElse(null);
+    public boolean check(UUID userId, UUID id) {
+        Object result = userIdMessageMap.get(userId).stream().filter(m -> m.getId().equals(id)).findFirst().orElse(null);
         return result == null;
-    }
-
-
-    /// formatting method
-    private String formatMessage(Message message) {
-        return "====================\n" +
-              "메시지ID: " + message.getId().toString() + "\n"
-            + "채널명: " + channelRepository.channelIdToName(message.getSendChannelId()) + "\n"
-            + "보낸이: " + userRepository.userIdToName(message.getSenderUserId()) + "\n"
-            + "생성일: " + sdf.format(message.getCreateAt()) + "\n"
-            + "수정일: " + sdf.format(message.getUpdateAt()) + "\n"
-            + "내용: " + message.getContent() + "\n";
     }
 }
