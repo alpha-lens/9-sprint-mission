@@ -101,7 +101,7 @@ public class FileUserRepository implements UserRepository {
     }
 
     @Override
-    public List<String> getAllUser() {
+    public List<String> findAll() {
         List<String> result = new ArrayList<>();
         idUserMap.values().stream().sorted(Comparator.comparing(User::getName)).forEach(user -> result.add(UserFinder.from(user, userStatusMap.get(user.getId()))));
         return result;

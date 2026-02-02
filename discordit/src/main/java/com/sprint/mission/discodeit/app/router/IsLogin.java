@@ -2,9 +2,9 @@ package com.sprint.mission.discodeit.app.router;
 
 import com.sprint.mission.discodeit.UserState;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class IsLogin {
     private final UserState userState;

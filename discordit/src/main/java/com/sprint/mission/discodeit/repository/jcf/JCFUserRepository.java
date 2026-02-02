@@ -44,7 +44,7 @@ public class JCFUserRepository implements UserRepository {
     }
 
     @Override
-    public List<String> getAllUser() {
+    public List<String> findAll() {
         List<String> result = new ArrayList<>();
         usersMap.values().stream().sorted(Comparator.comparing(User::getName)).forEach(user -> result.add(user.toString()));
         return result;

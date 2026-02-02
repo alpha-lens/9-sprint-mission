@@ -16,7 +16,7 @@ public record ResponseChannelDto(
     Instant createAt,
     Instant updateAt,
     String createUser,
-    Map<String, UUID> accessableUsers
+    Map<String, UUID> accessibleUsers
 ) {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분 ss초").withZone(ZoneId.of("Asia/Seoul"));
 
@@ -32,7 +32,7 @@ public record ResponseChannelDto(
         String accessUserResult = "";
         if(type.equals(ChannelType.PRIVATE)) {
             try {
-                accessUserResult = accessableUsers.entrySet().stream()
+                accessUserResult = accessibleUsers.entrySet().stream()
                         .map(entry -> "멤버명 : " + entry.getKey() + "\n멤버 ID : " + entry.getValue() + "\n")
                         .collect(Collectors.joining());
             } catch (Exception ignore) {}

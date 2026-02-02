@@ -4,6 +4,7 @@ import com.sprint.mission.discodeit.UserState;
 import com.sprint.mission.discodeit.dto.ResponseChannelDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
+import com.sprint.mission.discodeit.exepction.NotFound;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -85,15 +86,11 @@ public class FileChannelRepository implements ChannelRepository {
             oos.writeObject(channel);
             oos.flush();
             if (channel.getChannelType() == ChannelType.PUBLIC) {
-                publicChannelNameMap.getOrDefault(channel.getName(),
-                    publicChannelNameMap.put(channel.getName(), channel));
-                publicChannelIdMap.getOrDefault(channel.getId(),
-                    publicChannelIdMap.put(channel.getId(), channel));
+                publicChannelNameMap.put(channel.getName(), channel);
+                publicChannelIdMap.put(channel.getId(), channel);
             } else {
-                privateChannelIdMap.getOrDefault(channel.getId(),
-                        privateChannelIdMap.put(channel.getId(), channel));
-                privateChannelNameMap.getOrDefault(channel.getName(),
-                        privateChannelNameMap.put(channel.getName(), channel));
+                privateChannelIdMap.put(channel.getId(), channel);
+                privateChannelNameMap.put(channel.getName(), channel);
             }
 
             return true;
@@ -157,11 +154,12 @@ public class FileChannelRepository implements ChannelRepository {
     }
 
     public UUID readChannelId(String name) {
-        try {
+        if(publicChannelNameMap.containsKey(name))
             return publicChannelNameMap.get(name).getId();
-        } catch (Exception e) {
-            return null;
-        }
+        if(privateChannelNameMap.containsKey(name))
+            return privateChannelNameMap.get(name).getId();
+
+        throw new NotFound("해당 채널을 찾을 수 없습니다");
     }
 
     @Override // FIXME: 접근 권한 있는 채널만 조회하도록 변경해야 함.

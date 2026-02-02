@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.repository.file;
 
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.ReadStatus;
+import com.sprint.mission.discodeit.exepction.NotFound;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class FileReadStatusRepository implements ReadStatusRepository {
     // TODO: UserId:ReadStatus
     private final Map<UUID, ReadStatus> idReadStatusMap = new ConcurrentHashMap<>();
     private final Map<UUID, List<ReadStatus>> userIdReadStatusMap = new ConcurrentHashMap<>();
+    private final Map<UUID, List<ReadStatus>> channelIdReadStatusMap = new ConcurrentHashMap<>();
     private Path DIRECTORY;
     private final String EXTENSION = ".ser";
 
@@ -63,6 +65,7 @@ public class FileReadStatusRepository implements ReadStatusRepository {
         ReadStatus temp = new ReadStatus(userId, channelId);
         idReadStatusMap.put(temp.getId(), temp);
         userIdReadStatusMap.computeIfAbsent(userId, id -> new ArrayList<>()).add(temp);
+        channelIdReadStatusMap.computeIfAbsent(userId, id -> new ArrayList<>()).add(temp);
         Path path = resolvePath(temp.getId());
         try (FileOutputStream fos = new FileOutputStream(path.toFile());
                 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
@@ -86,14 +89,20 @@ public class FileReadStatusRepository implements ReadStatusRepository {
         return result;
     }
 
-    public void update(UUID id) {
-        ReadStatus temp = idReadStatusMap.get(id);
-        Path path = resolvePath(id);
+    public boolean update(UUID userId, UUID channelId) {
+        ReadStatus temp = userIdReadStatusMap.get(userId).stream().filter(readStatus -> readStatus.getChannelId().equals(channelId)).findFirst().orElse(null);
+
+        if(temp == null) throw new NotFound("상태값을 찾지 못했습니다.");
+
+        Path path = resolvePath(userId);
         try (FileOutputStream fos = new FileOutputStream(path.toFile());
              ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(temp);
+            temp.updateReadAt();
+            return true;
         } catch (IOException e) {
             System.err.println("[ERROR] : " + e);
+            return false;
         }
     }
 
@@ -101,11 +110,23 @@ public class FileReadStatusRepository implements ReadStatusRepository {
         Path path = resolvePath(id);
         try {
             Files.delete(path);
-            userIdReadStatusMap.remove(idReadStatusMap.remove(id).getUserId());
+            ReadStatus temp = idReadStatusMap.remove(id);
+            userIdReadStatusMap.remove(temp.getUserId());
+            channelIdReadStatusMap.remove(temp.getChannelId());
             return true;
         } catch (IOException e) {
             System.err.println("[ERROR] : "+ e);
             return false;
         }
+    }
+
+    public void deleteForChannel(UUID channelId) {
+        List<ReadStatus> temp = channelIdReadStatusMap.get(channelId);
+        temp.forEach(t -> delete(t.getId()));
+    }
+
+    public void deleteForUser(UUID userId) {
+        List<ReadStatus> temp = userIdReadStatusMap.get(userId);
+        temp.forEach(t -> delete(t.getId()));
     }
 }

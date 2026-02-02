@@ -12,7 +12,7 @@ public interface UserRepository {
 
     String getUser(String name);
 
-    List<String> getAllUser();
+    List<String> findAll();
 
     boolean deleteUser(UUID id);
 }

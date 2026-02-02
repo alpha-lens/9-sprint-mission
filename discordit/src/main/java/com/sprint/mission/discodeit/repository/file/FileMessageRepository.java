@@ -73,24 +73,36 @@ public class FileMessageRepository implements MessageRepository {
     }
 
     @Override
-    public boolean createMessage(String content, UUID channelId, UUID userId) {
+    public String create(String content, UUID channelId, UUID userId) {
+        // 1. 필수값 검증 (방어 코드 추가)
+        if (channelId == null) {
+            throw new IllegalArgumentException("Channel ID cannot be null");
+        }
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+
         Message message = new Message(channelId, userId, content);
+
+        // ConcurrentHashMap은 null key를 허용하지 않으므로 위에서 검증 필수
         channelIdMessageMap.computeIfAbsent(channelId, m -> new ArrayList<>()).add(message);
         userIdMessageMap.computeIfAbsent(userId, m -> new ArrayList<>()).add(message);
+
         Path path = resolvePath(message.getId());
         try (
                 FileOutputStream fos = new FileOutputStream(path.toFile());
                 ObjectOutputStream oos = new ObjectOutputStream(fos)
         ) {
             oos.writeObject(message);
-            return true;
+            return message.getUserId().toString();
         } catch (IOException e) {
-            return false;
+            e.printStackTrace(); // 에러 로그 확인용
+            return "";
         }
     }
 
     @Override
-    public List<MessageResponseDto> getInChannelMessage(UUID channelId) {
+    public List<MessageResponseDto> findAllInChannel(UUID channelId) {
         List<MessageResponseDto> result = new ArrayList<>();
         try{
             channelIdMessageMap.get(channelId)
@@ -116,7 +128,7 @@ public class FileMessageRepository implements MessageRepository {
     }
 
     @Override
-    public List<MessageResponseDto> getMessageForSender(UUID userId) {
+    public List<MessageResponseDto> findAllForSender(UUID userId) {
         List<MessageResponseDto> result = new ArrayList<>();
         try{
             userIdMessageMap.get(userId)
@@ -147,7 +159,7 @@ public class FileMessageRepository implements MessageRepository {
     }
 
     @Override
-    public boolean deleteMessage(UUID userId, UUID id) {
+    public boolean delete(UUID userId, UUID id) {
         Message message = userIdMessageMap.get(userId).stream().filter(e -> e.getId().equals(id)).findFirst().orElse(null);
         UUID channelId = message.getSendChannelId();
 
@@ -161,6 +173,13 @@ public class FileMessageRepository implements MessageRepository {
         } catch (IOException e) {
             return false;
         }
+    }
+
+    @Override
+    public void delete(UUID channelId) {
+        channelIdMessageMap.get(channelId).forEach(message -> {
+            delete(message.getUserId(), message.getId());
+        });
     }
 
     public boolean check(UUID userId, UUID id) {

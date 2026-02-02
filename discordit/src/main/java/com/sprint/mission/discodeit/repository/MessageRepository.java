@@ -6,13 +6,15 @@ import java.util.List;
 import java.util.UUID;
 
 public interface MessageRepository {
-    boolean createMessage(String content, UUID channelId, UUID userId);
+    String create(String content, UUID channelId, UUID userId);
 
-    List<MessageResponseDto> getInChannelMessage(UUID userId);
+    List<MessageResponseDto> findAllInChannel(UUID userId);
 
-    List<MessageResponseDto> getMessageForSender(UUID userId);
+    List<MessageResponseDto> findAllForSender(UUID userId);
 
     boolean updateMessage(UUID id, String content);
 
-    boolean deleteMessage(UUID userId, UUID id);
+    boolean delete(UUID userId, UUID id);
+
+    void delete(UUID channelId);
 }

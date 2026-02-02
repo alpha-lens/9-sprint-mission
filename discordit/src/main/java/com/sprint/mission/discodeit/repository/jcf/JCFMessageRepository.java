@@ -3,14 +3,9 @@ package com.sprint.mission.discodeit.repository.jcf;
 import com.sprint.mission.discodeit.dto.MessageResponseDto;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.MessageRepository;
-import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
-import com.sprint.mission.discodeit.repository.file.FileUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -25,15 +20,15 @@ public class JCFMessageRepository implements MessageRepository {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분 ss초").withZone(ZoneId.of("Asia/Seoul"));
 
     @Override
-    public boolean createMessage(String content, UUID channelId, UUID userId) {
+    public String create(String content, UUID channelId, UUID userId) {
         Message message = new Message(channelId, userId, content);
         channelIdMessageMap.computeIfAbsent(channelId, m -> new ArrayList<>()).add(message);
         userIdMessageMap.computeIfAbsent(userId, m -> new ArrayList<>()).add(message);
-        return true;
+        return "";
     }
 
     @Override
-    public List<MessageResponseDto> getInChannelMessage(UUID channelId) {
+    public List<MessageResponseDto> findAllInChannel(UUID channelId) {
         List<MessageResponseDto> result = new ArrayList<>();
         try{
             channelIdMessageMap.get(channelId)
@@ -50,7 +45,7 @@ public class JCFMessageRepository implements MessageRepository {
     }
 
     @Override
-    public List<MessageResponseDto> getMessageForSender(UUID userId) {
+    public List<MessageResponseDto> findAllForSender(UUID userId) {
         List<MessageResponseDto> result = new ArrayList<>();
         try{
             userIdMessageMap.get(userId)
@@ -77,7 +72,7 @@ public class JCFMessageRepository implements MessageRepository {
     }
 
     @Override
-    public boolean deleteMessage(UUID userId, UUID id) {
+    public boolean delete(UUID userId, UUID id) {
         Message message = userIdMessageMap.get(userId).stream().filter(e -> e.getId().equals(id)).findFirst().orElse(null);
         UUID channelId = message.getSendChannelId();
         try {
@@ -88,6 +83,11 @@ public class JCFMessageRepository implements MessageRepository {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    @Override
+    public void delete(UUID channelId) {
+
     }
 
     public boolean check(UUID userId, UUID id) {
