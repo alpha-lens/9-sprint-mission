@@ -3,7 +3,6 @@ package com.sprint.mission.discodeit.app.router;
 import com.sprint.mission.discodeit.UserState;
 import com.sprint.mission.discodeit.dto.BinaryContentDto;
 import com.sprint.mission.discodeit.entity.AttachmentType;
-import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.exepction.NotFound;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.basic.BasicMessageService;
@@ -143,7 +142,7 @@ public class RouteMessage {
         } else if (m == 2) {
             System.out.println("어디로 보낸 메시지인가요?");
             String sendeeChannelName = scanner.nextLine();
-            if (channelService.isPresent(sendeeChannelName)) {
+            if (!channelService.isPresent(sendeeChannelName)) {
                 System.out.println("존재하지 않는 채널입니다.");
                 return;
             }

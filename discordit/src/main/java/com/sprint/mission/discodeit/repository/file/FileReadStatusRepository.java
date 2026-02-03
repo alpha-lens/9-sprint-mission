@@ -62,14 +62,14 @@ public class FileReadStatusRepository implements ReadStatusRepository {
     }
 
     public void create(UUID userId, UUID channelId) {
-        ReadStatus temp = new ReadStatus(userId, channelId);
-        idReadStatusMap.put(temp.getId(), temp);
-        userIdReadStatusMap.computeIfAbsent(userId, id -> new ArrayList<>()).add(temp);
-        channelIdReadStatusMap.computeIfAbsent(userId, id -> new ArrayList<>()).add(temp);
-        Path path = resolvePath(temp.getId());
+        ReadStatus readStatus = new ReadStatus(userId, channelId);
+        idReadStatusMap.put(readStatus.getId(), readStatus);
+        userIdReadStatusMap.computeIfAbsent(userId, id -> new ArrayList<>()).add(readStatus);
+        channelIdReadStatusMap.computeIfAbsent(userId, id -> new ArrayList<>()).add(readStatus);
+        Path path = resolvePath(readStatus.getId());
         try (FileOutputStream fos = new FileOutputStream(path.toFile());
                 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-            oos.writeObject(temp);
+            oos.writeObject(readStatus);
         } catch (IOException e) {
             System.err.println("[ERROR] : " + e);
         }
@@ -94,7 +94,7 @@ public class FileReadStatusRepository implements ReadStatusRepository {
 
         if(temp == null) throw new NotFound("상태값을 찾지 못했습니다.");
 
-        Path path = resolvePath(userId);
+        Path path = resolvePath(temp.getId());
         try (FileOutputStream fos = new FileOutputStream(path.toFile());
              ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(temp);

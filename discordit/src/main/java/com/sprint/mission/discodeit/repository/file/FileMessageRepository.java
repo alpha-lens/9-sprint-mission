@@ -74,17 +74,9 @@ public class FileMessageRepository implements MessageRepository {
 
     @Override
     public String create(String content, UUID channelId, UUID userId) {
-        // 1. 필수값 검증 (방어 코드 추가)
-        if (channelId == null) {
-            throw new IllegalArgumentException("Channel ID cannot be null");
-        }
-        if (userId == null) {
-            throw new IllegalArgumentException("User ID cannot be null");
-        }
-
         Message message = new Message(channelId, userId, content);
 
-        // ConcurrentHashMap은 null key를 허용하지 않으므로 위에서 검증 필수
+        messageIdMap.put(message.getId(), message);
         channelIdMessageMap.computeIfAbsent(channelId, m -> new ArrayList<>()).add(message);
         userIdMessageMap.computeIfAbsent(userId, m -> new ArrayList<>()).add(message);
 
@@ -94,9 +86,8 @@ public class FileMessageRepository implements MessageRepository {
                 ObjectOutputStream oos = new ObjectOutputStream(fos)
         ) {
             oos.writeObject(message);
-            return message.getUserId().toString();
+            return message.getId().toString();
         } catch (IOException e) {
-            e.printStackTrace(); // 에러 로그 확인용
             return "";
         }
     }
@@ -105,8 +96,8 @@ public class FileMessageRepository implements MessageRepository {
     public List<MessageResponseDto> findAllInChannel(UUID channelId) {
         List<MessageResponseDto> result = new ArrayList<>();
         try{
-            channelIdMessageMap.get(channelId)
-                    .stream().sorted(Comparator.comparing(Message::getCreateAt))
+            List<Message> messages = channelIdMessageMap.get(channelId);
+            messages.stream().sorted(Comparator.comparing(Message::getCreateAt))
                     .forEach(message -> {
                         result.add(new MessageResponseDto(
                                 message.getId(), message.getChannelId(), message.getUserId(), FORMATTER.format(message.getCreateAt()), FORMATTER.format(message.getUpdateAt()), message.getContent()
@@ -130,14 +121,16 @@ public class FileMessageRepository implements MessageRepository {
     @Override
     public List<MessageResponseDto> findAllForSender(UUID userId) {
         List<MessageResponseDto> result = new ArrayList<>();
+        List<Message> messages = userIdMessageMap.get(userId);
         try{
-            userIdMessageMap.get(userId)
-                    .stream().sorted(Comparator.comparing(Message::getCreateAt))
-                    .forEach(message -> {
-                        result.add(new MessageResponseDto(
-                                message.getId(), message.getChannelId(), message.getUserId(), FORMATTER.format(message.getCreateAt()), FORMATTER.format(message.getUpdateAt()), message.getContent()
-                        ));
-                    });
+            if(messages != null) {
+                messages.stream().sorted(Comparator.comparing(Message::getCreateAt))
+                        .forEach(message -> {
+                            result.add(new MessageResponseDto(
+                                    message.getId(), message.getChannelId(), message.getUserId(), FORMATTER.format(message.getCreateAt()), FORMATTER.format(message.getUpdateAt()), message.getContent()
+                            ));
+                        });
+            }
         } catch (Exception e) {
             return List.of();
         }
@@ -146,12 +139,15 @@ public class FileMessageRepository implements MessageRepository {
 
     @Override
     public boolean updateMessage(UUID id, String content) {
+        Message message = messageIdMap.get(id);
+        if (message == null) return false;
+
+        message.updateMessage(content);
+
         Path path = resolvePath(id);
         try(FileOutputStream fos = new FileOutputStream(path.toFile());
             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-            oos.writeObject(messageIdMap.get(id));
-            messageIdMap.get(id).updateMessage(content);
-            System.out.println("성공");
+            oos.writeObject(message);
             return true;
         } catch (IOException e) {
             return false;
@@ -160,14 +156,22 @@ public class FileMessageRepository implements MessageRepository {
 
     @Override
     public boolean delete(UUID userId, UUID id) {
-        Message message = userIdMessageMap.get(userId).stream().filter(e -> e.getId().equals(id)).findFirst().orElse(null);
+        List<Message> userMessages = userIdMessageMap.get(userId);
+        if (userMessages == null) return false;
+
+        Message message = userMessages.stream().filter(e -> e.getId().equals(id)).findFirst().orElse(null);
+        if (message == null) return false;
+
         UUID channelId = message.getSendChannelId();
 
         Path path = resolvePath(id);
         try {
-            Files.delete(path);
+            Files.deleteIfExists(path);
             userIdMessageMap.get(userId).remove(message);
-            channelIdMessageMap.get(channelId).remove(message);
+
+            if(channelIdMessageMap.containsKey(channelId)) {
+                channelIdMessageMap.get(channelId).remove(message);
+            }
             messageIdMap.remove(message.getId());
             return true;
         } catch (IOException e) {
@@ -177,13 +181,18 @@ public class FileMessageRepository implements MessageRepository {
 
     @Override
     public void delete(UUID channelId) {
-        channelIdMessageMap.get(channelId).forEach(message -> {
-            delete(message.getUserId(), message.getId());
-        });
+        if(channelIdMessageMap.containsKey(channelId)) {
+            new ArrayList<>(channelIdMessageMap.get(channelId)).forEach(message -> {
+                delete(message.getUserId(), message.getId());
+            });
+        }
     }
 
     public boolean check(UUID userId, UUID id) {
-        Object result = userIdMessageMap.get(userId).stream().filter(m -> m.getId().equals(id)).findFirst().orElse(null);
+        List<Message> messages = userIdMessageMap.get(userId);
+        if(messages == null) return true;
+
+        Object result = messages.stream().filter(m -> m.getId().equals(id)).findFirst().orElse(null);
         return result == null;
     }
 }

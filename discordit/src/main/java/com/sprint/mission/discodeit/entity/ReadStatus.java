@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Getter
 public class ReadStatus implements Serializable {
-    private final UUID id;
+    private final UUID id = UUID.randomUUID();
     private final UUID userId;
     private final UUID channelId;
     private Instant lastReadAt;
@@ -16,7 +16,6 @@ public class ReadStatus implements Serializable {
     public ReadStatus(UUID userId, UUID channelId){
         this.userId = userId;
         this.channelId = channelId;
-        id = UUID.randomUUID();
         lastReadAt = Instant.now();
     };
 

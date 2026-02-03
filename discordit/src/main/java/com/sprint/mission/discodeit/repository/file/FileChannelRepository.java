@@ -102,17 +102,18 @@ public class FileChannelRepository implements ChannelRepository {
 
     @Override
     public boolean save(String oldName, String newName) {
-        Channel channel = publicChannelNameMap.getOrDefault(oldName, null);
-        boolean isPrivate = false;
+        if(!isPresentChannel(oldName)) return false;
+        boolean isPrivate = privateChannelNameMap.containsKey(oldName);
+        Path path;
+        Channel channel;
 
-        if (channel == null) {
-            channel = privateChannelNameMap.getOrDefault(oldName, null);
-            isPrivate = true;
+        if(isPrivate) {
+            channel = privateChannelNameMap.get(oldName);
+        } else {
+            channel = publicChannelNameMap.get(oldName);
         }
 
-        if (channel == null) return false;
-
-        Path path = resolvePath(publicChannelNameMap.get(oldName).getId());
+        path = resolvePath(channel.getId());
 
         try(FileOutputStream fos = new FileOutputStream(path.toFile());
             ObjectOutputStream oos = new ObjectOutputStream(fos)){
@@ -142,7 +143,7 @@ public class FileChannelRepository implements ChannelRepository {
             return publicChannelNameMap.get(name).toString();
         if(privateChannelNameMap.containsKey(name))
             return privateChannelNameMap.get(name).toString();
-        return null;
+        return "";
     }
 
     public ChannelType getChannelType(String name) {
@@ -166,7 +167,10 @@ public class FileChannelRepository implements ChannelRepository {
     public List<ResponseChannelDto> readAllChannel() {
         List<ResponseChannelDto> result = new ArrayList<>();
 
+        /// public
         result.addAll(publicChannelNameMap.values().stream().map(this::requestChannelInfo).toList());
+
+        /// private
         result.addAll(accessAblePrivateChannel(userState.getUserName()).stream().toList());
         return result;
     }
@@ -216,27 +220,20 @@ public class FileChannelRepository implements ChannelRepository {
 
     ///
     public boolean isPresentChannel(String name) {
-        try {
-            publicChannelNameMap.get(publicChannelNameMap.get(name).getName());
-            return true;
-        } catch (Exception ignore) {
-            return false;
-        }
+        return publicChannelNameMap.containsKey(name) || privateChannelNameMap.containsKey(name);
     }
 
     public UUID channelNameToId(String name) {
-        try {
-            return publicChannelNameMap.get(name).getId();
-        } catch (Exception e) {
-            return null;
-        }
+        if(publicChannelNameMap.containsKey(name)) return publicChannelNameMap.get(name).getId();
+        if(privateChannelNameMap.containsKey(name)) return privateChannelNameMap.get(name).getId();
+
+        throw new NotFound("해당 채널을 찾을 수 없습니다");
     }
 
     public String channelIdToName(UUID id) {
-        try {
-            return publicChannelIdMap.get(id).getName();
-        } catch (Exception e) {
-            return null;
-        }
+        if(publicChannelIdMap.containsKey(id)) return publicChannelIdMap.get(id).getName();
+        if(privateChannelIdMap.containsKey(id)) return privateChannelIdMap.get(id).getName();
+
+        throw new NotFound("해당 채널을 찾을 수 없습니다");
     }
 }

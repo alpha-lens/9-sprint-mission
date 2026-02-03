@@ -73,6 +73,7 @@ public class BasicMessageService implements MessageService {
                 + user + "\n"
                 + channel + "\n"
                 + "내용: " + dto.content() + "\n"
+                + "첨부파일: " + binaryContentRepository.find(AttachmentType.MESSAGE, dto.id()) + "\n"
                 + "생성일: " + dto.createAt() + "\n"
                 + "수정일: " + dto.updateAt();
     }

@@ -96,6 +96,10 @@ public class Router {
         System.out.println("해당 사용자의 비밀번호를 입력해주세요");
         String password = scanner.nextLine().trim();
 
-        authService.login(new LoginDto(name, password));
+        try {
+            authService.login(new LoginDto(name, password));
+        } catch (Exception e) {
+            System.err.println("[ERROR] " + e);
+        }
     }
 }

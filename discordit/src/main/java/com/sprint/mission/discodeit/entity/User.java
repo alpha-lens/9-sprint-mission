@@ -33,17 +33,11 @@ public class User implements Serializable {
         this.updateAt = now;
     }
 
-    public User(String name, String password, UUID profileId) {
-        this.id = UUID.randomUUID();
+    public void setProfileId(UUID profileId) {
         this.profileId = profileId;
-        this.name = name;
-        this.password = password;
-        Instant now = Instant.now();
-        this.createAt = now;
-        this.updateAt = now;
     }
 
-    public void setUpdateAt() {
+    private void setUpdateAt() {
         this.updateAt = Instant.now();
     }
 

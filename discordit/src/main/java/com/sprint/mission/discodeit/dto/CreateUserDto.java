@@ -1,10 +1,12 @@
 package com.sprint.mission.discodeit.dto;
 
+import com.sprint.mission.discodeit.entity.AttachmentType;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 
 import java.util.List;
+import java.util.UUID;
 
 public record CreateUserDto(
         String username,
@@ -12,18 +14,18 @@ public record CreateUserDto(
         String profileImage
 ) {
     public List<Object> toEntity() {
-        BinaryContent binaryContent = binaryContent(profileImage);
-        if(binaryContent == null) {
-            User user = new User(username, password);
-            return List.of(user, new UserStatus(user.getId()));
+        User user = new User(username, password);
+        BinaryContent binaryContent;
+
+        if(!profileImage.isEmpty()) {
+            binaryContent = binaryContent(user.getId(), profileImage);
+            user.setProfileId(binaryContent.getId());
         }
 
-        User user = new User (username, password, binaryContent.getId());
         return List.of(user,new UserStatus(user.getId()));
     }
 
-    private BinaryContent binaryContent(String profileImage) {
-        if(profileImage.trim().isEmpty()) return null;
-        return new BinaryContent(profileImage);
+    private BinaryContent binaryContent(UUID id, String profileImage) {
+        return new BinaryContent(AttachmentType.USER, id, profileImage);
     }
 }
