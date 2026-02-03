@@ -3,8 +3,11 @@ package com.sprint.mission.discodeit.app.router;
 import com.sprint.mission.discodeit.Input;
 import com.sprint.mission.discodeit.UserState;
 import com.sprint.mission.discodeit.dto.CreateUserDto;
+import com.sprint.mission.discodeit.dto.UserFinder;
+import com.sprint.mission.discodeit.entity.AttachmentType;
 import com.sprint.mission.discodeit.exepction.NotFound;
 import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
+import com.sprint.mission.discodeit.service.basic.BasicMessageService;
 import com.sprint.mission.discodeit.service.basic.BasicUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -16,6 +19,7 @@ import java.util.Scanner;
 @RequiredArgsConstructor
 public class RouteUser {
     private final BasicUserService userService;
+    private final BasicMessageService messageService;
     private final BasicBinaryContentService binaryContentService;
     private final Scanner scanner;
     private final IsLogin isLogin;
@@ -89,8 +93,9 @@ public class RouteUser {
         System.out.println("사용자 변경 메뉴입니다.");
         System.out.println("현재 로그인한 사용자의 비밀번호를 입력해주세요");
         String password = scanner.nextLine();
-        if(!userService.isValid(password)) {
+        if(userService.isValid(userState.getUserId(), password)) {
             System.err.println("비밀번호가 일치하지 않습니다. 처음으로 돌아갑니다.");
+            return;
         }
 
         while(true) {
@@ -100,7 +105,7 @@ public class RouteUser {
             String rePassword = input.inputUpdateField("비밀번호", "\\S+");
             String reMail = input.inputUpdateField("이메일", "\\S+@\\S+\\.\\S+");
             String rePhoneNumber = input.inputUpdateField("전화번호", "^\\d{10,11}$");
-            String reProfile = input.inputUpdateField("프로필 이미지", "\\.");
+            String reProfile = input.inputUpdateField("프로필 이미지", "(?i).*\\.(jpg|png)$");
 
             System.out.println("이대로 진행하시겠습니까?");
             System.out.println("맞으면 y, 다시 입력하려면 re");
@@ -111,11 +116,13 @@ public class RouteUser {
             if(finalCheckIsContinue.equalsIgnoreCase("re")) continue;
             if(finalCheckIsContinue.equalsIgnoreCase("n")) return;
 
-            if(finalCheckIsContinue.equalsIgnoreCase("y") && userService.update(reName, rePassword, reMail, rePhoneNumber, reProfile)) {
+            if(finalCheckIsContinue.equalsIgnoreCase("y") && userService.update(userState.getUserId(), reName, rePassword, reMail, rePhoneNumber, reProfile)) {
                 System.out.println("성공적으로 변경되었습니다.");
+                return;
             }
 
             System.err.println("알 수 없는 오류로 인해 실패했습니다.");
+            return;
         }
     }
 
@@ -124,7 +131,11 @@ public class RouteUser {
         String name = scanner.nextLine();
 
         try {
-            System.out.println(userService.find(name));
+            UserFinder requestDto = userService.find(name);
+            String profile = binaryContentService.find(AttachmentType.USER, requestDto.id()).get(0);
+
+            System.out.println(requestDto.userInfo());
+            System.out.println("프로필 이미지 : " + profile);
             System.out.println("====================");
         } catch (NotFound e) {
             System.err.println("[ERROR]" + e);
@@ -136,9 +147,18 @@ public class RouteUser {
             System.err.println("사용자를 찾을 수 없습니다.");
         }
 
-        List<String> findAllUser = userService.findAll();
+        List<UserFinder> findAllUser = userService.findAll();
 
-        findAllUser.forEach(System.out::println);
+        findAllUser.forEach(requestDto -> {
+            try {
+                String profile = binaryContentService.find(AttachmentType.USER, requestDto.id()).get(0);
+                System.out.println(requestDto.userInfo());
+                System.out.println("프로필 이미지 : " + profile);
+            } catch (Exception ignore) {
+                System.out.println(requestDto.userInfo());
+            }
+            System.out.println("====================");
+        });
         System.out.println("총 사용자 : " + findAllUser.size());
     }
 
@@ -157,11 +177,13 @@ public class RouteUser {
         System.out.println("현재 로그인한 사용자의 비밀번호를 입력해주세요.");
         String password = scanner.nextLine();
 
-        if(!userService.isValid(password)) {
+        if(userService.isValid(userState.getUserId(), password)) {
             System.err.println("비밀번호가 일치하지 않습니다. 처음으로 돌아갑니다.");
+            return;
         }
 
         if(userService.delete(userState.getUserId())) {
+            messageService.deleteAll(userState.getUserId());
             userState.userState("");
             System.out.println("성공적으로 삭제되었습니다.");
         }

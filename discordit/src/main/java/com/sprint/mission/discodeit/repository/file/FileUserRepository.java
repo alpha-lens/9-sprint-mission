@@ -95,15 +95,22 @@ public class FileUserRepository implements UserRepository {
     }
 
     @Override
-    public String getUser(String name) {
+    public UserFinder find(String name) {
         User user = idUserMap.get(userNameIdMap.get(name));
-        return UserFinder.from(user, userStatusMap.get(user.getId()));
+        UUID id = user.getId();
+        String userName = user.getName();
+
+        return new UserFinder(id, userName, user.toString(), userStatusMap.get(user.getId()));
     }
 
     @Override
-    public List<String> findAll() {
-        List<String> result = new ArrayList<>();
-        idUserMap.values().stream().sorted(Comparator.comparing(User::getName)).forEach(user -> result.add(UserFinder.from(user, userStatusMap.get(user.getId()))));
+    public List<UserFinder> findAll() {
+        List<UserFinder> result = new ArrayList<>();
+        idUserMap.values().stream().sorted(Comparator.comparing(User::getName)).forEach(user -> {
+            UUID id = user.getId();
+            String userName = user.getName();
+            result.add(new UserFinder(id, userName, user.toString(), userStatusMap.get(user.getId())));
+        });
         return result;
     }
 

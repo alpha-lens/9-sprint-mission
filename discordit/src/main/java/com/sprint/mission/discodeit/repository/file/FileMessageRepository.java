@@ -180,9 +180,14 @@ public class FileMessageRepository implements MessageRepository {
     }
 
     @Override
-    public void delete(UUID channelId) {
-        if(channelIdMessageMap.containsKey(channelId)) {
-            new ArrayList<>(channelIdMessageMap.get(channelId)).forEach(message -> {
+    public void delete(UUID id) {
+        if(channelIdMessageMap.containsKey(id)) {
+            new ArrayList<>(channelIdMessageMap.get(id)).forEach(message -> {
+                delete(message.getUserId(), message.getId());
+            });
+        }
+        if(userIdMessageMap.containsKey(id)) {
+            new ArrayList<>(userIdMessageMap.get(id)).forEach(message -> {
                 delete(message.getUserId(), message.getId());
             });
         }

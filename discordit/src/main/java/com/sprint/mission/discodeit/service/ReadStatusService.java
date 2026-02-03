@@ -1,11 +1,12 @@
 package com.sprint.mission.discodeit.service;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public interface ReadStatusService {
     void create(UUID userId, UUID channelId);
 
-    void find(UUID id);
+    Instant find(UUID id);
 
     void findAllByUserId(UUID userId);
 

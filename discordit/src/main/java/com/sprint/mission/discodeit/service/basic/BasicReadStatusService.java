@@ -22,8 +22,8 @@ public class BasicReadStatusService implements ReadStatusService {
     }
 
     @Override
-    public void find(UUID id) {
-        Instant lastReadAt = readStatusRepository.find(id);
+    public Instant find(UUID id) {
+        return readStatusRepository.find(id);
     }
     @Override
     public void findAllByUserId(UUID userId) {

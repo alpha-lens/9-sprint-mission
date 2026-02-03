@@ -37,5 +37,7 @@ public class RoutePrintText {
         System.out.println("2. " + retouchText.get(1) + " Update");
         System.out.println("3. " + retouchText.get(1) + " Read");
         System.out.println("4. " + retouchText.get(1) + " Delete");
+        if(retouchText.get(0).equals("채널"))
+            System.out.println("5. Private Channel Invite");
     }
 }

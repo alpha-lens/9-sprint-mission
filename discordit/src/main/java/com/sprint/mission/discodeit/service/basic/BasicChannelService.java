@@ -54,13 +54,18 @@ public class BasicChannelService implements ChannelService {
         return new FindChannelDto(channelInfo, channelType, lastMessageTime);
     }
 
+    @Override
+    public List<ResponseChannelDto> findAllPrivateChannel(String userName) {
+        return channelRepository.readAllPrivateChannel(userName);
+    }
+
     public UUID findChannelId(String channelName) {
         return channelRepository.channelNameToId(channelName);
     }
 
     @Override
-    public List<ResponseChannelDto> findAll() {
-        return channelRepository.readAllChannel();
+    public List<ResponseChannelDto> findAll(String userName) {
+        return channelRepository.readAllChannel(userName);
     }
 
     @Override
@@ -71,5 +76,11 @@ public class BasicChannelService implements ChannelService {
     @Override
     public boolean delete(String name) {
         return channelRepository.deleteChannel(name);
+    }
+
+    @Override
+    public boolean invitePrivateServer(String channelName, String userName, UUID userId) {
+        channelRepository.invitePrivateServer(channelName, userName, userId);
+        return true;
     }
 }

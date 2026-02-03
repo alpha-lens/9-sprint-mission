@@ -10,7 +10,9 @@ public interface ChannelRepository {
     boolean save(String oldName, String newName);
     String readChannel(String name);
 
-    List<ResponseChannelDto> readAllChannel();
+    List<ResponseChannelDto> readAllChannel(String userName);
+
+    List<ResponseChannelDto> readAllPrivateChannel(String userName);
 
     boolean deleteChannel(String name);
 }

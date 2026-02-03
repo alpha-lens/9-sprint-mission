@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.service.ReadStatusService;
 import com.sprint.mission.discodeit.service.basic.BasicChannelService;
 import com.sprint.mission.discodeit.service.basic.BasicMessageService;
+import com.sprint.mission.discodeit.service.basic.BasicUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,7 @@ public class RouteChannel {
     private final BasicMessageService messageService;
     private final BinaryContentRepository binaryContentRepository;
     private final UserState userState;
+    private final BasicUserService userService;
 
     public void route(int routeCRUD) {
         if(!isLogin.check("Channel", routeCRUD)) {
@@ -51,6 +53,11 @@ public class RouteChannel {
             /// delete
             case 4:
                 delete();
+                break;
+
+            /// invite Channel
+            case 5:
+                invite();
                 break;
 
             default:
@@ -125,7 +132,7 @@ public class RouteChannel {
             channelService.find(name);
         }
         else if (menu == 2) {
-            List<ResponseChannelDto> requestAllChannelDto = channelService.findAll();
+            List<ResponseChannelDto> requestAllChannelDto = channelService.findAll(userState.getUserName());
             if(requestAllChannelDto.isEmpty()) {
                 System.err.println("채널이 존재하지 않습니다.");
                 return;
@@ -163,12 +170,38 @@ public class RouteChannel {
         UUID channelId = channelService.findChannelId(name);
 
         if(channelService.delete(name)) {
-            messageService.delete(channelId);
+            messageService.deleAllFromUser(channelId);
             readStatusService.deleteForChannel(channelId);
             binaryContentRepository.delete(AttachmentType.CHANNEL, channelId);
             System.out.println("성공적으로 삭제되었습니다.");
         } else {
             System.err.println("삭제하지 못했어요!");
         }
+    }
+
+    private void invite() {
+        System.out.println("현재 당신이 접속하고 있는 Private Channel은 다음과 같습니다.");
+
+        channelService.findAllPrivateChannel(userState.getUserName());
+
+        System.out.println("초대하고자 하는 채널명을 입력해주세요.");
+        String channelName = scanner.nextLine().trim();
+
+        if(!channelService.isPresent(channelName)) {
+            System.err.println("해당 채널이 존재하지 않습니다.");
+            return;
+        }
+
+        System.out.println("초대하고자 하는 사용자명을 입력해주세요.");
+        String userName = scanner.nextLine().trim();
+
+        if(!userService.isPresent(userName)) {
+            System.err.println("해당 사용자가 존재하지 않습니다.");
+            return;
+        }
+
+        UUID userId = userService.userNameToId(userName);
+
+        channelService.invitePrivateServer(channelName, userName, userId);
     }
 }

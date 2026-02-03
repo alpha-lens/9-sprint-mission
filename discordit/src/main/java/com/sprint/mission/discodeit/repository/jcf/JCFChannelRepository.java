@@ -54,21 +54,22 @@ public class JCFChannelRepository implements ChannelRepository {
         }
     }
 
+    @Override
+    public List<ResponseChannelDto> readAllChannel(String userName) {
+        return List.of();
+    }
+
+    @Override
+    public List<ResponseChannelDto> readAllPrivateChannel(String userName) {
+        return List.of();
+    }
+
     public UUID readChannelId(String name) {
         try {
             return channelNameMap.get(name).getId();
         } catch (Exception e) {
             return null;
         }
-    }
-
-    @Override
-    public List<ResponseChannelDto> readAllChannel() {
-        if(channelNameMap.isEmpty()) {
-            return null;
-        }
-//        return channelNameMap.values().stream().toList();
-        return null;
     }
 
     @Override

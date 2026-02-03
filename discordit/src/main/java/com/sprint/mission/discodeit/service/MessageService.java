@@ -15,7 +15,7 @@ public interface MessageService {
 
     boolean delete(UUID userId, UUID messageId);
 
-    void delete(UUID channelId);
+    void deleteAll(UUID channelId);
 
     String lastMessageTime(String channelName);
 }

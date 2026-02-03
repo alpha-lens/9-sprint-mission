@@ -26,7 +26,7 @@ public class BinaryContent implements Serializable {
 
     @Override
     public String toString() {
-        return "        BinaryContent ID : " + id
-                + "        fileName : " + fileName + "." + fileExtension + "\n";
+        return "\n        BinaryContent ID : " + id
+                + "\n        fileName : " + fileName + "." + fileExtension + "\n";
     }
 }

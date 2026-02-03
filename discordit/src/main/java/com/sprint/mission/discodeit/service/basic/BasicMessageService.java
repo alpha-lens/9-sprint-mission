@@ -95,7 +95,7 @@ public class BasicMessageService implements MessageService {
     }
 
     @Override
-    public void delete(UUID channelId) {
+    public void deleteAll(UUID channelId) {
         messageRepository.delete(channelId);
     }
 

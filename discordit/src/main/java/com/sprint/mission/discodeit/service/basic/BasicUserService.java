@@ -1,7 +1,7 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.UserState;
 import com.sprint.mission.discodeit.dto.CreateUserDto;
+import com.sprint.mission.discodeit.dto.UserFinder;
 import com.sprint.mission.discodeit.entity.AttachmentType;
 import com.sprint.mission.discodeit.exepction.NotFound;
 import com.sprint.mission.discodeit.repository.file.FileBinaryContentRepository;
@@ -18,7 +18,10 @@ import java.util.UUID;
 public class BasicUserService implements UserService {
     private final FileUserRepository userRepository;
     private final FileBinaryContentRepository binaryContentRepository;
-    private final UserState userState;
+
+    public UUID userNameToId(String name) {
+        return userRepository.userNameToId(name);
+    }
 
     @Override
     public boolean isPresent(String name) {
@@ -26,8 +29,8 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public boolean isValid(String password) {
-        return userRepository.check(userState.getUserId(), password);
+    public boolean isValid(UUID userId, String password) {
+        return userRepository.check(userId, password);
     }
 
     @Override
@@ -37,8 +40,7 @@ public class BasicUserService implements UserService {
 
     /// Update
     @Override
-    public boolean update(String reName, String rePassword, String reMail, String rePhoneNumber, String reProfile) {
-        UUID userId = userState.getUserId();
+    public boolean update(UUID userId, String reName, String rePassword, String reMail, String rePhoneNumber, String reProfile) {
 
         if(userRepository.updateUser(userId, reName, rePassword, reMail, rePhoneNumber)) {
             if(reProfile != null){
@@ -52,14 +54,14 @@ public class BasicUserService implements UserService {
 
     /// Read
     @Override
-    public String find(String name) {
+    public UserFinder find(String name) {
         if(userRepository.userNameToId(name) == null)
             throw new NotFound("해당 사용자를 찾지 못했습니다");
-        return userRepository.getUser(name);
+        return userRepository.find(name);
     }
 
     @Override
-    public List<String> findAll() {
+    public List<UserFinder> findAll() {
         return userRepository.findAll();
     }
 

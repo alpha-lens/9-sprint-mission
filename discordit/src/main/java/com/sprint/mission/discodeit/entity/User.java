@@ -76,8 +76,7 @@ public class User implements Serializable {
 
     @Override
     public String toString() {
-        return "===================="
-                + "\n사용자ID : " + this.getId()
+        return "사용자ID : " + this.getId()
                 + "\n사용자명 : " + this.getName()
                 + "\n이메일 : " + this.getEmail()
                 + "\n전화번호 : " + this.getPhoneNumber()

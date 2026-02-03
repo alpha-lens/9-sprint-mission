@@ -1,6 +1,5 @@
 package com.sprint.mission.discodeit.repository.file;
 
-import com.sprint.mission.discodeit.UserState;
 import com.sprint.mission.discodeit.dto.ResponseChannelDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
@@ -28,7 +27,6 @@ public class FileChannelRepository implements ChannelRepository {
     private final Map<UUID, Channel> publicChannelIdMap = new ConcurrentHashMap<>();
     private final Map<String, Channel> privateChannelNameMap = new ConcurrentHashMap<>();
     private final Map<UUID, Channel> privateChannelIdMap = new ConcurrentHashMap<>();
-    private final UserState userState;
     private Path DIRECTORY;
     private final String EXTENSION = ".ser";
     private Path resolvePath(UUID id) {
@@ -145,7 +143,6 @@ public class FileChannelRepository implements ChannelRepository {
             return privateChannelNameMap.get(name).toString();
         return "";
     }
-
     public ChannelType getChannelType(String name) {
         if(publicChannelNameMap.containsKey(name))
             return publicChannelNameMap.get(name).getChannelType();
@@ -163,16 +160,24 @@ public class FileChannelRepository implements ChannelRepository {
         throw new NotFound("해당 채널을 찾을 수 없습니다");
     }
 
-    @Override // FIXME: 접근 권한 있는 채널만 조회하도록 변경해야 함.
-    public List<ResponseChannelDto> readAllChannel() {
+    @Override
+    public List<ResponseChannelDto> readAllChannel(String userName) {
         List<ResponseChannelDto> result = new ArrayList<>();
 
         /// public
         result.addAll(publicChannelNameMap.values().stream().map(this::requestChannelInfo).toList());
 
         /// private
-        result.addAll(accessAblePrivateChannel(userState.getUserName()).stream().toList());
+        result.addAll(accessAblePrivateChannel(userName).stream().toList());
         return result;
+    }
+
+    @Override
+    public List<ResponseChannelDto> readAllPrivateChannel(String userName) {
+        if(accessAblePrivateChannel(userName).isEmpty())
+            throw new NotFound("권한이 있는 Private Channel이 없습니다!");
+
+        return new ArrayList<>(accessAblePrivateChannel(userName).stream().toList());
     }
 
     private List<ResponseChannelDto> accessAblePrivateChannel(String userName) {

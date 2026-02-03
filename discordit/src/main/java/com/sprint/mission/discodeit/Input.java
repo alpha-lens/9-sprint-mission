@@ -24,7 +24,7 @@ public class Input {
                 continue;
             }
 
-            if (text.equals("프로필 이미지") && inputString.matches("(?i).*\\.(jpg|png)")) {
+            if (text.equals("프로필 이미지") && !inputString.matches(regexRule)) {
                 System.err.println("이미지는 jpg, png만 지원합니다.");
                 continue;
             }
@@ -40,10 +40,10 @@ public class Input {
     }
 
     public String inputUpdateField(String text, String regexRule) {
-        System.out.print("변경하실 " + text + " : ");
         if (text.equals("프로필 이미지")){
-            System.out.print("이미지 확장자는 jpg, png만 지원합니다.");
+            System.out.println("이미지 확장자는 jpg, png만 지원합니다.");
         }
+        System.out.print("변경하실 " + text + " : ");
         return inputChecker(text, regexRule);
     }
 }

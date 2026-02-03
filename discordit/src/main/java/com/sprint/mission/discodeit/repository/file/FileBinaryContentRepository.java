@@ -88,20 +88,19 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
 
     @Override
     public List<String> find(AttachmentType type, UUID id){
-        try {
-            switch (type){
-                case MESSAGE -> {
+        switch (type){
+            case MESSAGE -> {
+                if(messageIdMap.containsKey(id))
                     return messageIdMap.get(id).stream().map(BinaryContent::toString).toList();
-                }
-                case CHANNEL -> {
-                    return List.of(channelIdMap.get(id).toString());
-                }
-                case USER -> {
-                    return List.of(userIdMap.get(id).toString());
-                }
             }
-        } catch (Exception e) {
-            throw new NotFound("왠지 모르지만 오류가 발생했다!");
+            case CHANNEL -> {
+                if(channelIdMap.containsKey(id))
+                    return List.of(channelIdMap.get(id).toString());
+            }
+            case USER -> {
+                if(userIdMap.containsKey(id))
+                    return List.of(userIdMap.get(id).toString());
+            }
         }
         return List.of();
     }
