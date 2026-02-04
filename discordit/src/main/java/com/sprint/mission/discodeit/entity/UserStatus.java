@@ -9,23 +9,32 @@ import java.util.UUID;
 
 @Getter
 public class UserStatus implements Serializable {
-    private final UUID id = UUID.randomUUID();
+    private final UUID id;
     private final UUID userId;
-    private Instant lastAccessTime;
+    private final String userName;
+    private final Instant createAt;
+    private Instant updateAt;
 
-    public UserStatus(UUID userId) {
+    public UserStatus(UUID userId, String userName) {
+        this.id = UUID.randomUUID();
+        Instant now = Instant.now();
         this.userId = userId;
-        lastAccessTime = Instant.now();
+        this.userName = userName;
+        updateAt = now;
+        createAt = now;
     }
 
     public void lastAccessTimeUpdater() {
-        lastAccessTime = Instant.now();
+        updateAt = Instant.now();
     }
 
-    @Override
-    public String toString() {
+    public void lastAccessTimeUpdater(Instant time) {
+        updateAt = time;
+    }
+
+    public String isOnline() {
         try {
-            Duration duration = Duration.between(this.getLastAccessTime(), Instant.now());
+            Duration duration = Duration.between(this.getUpdateAt(), Instant.now());
             if(duration.toMinutes() > 5) return "오프라인";
             return "온라인";
         } catch (Exception ignore) {

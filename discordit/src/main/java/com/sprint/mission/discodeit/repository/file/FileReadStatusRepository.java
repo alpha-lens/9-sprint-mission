@@ -1,7 +1,9 @@
 package com.sprint.mission.discodeit.repository.file;
 
-import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.ReadStatus;
+import com.sprint.mission.discodeit.exepction.FailedDelete;
+import com.sprint.mission.discodeit.exepction.FailedInit;
+import com.sprint.mission.discodeit.exepction.FailedUpdate;
 import com.sprint.mission.discodeit.exepction.NotFound;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import jakarta.annotation.PostConstruct;
@@ -19,8 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Repository
 @RequiredArgsConstructor
 public class FileReadStatusRepository implements ReadStatusRepository {
-    // TODO: ID:ReadStatus
-    // TODO: UserId:ReadStatus
     private final Map<UUID, ReadStatus> idReadStatusMap = new ConcurrentHashMap<>();
     private final Map<UUID, List<ReadStatus>> userIdReadStatusMap = new ConcurrentHashMap<>();
     private final Map<UUID, List<ReadStatus>> channelIdReadStatusMap = new ConcurrentHashMap<>();
@@ -57,7 +57,7 @@ public class FileReadStatusRepository implements ReadStatusRepository {
                         userIdReadStatusMap.computeIfAbsent(readstatus.getUserId(), id -> new ArrayList<>()).add(readstatus);
                     });
         } catch (Exception e) {
-            System.err.println("[ERROR] : " + e);
+            throw new FailedInit("FileReadStatusRepository init failed");
         }
     }
 
@@ -71,19 +71,19 @@ public class FileReadStatusRepository implements ReadStatusRepository {
                 ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(readStatus);
         } catch (IOException e) {
-            System.err.println("[ERROR] : " + e);
+            throw new FailedInit("FileReadStatusRepository init failed");
         }
     }
 
     public Instant find(UUID id) {
-        return idReadStatusMap.get(id).getLastReadAt();
+        return idReadStatusMap.get(id).getUpdateAt();
     }
 
     public Map<UUID, Instant> findAllByUserId(UUID userId) {
         List<ReadStatus> tempList = userIdReadStatusMap.get(userId);
         Map<UUID, Instant> result = new HashMap<>();
         for(ReadStatus temp : tempList) {
-            result.put(temp.getChannelId(), temp.getLastReadAt());
+            result.put(temp.getChannelId(), temp.getUpdateAt());
         }
 
         return result;
@@ -101,8 +101,7 @@ public class FileReadStatusRepository implements ReadStatusRepository {
             temp.updateReadAt();
             return true;
         } catch (IOException e) {
-            System.err.println("[ERROR] : " + e);
-            return false;
+            throw new FailedUpdate("ReadStatus update failed");
         }
     }
 
@@ -115,18 +114,17 @@ public class FileReadStatusRepository implements ReadStatusRepository {
             channelIdReadStatusMap.remove(temp.getChannelId());
             return true;
         } catch (IOException e) {
-            System.err.println("[ERROR] : "+ e);
-            return false;
+            throw new FailedDelete("ReadStatus delete failed");
         }
     }
 
     public void deleteForChannel(UUID channelId) {
         List<ReadStatus> temp = channelIdReadStatusMap.get(channelId);
-        temp.forEach(t -> delete(t.getId()));
+        temp.forEach(readStatus -> delete(readStatus.getId()));
     }
 
     public void deleteForUser(UUID userId) {
         List<ReadStatus> temp = userIdReadStatusMap.get(userId);
-        temp.forEach(t -> delete(t.getId()));
+        temp.forEach(readStatus -> delete(readStatus.getId()));
     }
 }

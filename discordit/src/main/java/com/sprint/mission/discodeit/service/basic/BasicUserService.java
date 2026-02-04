@@ -1,9 +1,9 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.CreateUserDto;
+import com.sprint.mission.discodeit.dto.UpdateUserDto;
 import com.sprint.mission.discodeit.dto.UserFinder;
-import com.sprint.mission.discodeit.entity.AttachmentType;
-import com.sprint.mission.discodeit.exepction.NotFound;
+import com.sprint.mission.discodeit.exepction.FailedFound;
 import com.sprint.mission.discodeit.repository.file.FileBinaryContentRepository;
 import com.sprint.mission.discodeit.repository.file.FileUserRepository;
 import com.sprint.mission.discodeit.service.UserService;
@@ -18,6 +18,7 @@ import java.util.UUID;
 public class BasicUserService implements UserService {
     private final FileUserRepository userRepository;
     private final FileBinaryContentRepository binaryContentRepository;
+    private final UUID nullUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     public UUID userNameToId(String name) {
         return userRepository.userNameToId(name);
@@ -35,17 +36,20 @@ public class BasicUserService implements UserService {
 
     @Override
     public boolean create(CreateUserDto requestDto) {
-        return userRepository.createUser(requestDto);
+        UUID userId = userRepository.create(requestDto);
+
+        return userId != nullUUID;
     }
 
     /// Update
     @Override
-    public boolean update(UUID userId, String reName, String rePassword, String reMail, String rePhoneNumber, String reProfile) {
+    public boolean update(UpdateUserDto requestDto) {
+        UUID reProfileId = requestDto.reProfileId();
+        UUID userId = requestDto.id();
 
-        if(userRepository.updateUser(userId, reName, rePassword, reMail, rePhoneNumber)) {
-            if(reProfile != null){
-                binaryContentRepository.delete(AttachmentType.USER, userId);
-                binaryContentRepository.create(AttachmentType.USER, userId, reProfile);
+        if(userRepository.update(requestDto)) {
+            if(reProfileId != null){
+                binaryContentRepository.delete(userId);
             }
             return true;
         }
@@ -56,7 +60,7 @@ public class BasicUserService implements UserService {
     @Override
     public UserFinder find(String name) {
         if(userRepository.userNameToId(name) == null)
-            throw new NotFound("해당 사용자를 찾지 못했습니다");
+            throw new FailedFound("해당 사용자를 찾지 못했습니다");
         return userRepository.find(name);
     }
 
@@ -68,6 +72,7 @@ public class BasicUserService implements UserService {
     /// Delete
     @Override
     public boolean delete(UUID id) {
-        return userRepository.deleteUser(id);
+        binaryContentRepository.delete(id);
+        return userRepository.delete(id);
     }
 }

@@ -2,29 +2,32 @@ package com.sprint.mission.discodeit.app.router;
 
 import com.sprint.mission.discodeit.Input;
 import com.sprint.mission.discodeit.UserState;
-import com.sprint.mission.discodeit.dto.CreateUserDto;
-import com.sprint.mission.discodeit.dto.UserFinder;
+import com.sprint.mission.discodeit.dto.*;
 import com.sprint.mission.discodeit.entity.AttachmentType;
 import com.sprint.mission.discodeit.exepction.NotFound;
-import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
-import com.sprint.mission.discodeit.service.basic.BasicMessageService;
-import com.sprint.mission.discodeit.service.basic.BasicUserService;
+import com.sprint.mission.discodeit.service.ReadStatusService;
+import com.sprint.mission.discodeit.service.basic.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Scanner;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 public class RouteUser {
     private final BasicUserService userService;
     private final BasicMessageService messageService;
+    private final BasicChannelService channelService;
+    private final BasicUserStatusService userStatusService;
     private final BasicBinaryContentService binaryContentService;
     private final Scanner scanner;
     private final IsLogin isLogin;
     private final Input input;
     private final UserState userState;
+    private final ReadStatusService readStatusService;
 
     public void route(int routeCRUD) {
         int menu;
@@ -61,9 +64,6 @@ public class RouteUser {
             case 4:
                 delete();
                 break;
-
-            default:
-                return;
         }
     }
 
@@ -83,9 +83,17 @@ public class RouteUser {
 
         System.out.print("사용할 프로필 이미지를 입력해주세요 : ");
         String profileImage = scanner.nextLine();
-        if(userService.create(new CreateUserDto(name, password, profileImage))) {
+        try {
+            UUID profileId = !profileImage.isEmpty() ?
+                    binaryContentService.create(new CreateBinaryContentDto(AttachmentType.USER, profileImage, null)) : null;
+
+            userService.create(new CreateUserDto(name, password, profileId));
+            UUID id = userService.userNameToId(name);
+            userStatusService.create(new CreateUserStatusDto(name, id));
             System.out.println("성공적으로 추가했습니다.");
-        } else System.err.println("알 수 없는 오류로 실패했습니다.");
+        } catch (Exception e) {
+            System.err.println("[ERROR] " + e);
+        }
     }
 
     private void update() {
@@ -116,9 +124,16 @@ public class RouteUser {
             if(finalCheckIsContinue.equalsIgnoreCase("re")) continue;
             if(finalCheckIsContinue.equalsIgnoreCase("n")) return;
 
-            if(finalCheckIsContinue.equalsIgnoreCase("y") && userService.update(userState.getUserId(), reName, rePassword, reMail, rePhoneNumber, reProfile)) {
-                System.out.println("성공적으로 변경되었습니다.");
-                return;
+            if(finalCheckIsContinue.equalsIgnoreCase("y")) {
+                UUID reProfileId = !reProfile.isEmpty() ?
+                        binaryContentService.create(new CreateBinaryContentDto(AttachmentType.USER, reProfile, null)) : null;
+                if(reProfileId != null) binaryContentService.delete(reProfileId);
+
+                if(userService.update(new UpdateUserDto(userState.getUserId(), reName, rePassword, reMail, rePhoneNumber, reProfileId))) {
+                    System.out.println("성공적으로 변경되었습니다.");
+                    accessTimeUpdate();
+                    return;
+                }
             }
 
             System.err.println("알 수 없는 오류로 인해 실패했습니다.");
@@ -132,14 +147,17 @@ public class RouteUser {
 
         try {
             UserFinder requestDto = userService.find(name);
-            String profile = binaryContentService.find(AttachmentType.USER, requestDto.id()).get(0);
+            String profile = binaryContentService.find(requestDto.profileId());
 
             System.out.println(requestDto.userInfo());
             System.out.println("프로필 이미지 : " + profile);
+            System.out.println("접속상태 : " + userStatusService.find(new FindUserStatusDto(requestDto.id(), requestDto.name())));
             System.out.println("====================");
         } catch (NotFound e) {
             System.err.println("[ERROR]" + e);
         }
+
+        accessTimeUpdate();
     }
 
     private void findAll() {
@@ -151,15 +169,19 @@ public class RouteUser {
 
         findAllUser.forEach(requestDto -> {
             try {
-                String profile = binaryContentService.find(AttachmentType.USER, requestDto.id()).get(0);
+                String profile = binaryContentService.find(requestDto.profileId());
                 System.out.println(requestDto.userInfo());
                 System.out.println("프로필 이미지 : " + profile);
             } catch (Exception ignore) {
                 System.out.println(requestDto.userInfo());
             }
+
+            System.out.println("접속상태 : " + userStatusService.find(new FindUserStatusDto(requestDto.id(), requestDto.name())));
             System.out.println("====================");
         });
         System.out.println("총 사용자 : " + findAllUser.size());
+
+        accessTimeUpdate();
     }
 
     private void delete() {
@@ -177,15 +199,40 @@ public class RouteUser {
         System.out.println("현재 로그인한 사용자의 비밀번호를 입력해주세요.");
         String password = scanner.nextLine();
 
-        if(userService.isValid(userState.getUserId(), password)) {
+        UUID userId = userState.getUserId();
+        String userName = userState.getUserName();
+        List<ResponseChannelDto> allPrivateChannelDto = channelService.findAllPrivateChannel(userName);
+
+        if(userService.isValid(userId, password)) {
             System.err.println("비밀번호가 일치하지 않습니다. 처음으로 돌아갑니다.");
             return;
         }
 
-        if(userService.delete(userState.getUserId())) {
-            messageService.deleteAll(userState.getUserId());
+        UUID profileId = userService.find(userName).profileId();
+
+        if(userService.delete(userId)) { // FIXME: BinaryContent, 채널 삭제로 인한 타인의 메시지 삭제
+            messageService.deleteAll(userId);
+            userStatusService.delete(new DeleteUserStatusDto(userId, userName));
+            readStatusService.deleteForUser(userId);
+            binaryContentService.delete(profileId);
+            if(!allPrivateChannelDto.isEmpty())
+                allPrivateChannelDto.forEach(req -> {
+                    channelService.excludePrivateChannel(req.channelName(), userName);
+                });
+            if(channelService.isCeatePrivateChannel(userName)) {
+                channelService.deleteAll(userName);
+                messageService.deleteAll(channelService.findChannelId(userName));
+            }
             userState.userState("");
             System.out.println("성공적으로 삭제되었습니다.");
         }
+    }
+
+    private void accessTimeUpdate() {
+        if(userState.getUserName().isEmpty()) return;
+
+        String userName = userState.getUserName();
+        UUID userId = userState.getUserId();
+        userStatusService.update(new UserStatusUpdateDto(userId, userName, Instant.now()));
     }
 }

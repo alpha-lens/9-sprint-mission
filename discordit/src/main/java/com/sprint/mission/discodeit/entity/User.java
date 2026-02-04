@@ -3,10 +3,10 @@ package com.sprint.mission.discodeit.entity;
 import lombok.Getter;
 
 import java.io.Serial;
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.io.Serializable;
 import java.util.UUID;
 
 @Getter
@@ -24,8 +24,9 @@ public class User implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public User(String name, String password) {
+    public User(String name, String password, UUID profileId) {
         Instant now = Instant.now();
+        this.profileId = profileId;
         this.id = UUID.randomUUID();
         this.name = name;
         this.password = password;
@@ -33,21 +34,21 @@ public class User implements Serializable {
         this.updateAt = now;
     }
 
-    public void setProfileId(UUID profileId) {
-        this.profileId = profileId;
-    }
-
     private void setUpdateAt() {
         this.updateAt = Instant.now();
     }
 
-    public void updateUser(String name, String password, String email, String phoneNumber) {
+    public void updateUser(String name, String password, String email, String phoneNumber, UUID profileId) {
         /// null checker
-        boolean[] argumentsList = {check(name), check(password), check(email), check(phoneNumber)};
+        boolean[] argumentsList = {
+                check(name), check(password), check(email), check(phoneNumber), check(String.valueOf(profileId))
+        };
         if(argumentsList[0]) setName(name);
         if(argumentsList[1]) setPassword(password);
         if(argumentsList[2]) setEmail(email);
         if(argumentsList[3]) setPhoneNumber(phoneNumber);
+        if(argumentsList[4]) setProfileId(profileId);
+        setUpdateAt();
     }
 
     private boolean check(String text) {
@@ -56,22 +57,22 @@ public class User implements Serializable {
 
     private void setName(String name) {
         this.name = name;
-        setUpdateAt();
     }
 
     private void setPassword(String password) {
         this.password = password;
-        setUpdateAt();
     }
 
     private void setEmail(String email) {
         this.email = email;
-        setUpdateAt();
     }
 
     private void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
-        setUpdateAt();
+    }
+
+    private void setProfileId(UUID profileId) {
+        this.profileId = profileId;
     }
 
     @Override

@@ -2,15 +2,19 @@ package com.sprint.mission.discodeit.app.router;
 
 import com.sprint.mission.discodeit.UserState;
 import com.sprint.mission.discodeit.dto.ResponseChannelDto;
+import com.sprint.mission.discodeit.dto.UpdateChannelDto;
+import com.sprint.mission.discodeit.dto.UserStatusUpdateDto;
 import com.sprint.mission.discodeit.entity.AttachmentType;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.service.ReadStatusService;
+import com.sprint.mission.discodeit.service.basic.BasicUserStatusService;
 import com.sprint.mission.discodeit.service.basic.BasicChannelService;
 import com.sprint.mission.discodeit.service.basic.BasicMessageService;
 import com.sprint.mission.discodeit.service.basic.BasicUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
@@ -21,6 +25,7 @@ public class RouteChannel {
     private final BasicChannelService channelService;
     private final IsLogin isLogin;
     private final Scanner scanner;
+    private final BasicUserStatusService userStatusService;
     private final ReadStatusService readStatusService;
     private final BasicMessageService messageService;
     private final BinaryContentRepository binaryContentRepository;
@@ -33,35 +38,39 @@ public class RouteChannel {
             return;
         }
 
-        switch (routeCRUD) {
+        try {
+            switch (routeCRUD) {
 
-            /// create
-            case 1:
-                create();
-                break;
+                /// create
+                case 1:
+                    create();
+                    break;
 
-            /// update
-            case 2:
-                update();
-                break;
+                /// update
+                case 2:
+                    update();
+                    break;
 
-            /// read
-            case 3:
-                read();
-                break;
+                /// read
+                case 3:
+                    read();
+                    break;
 
-            /// delete
-            case 4:
-                delete();
-                break;
+                /// delete
+                case 4:
+                    delete();
+                    break;
 
-            /// invite Channel
-            case 5:
-                invite();
-                break;
+                /// invite Channel
+                case 5:
+                    invite();
+                    break;
 
-            default:
-                System.err.println("잘못된 입력값입니다.");
+                default:
+                    System.err.println("잘못된 입력값입니다.");
+            }
+        } catch (Exception e) {
+            System.err.println("[ERROR] " + e);
         }
     }
 
@@ -78,16 +87,20 @@ public class RouteChannel {
         System.out.println("1. PUBLIC");
         System.out.println("2. PRIVATE");
         String type = scanner.nextLine().trim();
+        String userName = userState.getUserName();
 
-        if(!channelService.create(type, name)) {
+        if(!channelService.create(type, name, userName)) {
             System.err.println("잘못된 입력값입니다. 처음으로 돌아갑니다.");
             return;
         };
 
-        UUID channelId = channelService.findChannelId(name);
         UUID userId = userState.getUserId();
+        UUID channelId = channelService.findChannelId(name);
+        accessTimeUpdate();
 
         readStatusService.create(userId, channelId);
+
+        System.out.println("성공");
     }
 
     private void update() {
@@ -104,10 +117,13 @@ public class RouteChannel {
 
         String newName = scanner.nextLine();
 
-        if (channelService.update(oldName, newName)) {
-            System.out.println("잘 변경되었어요!");
-        } else {
-            System.err.println("실패했어요!");
+        try {
+            if (channelService.update(new UpdateChannelDto(oldName, newName))) {
+                System.out.println("잘 변경되었어요!");
+                accessTimeUpdate();
+            }
+        } catch (Exception e) {
+            System.err.println("[ERROR] " + e);
         }
     }
 
@@ -143,6 +159,7 @@ public class RouteChannel {
                 System.out.println("마지막 메시지 시간 : " + messageService.lastMessageTime(req.channelName()));
             });
             System.out.println("총 채널 수 : " + requestAllChannelDto.size());
+            accessTimeUpdate();
         }
     }
 
@@ -170,9 +187,8 @@ public class RouteChannel {
         UUID channelId = channelService.findChannelId(name);
 
         if(channelService.delete(name)) {
-            messageService.deleAllFromUser(channelId);
+            messageService.deleteAll(channelId);
             readStatusService.deleteForChannel(channelId);
-            binaryContentRepository.delete(AttachmentType.CHANNEL, channelId);
             System.out.println("성공적으로 삭제되었습니다.");
         } else {
             System.err.println("삭제하지 못했어요!");
@@ -182,7 +198,13 @@ public class RouteChannel {
     private void invite() {
         System.out.println("현재 당신이 접속하고 있는 Private Channel은 다음과 같습니다.");
 
-        channelService.findAllPrivateChannel(userState.getUserName());
+        try {
+            channelService.findAllPrivateChannel(userState.getUserName()).forEach(channel -> {
+                System.out.println("채널명 : " + channel.channelName());
+            });
+        } catch (Exception e) {
+            System.err.println("[ERROR] " + e);
+        }
 
         System.out.println("초대하고자 하는 채널명을 입력해주세요.");
         String channelName = scanner.nextLine().trim();
@@ -202,6 +224,14 @@ public class RouteChannel {
 
         UUID userId = userService.userNameToId(userName);
 
-        channelService.invitePrivateServer(channelName, userName, userId);
+        channelService.includePrivateChannel(channelName, userName, userId);
+
+        System.out.println("성공");
+    }
+
+    private void accessTimeUpdate() {
+        String userName = userState.getUserName();
+        UUID userId = userState.getUserId();
+        userStatusService.update(new UserStatusUpdateDto(userId, userName, Instant.now()));
     }
 }

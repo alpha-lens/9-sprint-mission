@@ -1,9 +1,10 @@
 package com.sprint.mission.discodeit.repository.file;
 
 import com.sprint.mission.discodeit.dto.CreateUserDto;
+import com.sprint.mission.discodeit.dto.UpdateUserDto;
 import com.sprint.mission.discodeit.dto.UserFinder;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.exepction.*;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import org.springframework.stereotype.Repository;
 
@@ -18,9 +19,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class FileUserRepository implements UserRepository {
     private final Map<UUID, User> idUserMap = new ConcurrentHashMap<>();
     private final Map<String, UUID> userNameIdMap = new ConcurrentHashMap<>();
-    private final Map<UUID, UserStatus> userStatusMap = new ConcurrentHashMap<>();
     private final Path DIRECTORY;
     private final String EXTENSION = ".ser";
+    private final UUID nullUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     public FileUserRepository() {
         this.DIRECTORY = Paths.get(System.getProperty("user.dir"), "file-data-map", User.class.getSimpleName());
@@ -32,7 +33,6 @@ public class FileUserRepository implements UserRepository {
             }
         }
 
-        /// 파일에서 user값을 불러와, hashMap으로 다시 저장하는 과정
         try {
             Files.list(DIRECTORY)
                     .filter(path -> path.toString().endsWith(EXTENSION))
@@ -50,7 +50,7 @@ public class FileUserRepository implements UserRepository {
                         userNameIdMap.put(user.getName(), user.getId());
                     });
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FailedInit("FileUserRepository init failed");
         }
     }
 
@@ -60,13 +60,10 @@ public class FileUserRepository implements UserRepository {
     }
 
     @Override
-    public boolean createUser(CreateUserDto dto) {
-        List<Object> userSet = dto.toEntity();
-        User user = (User) userSet.get(0);
-        UserStatus userStatus = (UserStatus) userSet.get(1);
+    public UUID create(CreateUserDto dto) {
+        User user = dto.toEntity();
         userNameIdMap.put(user.getName(), user.getId());
         idUserMap.put(user.getId(), user);
-        userStatusMap.put(user.getId(), userStatus);
         Path path = resolvePath(user.getId());
 
         try (
@@ -74,23 +71,30 @@ public class FileUserRepository implements UserRepository {
                 ObjectOutputStream oos = new ObjectOutputStream(fos)
         ) {
             oos.writeObject(user);
-            return true;
+            return user.getId();
         } catch (IOException e) {
-            return false;
+            throw new FailedCreate("FileBinaryContentRepository create failed");
         }
     }
 
     @Override
-    public boolean updateUser(UUID userId, String reName, String rePassword, String reMail, String rePhoneNumber) {
+    public boolean update(UpdateUserDto requestDto) {
+        UUID userId = requestDto.id();
+        String reName = requestDto.reName();
+        String rePassword = requestDto.rePassword();
+        String reMail = requestDto.reMail();
+        String rePhoneNumber = requestDto.rePhoneNumber();
+        UUID reProfileId = requestDto.reProfileId();
+
         Path path = resolvePath(userId);
 
         try(FileOutputStream fos = new FileOutputStream(path.toFile());
             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(idUserMap.get(userId));
-            idUserMap.get(userId).updateUser(reName, rePassword, reMail, rePhoneNumber);
+            idUserMap.get(userId).updateUser(reName, rePassword, reMail, rePhoneNumber, reProfileId);
             return true;
         } catch (IOException e) {
-            return false;
+            throw new FailedUpdate("User update failed");
         }
     }
 
@@ -100,7 +104,7 @@ public class FileUserRepository implements UserRepository {
         UUID id = user.getId();
         String userName = user.getName();
 
-        return new UserFinder(id, userName, user.toString(), userStatusMap.get(user.getId()));
+        return new UserFinder(id, userName, user.toString(), user.getProfileId());
     }
 
     @Override
@@ -109,20 +113,19 @@ public class FileUserRepository implements UserRepository {
         idUserMap.values().stream().sorted(Comparator.comparing(User::getName)).forEach(user -> {
             UUID id = user.getId();
             String userName = user.getName();
-            result.add(new UserFinder(id, userName, user.toString(), userStatusMap.get(user.getId())));
+            result.add(new UserFinder(id, userName, user.toString(), user.getProfileId()));
         });
         return result;
     }
 
     @Override
-    public boolean deleteUser(UUID id) {
+    public boolean delete(UUID id) {
         Path path = resolvePath(id);
         try {
             Files.delete(path);
         } catch (IOException e) {
-            return false;
+            throw new FailedDelete("User delete failed");
         }
-        userStatusMap.remove(id);
         userNameIdMap.remove(idUserMap.get(id).getName());
         idUserMap.remove(id);
         return true;
@@ -132,7 +135,7 @@ public class FileUserRepository implements UserRepository {
         try {
             return userNameIdMap.get(name);
         } catch (Exception e) {
-            return null;
+            throw new FailedFound("Do not found this user : " + name);
         }
     }
 
@@ -140,7 +143,7 @@ public class FileUserRepository implements UserRepository {
         try {
             return idUserMap.get(id).getName();
         } catch (Exception e) {
-            return null;
+            throw new FailedFound("Do not found this user : " + id);
         }
     }
 
@@ -152,24 +155,11 @@ public class FileUserRepository implements UserRepository {
         }
     }
 
-    public boolean isPresentThis(String checkThis, String findThis) {
+    public boolean duplicateChecker(String checkThis, String findThis) {
         try {
             if (checkThis.equals("이메일") && idUserMap.values().stream().anyMatch(u -> u.getEmail().equals(findThis))) return true;
             if (checkThis.equals("전화번호") && idUserMap.values().stream().anyMatch(u -> u.getPhoneNumber().equals(findThis))) return true;
             if (checkThis.equals("사용자명") && userNameIdMap.get(findThis) != null) return true;
-        } catch (Exception ignored) {}
-        return false;
-    }
-
-    public boolean isPresentUser(Object arg) {
-        try {
-            if(arg instanceof String) {
-                idUserMap.get(userNameIdMap.get((String) arg));
-            } else if(arg instanceof UUID){
-                idUserMap.get((UUID) arg);
-            } else {
-                return true;
-            }
         } catch (Exception ignored) {}
         return false;
     }

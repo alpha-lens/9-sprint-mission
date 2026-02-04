@@ -1,10 +1,14 @@
 package com.sprint.mission.discodeit.repository.file;
 
+import com.sprint.mission.discodeit.dto.CreateBinaryContentDto;
 import com.sprint.mission.discodeit.entity.AttachmentType;
 import com.sprint.mission.discodeit.entity.BinaryContent;
-import com.sprint.mission.discodeit.exepction.NotFound;
+import com.sprint.mission.discodeit.exepction.FailedCreate;
+import com.sprint.mission.discodeit.exepction.FailedDelete;
+import com.sprint.mission.discodeit.exepction.FailedInit;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.io.*;
@@ -17,12 +21,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 @Repository
 public class FileBinaryContentRepository implements BinaryContentRepository {
     private final Map<UUID, BinaryContent> fileIdMap = new ConcurrentHashMap<>();
-    private final Map<UUID, List<BinaryContent>> messageIdMap = new ConcurrentHashMap<>();
-    private final Map<UUID, BinaryContent> userIdMap = new ConcurrentHashMap<>();
-    private final Map<UUID, BinaryContent> channelIdMap = new ConcurrentHashMap<>();
     private Path DIRECTORY;
     private final String EXTENSION = ".ser";
 
@@ -52,88 +54,64 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
                             throw new RuntimeException(e);
                         }
                     }).forEach(binaryContent -> {
-                        switch (binaryContent.getType()){
-                            case USER -> userIdMap.put(binaryContent.getRelationId(), binaryContent);
-                            case CHANNEL -> channelIdMap.put(binaryContent.getRelationId(), binaryContent);
-                            case MESSAGE -> messageIdMap.computeIfAbsent(binaryContent.getId(), id -> new ArrayList<>()).add(binaryContent);
-                        }
+                        fileIdMap.put(binaryContent.getId(), binaryContent);
                     });
         } catch (Exception e) {
-            System.err.println("[ERROR] : " + e);
+            throw new FailedInit("FileBinaryContentRepository init failed");
         }
     }
 
     @Override
-    public boolean create(AttachmentType type, UUID id, String file) {
-        BinaryContent binaryContent = new BinaryContent(type, id, file);
-        fileIdMap.put(binaryContent.getId(), binaryContent);
-        switch (type){
-            case MESSAGE -> messageIdMap.computeIfAbsent(id, m -> new ArrayList<>()).add(binaryContent);
-            case CHANNEL -> channelIdMap.put(id, binaryContent);
-            case USER -> userIdMap.put(id, binaryContent);
-        }
-
+    public UUID create(CreateBinaryContentDto requestDto) {
+        AttachmentType type = requestDto.type();
+        String file = requestDto.filename();
+        BinaryContent binaryContent = new BinaryContent(type, file, null);
+        
         Path path = resolvePath(binaryContent.getId());
-
         try(FileOutputStream fos = new FileOutputStream(path.toFile());
         ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(binaryContent);
         } catch (IOException e) {
-            System.err.println("파일 생성에 실패했다 : " + e);
-            return false;
+            throw new FailedCreate("파일 생성에 실패했습니다.");
         }
 
-        return true;
+        fileIdMap.put(binaryContent.getId(), binaryContent);
+
+        return binaryContent.getId();
     }
 
     @Override
-    public List<String> find(AttachmentType type, UUID id){
-        switch (type){
-            case MESSAGE -> {
-                if(messageIdMap.containsKey(id))
-                    return messageIdMap.get(id).stream().map(BinaryContent::toString).toList();
-            }
-            case CHANNEL -> {
-                if(channelIdMap.containsKey(id))
-                    return List.of(channelIdMap.get(id).toString());
-            }
-            case USER -> {
-                if(userIdMap.containsKey(id))
-                    return List.of(userIdMap.get(id).toString());
-            }
-        }
-        return List.of();
-    }
-
-    @Override
-    public boolean delete(AttachmentType type, UUID id) {
+    public String find(UUID id) {
         try {
-            switch (type){
-                case MESSAGE -> {
-                    messageIdMap.remove(id).forEach(t -> {
-                        delete(t.getId());
-                    });
-                }
-                case CHANNEL -> {
-                    delete(channelIdMap.remove(id).getId());
-                }
-                case USER -> {
-                    delete(userIdMap.remove(id).getId());
-                }
-            }
+            return fileIdMap.get(id).toString();
         } catch (Exception e) {
-            return false;
+            System.err.println("왠지 모르지만, 여기서 오류난다. " + e.getMessage());
+            return null;
         }
-
-        return true;
     }
 
-    private void delete(UUID id) {
+    @Override
+    public List<String> findAllByIdIn(List<UUID> ids) {
+        List<String> result = new ArrayList<>();
+        ids.forEach(id -> result.add(fileIdMap.get(id).toString()));
+        return result;
+    }
+
+    @Override
+    public boolean delete(UUID id) {
         try {
             Path path = resolvePath(id);
-            Files.delete(path);
+            Files.deleteIfExists(path);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FailedDelete("IOException 발생");
         }
+
+        fileIdMap.remove(id);
+        return true;
+    }
+
+    @Override
+    public void delete(List<UUID> ids) {
+        ids.forEach(this::delete);
     }
 }

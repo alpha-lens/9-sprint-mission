@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service;
 
 import com.sprint.mission.discodeit.dto.CreateUserDto;
+import com.sprint.mission.discodeit.dto.UpdateUserDto;
 import com.sprint.mission.discodeit.dto.UserFinder;
 
 import java.util.List;
@@ -12,7 +13,7 @@ public interface UserService {
     boolean isValid(UUID userId, String password);
 
     boolean create(CreateUserDto requestDto);
-    boolean update(UUID userId, String reName, String rePassword, String reMail, String rePhoneNumber, String reProfile);
+    boolean update(UpdateUserDto requestDto);
     UserFinder find(String name);
     List<UserFinder> findAll();
     boolean delete(UUID id);

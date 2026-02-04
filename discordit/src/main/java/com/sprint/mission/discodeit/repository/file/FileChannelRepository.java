@@ -1,9 +1,10 @@
 package com.sprint.mission.discodeit.repository.file;
 
 import com.sprint.mission.discodeit.dto.ResponseChannelDto;
+import com.sprint.mission.discodeit.dto.UpdateChannelDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
-import com.sprint.mission.discodeit.exepction.NotFound;
+import com.sprint.mission.discodeit.exepction.*;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -67,16 +68,13 @@ public class FileChannelRepository implements ChannelRepository {
                         }
                     });
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FailedInit("FileChannelRepository init failed");
         }
     }
 
     /// interface
     @Override
     public boolean save(Channel channel) {
-        // 입력값: 현재 채널, 변경할 이름
-        // TODO: 채널명 변경, 기존 키 삭제 및 추가
-
         Path path = resolvePath(channel.getId());
 
         try(FileOutputStream fos = new FileOutputStream(path.toFile());
@@ -93,23 +91,19 @@ public class FileChannelRepository implements ChannelRepository {
 
             return true;
         } catch (IOException e) {
-            System.err.println("[ERROR] " + e);
+            throw new FailedCreate("Channel save failed");
         }
-        return false;
     }
 
     @Override
-    public boolean save(String oldName, String newName) {
+    public boolean save(UpdateChannelDto requestDto) {
+        String oldName = requestDto.oldName();
+        String newName = requestDto.newName();
         if(!isPresentChannel(oldName)) return false;
-        boolean isPrivate = privateChannelNameMap.containsKey(oldName);
+        if(privateChannelNameMap.containsKey(oldName))
+            throw new DoNotUpdatePrivateChannel("Do not update private channel");
         Path path;
-        Channel channel;
-
-        if(isPrivate) {
-            channel = privateChannelNameMap.get(oldName);
-        } else {
-            channel = publicChannelNameMap.get(oldName);
-        }
+        Channel channel = publicChannelNameMap.get(oldName);
 
         path = resolvePath(channel.getId());
 
@@ -118,20 +112,13 @@ public class FileChannelRepository implements ChannelRepository {
             oos.writeObject(channel);
             oos.flush();
 
-            if (!isPrivate) {
-                publicChannelNameMap.put(newName, channel);
-                publicChannelNameMap.remove(oldName);
-            } else {
-                privateChannelNameMap.put(newName, channel);
-                privateChannelNameMap.remove(oldName);
-            }
-
+            publicChannelNameMap.put(newName, channel);
+            publicChannelNameMap.remove(oldName);
             channel.channelUpdater(newName);
 
             return true;
         } catch (IOException e) {
-            System.err.println("[ERROR] " + e);
-            return false;
+            throw new FailedUpdate("Channel update failed");
         }
     }
 
@@ -141,23 +128,23 @@ public class FileChannelRepository implements ChannelRepository {
             return publicChannelNameMap.get(name).toString();
         if(privateChannelNameMap.containsKey(name))
             return privateChannelNameMap.get(name).toString();
-        return "";
+        throw new FailedFound("Channel not found");
     }
     public ChannelType getChannelType(String name) {
         if(publicChannelNameMap.containsKey(name))
             return publicChannelNameMap.get(name).getChannelType();
         if(privateChannelNameMap.containsKey(name))
             return privateChannelNameMap.get(name).getChannelType();
-        return null;
+        throw new FailedFound("ChannelType not found");
     }
 
-    public UUID readChannelId(String name) {
+    public UUID getChannelId(String name) {
         if(publicChannelNameMap.containsKey(name))
             return publicChannelNameMap.get(name).getId();
         if(privateChannelNameMap.containsKey(name))
             return privateChannelNameMap.get(name).getId();
 
-        throw new NotFound("해당 채널을 찾을 수 없습니다");
+        throw new FailedFound("ChannelId not found");
     }
 
     @Override
@@ -168,22 +155,22 @@ public class FileChannelRepository implements ChannelRepository {
         result.addAll(publicChannelNameMap.values().stream().map(this::requestChannelInfo).toList());
 
         /// private
-        result.addAll(accessAblePrivateChannel(userName).stream().toList());
+        result.addAll(accessiblePrivateChannel(userName).stream().toList());
         return result;
     }
 
     @Override
-    public List<ResponseChannelDto> readAllPrivateChannel(String userName) {
-        if(accessAblePrivateChannel(userName).isEmpty())
+    public List<ResponseChannelDto> findAllPrivateChannel(String userName) {
+        if(accessiblePrivateChannel(userName).isEmpty())
             throw new NotFound("권한이 있는 Private Channel이 없습니다!");
 
-        return new ArrayList<>(accessAblePrivateChannel(userName).stream().toList());
+        return new ArrayList<>(accessiblePrivateChannel(userName).stream().toList());
     }
 
-    private List<ResponseChannelDto> accessAblePrivateChannel(String userName) {
+    private List<ResponseChannelDto> accessiblePrivateChannel(String userName) {
         List<ResponseChannelDto> requestDto = new ArrayList<>();
         privateChannelIdMap.values().stream()
-                .filter(channel -> channel.getAccessableUser() != null && channel.getAccessableUser().containsKey(userName))
+                .filter(channel -> channel.getAccessibleUser() != null && channel.getAccessibleUser().containsKey(userName))
                 .forEach(channel -> requestDto.add(requestChannelInfo(channel)));
 
         return requestDto;
@@ -198,34 +185,60 @@ public class FileChannelRepository implements ChannelRepository {
         String createUser = channel.getCreateUser();
         Map<String, UUID> accessableUser = null;
         try {
-            accessableUser = channel.getAccessableUser();
+            accessableUser = channel.getAccessibleUser();
         } catch (Exception ignore) {}
 
         return new ResponseChannelDto(name, id, type, createAt, updateAt, createUser, accessableUser);
     }
 
-    public void invitePrivateServer(String channelName, String userName, UUID userId) {
-        privateChannelNameMap.get(channelName).addAccessUser(userName, userId);
+    public void includePrivateChannel(String channelName, String userName, UUID userId) {
+        privateChannelNameMap.get(channelName).addAccessibleUser(userName, userId);
+    }
+
+    public void excludePrivateChannel(String channelName, String userName) {
+        privateChannelNameMap.get(channelName).removeAccessibleUser(userName);
     }
 
     @Override
     public boolean deleteChannel(String name) {
-        UUID id = publicChannelNameMap.get(name).getId();
+        UUID id;
+        boolean isPrivate = privateChannelNameMap.containsKey(name);
+
+        if(isPrivate){
+            id = privateChannelNameMap.get(name).getId();
+        } else {
+            id = publicChannelNameMap.get(name).getId();
+        }
 
         Path path = resolvePath(id);
         try {
-            Files.delete(path);
-            publicChannelNameMap.remove(name);
-            publicChannelIdMap.remove(id);
+            Files.deleteIfExists(path);
+            if(isPrivate){
+                privateChannelNameMap.remove(name);
+                privateChannelIdMap.remove(id);
+            } else {
+                publicChannelNameMap.remove(name);
+                publicChannelIdMap.remove(id);
+            }
             return true;
         } catch (IOException e) {
-            return false;
+            throw new FailedDelete("Channel delete failed");
         }
+    }
+
+    public void deleteAllChannel(String name) {
+        List<Channel> channels = privateChannelNameMap.values().stream().filter(channel -> channel.getCreateUser().equals(name)).toList();
+
+        channels.forEach(channel -> deleteChannel(channel.getName()));
     }
 
     ///
     public boolean isPresentChannel(String name) {
         return publicChannelNameMap.containsKey(name) || privateChannelNameMap.containsKey(name);
+    }
+
+    public boolean isCeatePrivateChannel(String name) {
+        return !privateChannelNameMap.values().stream().filter(channel -> channel.getCreateUser().equals(name)).toList().isEmpty();
     }
 
     public UUID channelNameToId(String name) {

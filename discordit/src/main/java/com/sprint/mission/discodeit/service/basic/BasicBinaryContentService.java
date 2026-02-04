@@ -1,6 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.BinaryContentDto;
+import com.sprint.mission.discodeit.dto.CreateBinaryContentDto;
 import com.sprint.mission.discodeit.entity.AttachmentType;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,19 @@ import java.util.UUID;
 public class BasicBinaryContentService {
     private final BinaryContentRepository binaryContentRepository;
 
-    public List<String> find(AttachmentType type, UUID id) {
-        return binaryContentRepository.find(type, id);
+    public UUID create(CreateBinaryContentDto createBinaryContentDto) {
+        return binaryContentRepository.create(createBinaryContentDto);
+    }
+
+    public String find(UUID id) {
+        return binaryContentRepository.find(id);
+    }
+
+    public List<String> findAllByIdIn(List<UUID> ids) {
+        return binaryContentRepository.findAllByIdIn(ids);
+    }
+
+    public boolean delete(UUID id) {
+        return binaryContentRepository.delete(id);
     }
 }

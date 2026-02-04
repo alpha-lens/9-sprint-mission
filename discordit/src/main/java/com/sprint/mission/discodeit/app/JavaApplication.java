@@ -1,7 +1,5 @@
 package com.sprint.mission.discodeit.app;
 
-import com.sprint.mission.discodeit.app.router.Router;
-
 import java.util.Scanner;
 
 public class JavaApplication {

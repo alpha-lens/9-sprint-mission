@@ -5,12 +5,9 @@ import lombok.Getter;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Getter
 public class Channel implements Serializable {
@@ -19,7 +16,7 @@ public class Channel implements Serializable {
     private final UUID id;
     private final Instant createAt;
     private final String createUser;
-    private final Map<String, UUID> accessableUser = new ConcurrentHashMap<>();
+    private final Map<String, UUID> accessibleUser = new ConcurrentHashMap<>();
     private final Map<String, ReadStatus> userReadStatusMap = new ConcurrentHashMap<>();
     private final ChannelType channelType;
     private String name;
@@ -37,7 +34,7 @@ public class Channel implements Serializable {
         this.channelType = channelType;
         this.createAt = now;
         this.updateAt = now;
-        accessableUser.put(createUser, createUserId);
+        accessibleUser.put(createUser, createUserId);
     }
 
     /// setter
@@ -54,11 +51,11 @@ public class Channel implements Serializable {
         setName(name);
     }
 
-    public void addAccessUser(String userName, UUID userId) {
-        accessableUser.put(userName, userId);
+    public void addAccessibleUser(String userName, UUID userId) {
+        accessibleUser.put(userName, userId);
     }
 
-    public void removeAccessUser(String userName) {
-        accessableUser.remove(userName);
+    public void removeAccessibleUser(String userName) {
+        accessibleUser.remove(userName);
     }
 }

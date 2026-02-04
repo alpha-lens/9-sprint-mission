@@ -4,5 +4,7 @@ import com.sprint.mission.discodeit.entity.AttachmentType;
 
 import java.util.UUID;
 
-public record BinaryContentDto(AttachmentType type, UUID id, String filename) {
+public record CreateBinaryContentDto(
+        AttachmentType type, String filename, byte[] bytes
+) {
 }

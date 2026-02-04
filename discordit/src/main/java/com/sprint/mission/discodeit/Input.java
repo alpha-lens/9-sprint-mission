@@ -29,7 +29,7 @@ public class Input {
                 continue;
             }
 
-            if (userRepository.isPresentThis(text, inputString)) {
+            if (userRepository.duplicateChecker(text, inputString)) {
                 System.err.println("동일한 " + text + "은(는) 존재할 수 없습니다.");
                 continue;
             }

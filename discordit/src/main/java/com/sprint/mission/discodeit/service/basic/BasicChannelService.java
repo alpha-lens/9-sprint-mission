@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.UserState;
 import com.sprint.mission.discodeit.dto.FindChannelDto;
 import com.sprint.mission.discodeit.dto.ResponseChannelDto;
+import com.sprint.mission.discodeit.dto.UpdateChannelDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
@@ -21,7 +22,6 @@ import java.util.UUID;
 public class BasicChannelService implements ChannelService {
     private final FileChannelRepository channelRepository;
     private final FileUserRepository userRepository;
-    private final UserState userState;
     private final FileMessageRepository messageRepository;
 
     @Override
@@ -30,8 +30,7 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public boolean create(String type, String name) {
-        String createUserName = userState.getUserName();
+    public boolean create(String type, String name, String createUserName) {
         UUID createUserId = userRepository.userNameToId(createUserName);
 
         if(type.equalsIgnoreCase("public") || type.equals("1")) {
@@ -56,7 +55,7 @@ public class BasicChannelService implements ChannelService {
 
     @Override
     public List<ResponseChannelDto> findAllPrivateChannel(String userName) {
-        return channelRepository.readAllPrivateChannel(userName);
+        return channelRepository.findAllPrivateChannel(userName);
     }
 
     public UUID findChannelId(String channelName) {
@@ -69,8 +68,8 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public boolean update(String oldName, String newName) {
-        return channelRepository.save(oldName, newName);
+    public boolean update(UpdateChannelDto requestDto) {
+        return channelRepository.save(requestDto);
     }
 
     @Override
@@ -79,8 +78,23 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public boolean invitePrivateServer(String channelName, String userName, UUID userId) {
-        channelRepository.invitePrivateServer(channelName, userName, userId);
+    public void deleteAll(String name) {
+        channelRepository.deleteAllChannel(name);
+    }
+
+    @Override
+    public boolean includePrivateChannel(String channelName, String userName, UUID userId) {
+        channelRepository.includePrivateChannel(channelName, userName, userId);
         return true;
+    }
+
+    @Override
+    public void excludePrivateChannel(String channelName, String userName) {
+        channelRepository.excludePrivateChannel(channelName, userName);
+    }
+
+    @Override
+    public boolean isCeatePrivateChannel(String userName) {
+        return channelRepository.isCeatePrivateChannel(userName);
     }
 }

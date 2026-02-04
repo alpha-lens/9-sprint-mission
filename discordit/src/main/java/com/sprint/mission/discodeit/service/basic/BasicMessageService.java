@@ -1,10 +1,9 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.UserState;
-import com.sprint.mission.discodeit.dto.BinaryContentDto;
-import com.sprint.mission.discodeit.dto.MessageResponseDto;
+import com.sprint.mission.discodeit.dto.CreateMessageDto;
+import com.sprint.mission.discodeit.dto.MessageRequestDto;
 import com.sprint.mission.discodeit.entity.AttachmentType;
-import com.sprint.mission.discodeit.exepction.NotFound;
+import com.sprint.mission.discodeit.exepction.FailedFound;
 import com.sprint.mission.discodeit.repository.file.FileBinaryContentRepository;
 import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
 import com.sprint.mission.discodeit.repository.file.FileMessageRepository;
@@ -19,36 +18,26 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class BasicMessageService implements MessageService {
-    private final UserState userState;
     private final FileUserRepository userRepository;
     private final FileChannelRepository channelRepository;
     private final FileMessageRepository messageRepository;
     private final FileBinaryContentRepository binaryContentRepository;
+    private final UUID nullUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     public boolean isPresent(UUID userId, UUID messageId) {
         return messageRepository.check(userId, messageId);
     }
 
     @Override
-    public boolean create(String text, String sendeeChannelName, String senderUserName) {
-        UUID channelId = channelRepository.readChannelId(sendeeChannelName);
+    public boolean create(CreateMessageDto requestDto) {
+        String text = requestDto.text();
+        String sendeeChannelName = requestDto.sendeeChannelName();
+        String senderUserName = requestDto.senderUserName();
+        List<UUID> binaryContentIds = requestDto.binaryContentIds();
+
+        UUID channelId = channelRepository.getChannelId(sendeeChannelName);
         UUID userId = userRepository.userNameToId(senderUserName);
-
-        /// 사실 2차 검증이라 불필요한거 같긴 한데..
-        return channelId != null && userId != null && !messageRepository.create(text, channelId, userId).isEmpty();
-    }
-
-    public boolean create(String text, String sendeeChannelName, String senderUserName, List<BinaryContentDto> binaryContentDtos) {
-        UUID channelId = channelRepository.readChannelId(sendeeChannelName);
-        UUID userId = userRepository.userNameToId(senderUserName);
-
-        String messageIdS = messageRepository.create(text, channelId, userId);
-
-        if(messageIdS.isEmpty()) throw new NotFound("메시지 ID가 없습니다");
-
-        UUID messageId = UUID.fromString(messageIdS);
-
-        binaryContentDtos.forEach(content -> binaryContentRepository.create(AttachmentType.MESSAGE, messageId, content.filename()));
+        messageRepository.create(text, channelId, userId, binaryContentIds);
 
         return true;
     }
@@ -64,7 +53,7 @@ public class BasicMessageService implements MessageService {
         return messageRepository.findAllInChannel(channelId).stream().map(this::formattingMessage).toList();
     }
 
-    private String formattingMessage(MessageResponseDto dto) {
+    private String formattingMessage(MessageRequestDto dto) {
         String id = "ID: " + dto.id().toString();
         String user = "사용자명: " + userRepository.userIdToName(dto.userId());
         String channel = "채널명: " + channelRepository.channelIdToName(dto.channelId());
@@ -73,17 +62,15 @@ public class BasicMessageService implements MessageService {
                 + user + "\n"
                 + channel + "\n"
                 + "내용: " + dto.content() + "\n"
-                + "첨부파일: " + binaryContentRepository.find(AttachmentType.MESSAGE, dto.id()) + "\n"
+                + "첨부파일: " + String.join("", binaryContentRepository.findAllByIdIn(dto.attachmentIds())) + "\n"
                 + "생성일: " + dto.createAt() + "\n"
-                + "수정일: " + dto.updateAt();
+                + "수정일: " + dto.updateAt() + "\n====================";
     }
 
     @Override
-    public boolean update(UUID messageId, String content) {
-        UUID userId = userState.getUserId();
-
+    public boolean update(UUID userId, UUID messageId, String content) {
         if (messageRepository.check(userId, messageId)) {
-            throw new NotFound("해당 ID를 찾지 못했습니다.");
+            throw new FailedFound("해당 ID를 찾지 못했습니다.");
         }
 
         return messageRepository.updateMessage(messageId, content);
@@ -91,17 +78,20 @@ public class BasicMessageService implements MessageService {
 
     @Override
     public boolean delete(UUID userId, UUID messageId) {
-        return messageRepository.delete(userId, messageId);
+        UUID delete = messageRepository.delete(userId, messageId);
+        if(delete.equals(nullUUID)) return false;
+        binaryContentRepository.delete(delete);
+        return true;
     }
 
     @Override
-    public void deleteAll(UUID channelId) {
-        messageRepository.delete(channelId);
+    public void deleteAll(UUID id) {
+        messageRepository.deleteAll(id).forEach(binaryContentRepository::delete);
     }
 
     @Override
     public String lastMessageTime(String channelName) {
         UUID channelId = channelRepository.channelNameToId(channelName);
-        return messageRepository.findAllInChannel(channelId).stream().map(MessageResponseDto::createAt).max(String::compareTo).orElse("없음");
+        return messageRepository.findAllInChannel(channelId).stream().map(MessageRequestDto::createAt).max(String::compareTo).orElse("없음");
     }
 }

@@ -1,8 +1,9 @@
 package com.sprint.mission.discodeit.repository.file;
 
 
-import com.sprint.mission.discodeit.dto.MessageResponseDto;
+import com.sprint.mission.discodeit.dto.MessageRequestDto;
 import com.sprint.mission.discodeit.entity.Message;
+import com.sprint.mission.discodeit.exepction.*;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -68,13 +69,13 @@ public class FileMessageRepository implements MessageRepository {
                         messageIdMap.put(message.getId(), message);
                     });
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new FailedInit("FileMessageRepository init failed");
         }
     }
 
     @Override
-    public String create(String content, UUID channelId, UUID userId) {
-        Message message = new Message(channelId, userId, content);
+    public UUID create(String content, UUID channelId, UUID userId, List<UUID> attachmentIdList) {
+        Message message = new Message(channelId, userId, content, attachmentIdList);
 
         messageIdMap.put(message.getId(), message);
         channelIdMessageMap.computeIfAbsent(channelId, m -> new ArrayList<>()).add(message);
@@ -86,21 +87,26 @@ public class FileMessageRepository implements MessageRepository {
                 ObjectOutputStream oos = new ObjectOutputStream(fos)
         ) {
             oos.writeObject(message);
-            return message.getId().toString();
+            return message.getId();
         } catch (IOException e) {
-            return "";
+            throw new FailedCreate("Message create failed");
         }
     }
 
     @Override
-    public List<MessageResponseDto> findAllInChannel(UUID channelId) {
-        List<MessageResponseDto> result = new ArrayList<>();
+    public List<MessageRequestDto> findAllInChannel(UUID channelId) {
+        List<MessageRequestDto> result = new ArrayList<>();
         try{
             List<Message> messages = channelIdMessageMap.get(channelId);
             messages.stream().sorted(Comparator.comparing(Message::getCreateAt))
                     .forEach(message -> {
-                        result.add(new MessageResponseDto(
-                                message.getId(), message.getChannelId(), message.getUserId(), FORMATTER.format(message.getCreateAt()), FORMATTER.format(message.getUpdateAt()), message.getContent()
+                        result.add(new MessageRequestDto(
+                                message.getId(),
+                                message.getChannelId(),
+                                message.getUserId(),
+                                message.getAttachmentIds(),
+                                FORMATTER.format(message.getCreateAt()),
+                                FORMATTER.format(message.getUpdateAt()), message.getContent()
                         ));
                     });
             return result;
@@ -114,25 +120,31 @@ public class FileMessageRepository implements MessageRepository {
             return channelIdMessageMap.get(channelId)
                     .stream().max(Comparator.comparing(Message::getCreateAt)).orElse(null).getCreateAt();
         } catch (NullPointerException e) {
-            return null;
+            throw new FailedFound("Last message not found");
         }
     }
 
     @Override
-    public List<MessageResponseDto> findAllForSender(UUID userId) {
-        List<MessageResponseDto> result = new ArrayList<>();
+    public List<MessageRequestDto> findAllForSender(UUID userId) {
+        List<MessageRequestDto> result = new ArrayList<>();
         List<Message> messages = userIdMessageMap.get(userId);
         try{
             if(messages != null) {
                 messages.stream().sorted(Comparator.comparing(Message::getCreateAt))
                         .forEach(message -> {
-                            result.add(new MessageResponseDto(
-                                    message.getId(), message.getChannelId(), message.getUserId(), FORMATTER.format(message.getCreateAt()), FORMATTER.format(message.getUpdateAt()), message.getContent()
+                            result.add(new MessageRequestDto(
+                                    message.getId(),
+                                    message.getChannelId(),
+                                    message.getUserId(),
+                                    message.getAttachmentIds(),
+                                    FORMATTER.format(message.getCreateAt()),
+                                    FORMATTER.format(message.getUpdateAt()),
+                                    message.getContent()
                             ));
                         });
             }
         } catch (Exception e) {
-            return List.of();
+            throw new FailedFound("Message not found");
         }
         return result;
     }
@@ -140,7 +152,7 @@ public class FileMessageRepository implements MessageRepository {
     @Override
     public boolean updateMessage(UUID id, String content) {
         Message message = messageIdMap.get(id);
-        if (message == null) return false;
+        if (message == null) throw new FailedFound("Message not found");
 
         message.updateMessage(content);
 
@@ -150,17 +162,17 @@ public class FileMessageRepository implements MessageRepository {
             oos.writeObject(message);
             return true;
         } catch (IOException e) {
-            return false;
+            throw new FailedUpdate("Message update failed");
         }
     }
 
     @Override
-    public boolean delete(UUID userId, UUID id) {
+    public UUID delete(UUID userId, UUID id) {
         List<Message> userMessages = userIdMessageMap.get(userId);
-        if (userMessages == null) return false;
+        if (userMessages == null) throw new FailedFound("Message not found(Delete)");
 
         Message message = userMessages.stream().filter(e -> e.getId().equals(id)).findFirst().orElse(null);
-        if (message == null) return false;
+        if (message == null) throw new FailedFound("Message not found(Delete)");
 
         UUID channelId = message.getSendChannelId();
 
@@ -173,31 +185,35 @@ public class FileMessageRepository implements MessageRepository {
                 channelIdMessageMap.get(channelId).remove(message);
             }
             messageIdMap.remove(message.getId());
-            return true;
+            return message.getId();
         } catch (IOException e) {
-            return false;
+            throw new FailedDelete("Message delete failed");
         }
     }
 
     @Override
-    public void delete(UUID id) {
+    public List<List<UUID>> deleteAll(UUID id) {
+        List<List<UUID>> result = new ArrayList<>();
         if(channelIdMessageMap.containsKey(id)) {
             new ArrayList<>(channelIdMessageMap.get(id)).forEach(message -> {
+                result.add(message.getAttachmentIds());
                 delete(message.getUserId(), message.getId());
             });
         }
         if(userIdMessageMap.containsKey(id)) {
             new ArrayList<>(userIdMessageMap.get(id)).forEach(message -> {
+                result.add(message.getAttachmentIds());
                 delete(message.getUserId(), message.getId());
             });
         }
+        return result;
     }
 
     public boolean check(UUID userId, UUID id) {
         List<Message> messages = userIdMessageMap.get(userId);
-        if(messages == null) return true;
+        if(messages == null) return false;
 
-        Object result = messages.stream().filter(m -> m.getId().equals(id)).findFirst().orElse(null);
-        return result == null;
+        Object result = messages.stream().filter(message -> message.getId().equals(id)).findFirst().orElse(null);
+        return result != null;
     }
 }

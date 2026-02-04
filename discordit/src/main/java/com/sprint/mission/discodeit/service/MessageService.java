@@ -1,13 +1,15 @@
 package com.sprint.mission.discodeit.service;
 
+import com.sprint.mission.discodeit.dto.CreateMessageDto;
+
 import java.util.List;
 import java.util.UUID;
 
 public interface MessageService {
 
-    boolean create(String text, String sendeeChannelName, String senderUserName);
+    boolean create(CreateMessageDto requestDto);
 
-    boolean update(UUID messageId, String content);
+    boolean update(UUID userId, UUID messageId, String content);
 
     List<String> findAllForSender(UUID userId);
 
