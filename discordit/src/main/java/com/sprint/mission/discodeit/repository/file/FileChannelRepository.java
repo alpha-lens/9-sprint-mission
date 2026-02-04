@@ -7,7 +7,7 @@ import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.exepction.*;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.io.*;
@@ -22,7 +22,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-@RequiredArgsConstructor
+@Profile("file")
 public class FileChannelRepository implements ChannelRepository {
     private final Map<String, Channel> publicChannelNameMap = new ConcurrentHashMap<>();
     private final Map<UUID, Channel> publicChannelIdMap = new ConcurrentHashMap<>();
@@ -130,6 +130,8 @@ public class FileChannelRepository implements ChannelRepository {
             return privateChannelNameMap.get(name).toString();
         throw new FailedFound("Channel not found");
     }
+
+    @Override
     public ChannelType getChannelType(String name) {
         if(publicChannelNameMap.containsKey(name))
             return publicChannelNameMap.get(name).getChannelType();
@@ -138,6 +140,7 @@ public class FileChannelRepository implements ChannelRepository {
         throw new FailedFound("ChannelType not found");
     }
 
+    @Override
     public UUID getChannelId(String name) {
         if(publicChannelNameMap.containsKey(name))
             return publicChannelNameMap.get(name).getId();
@@ -167,7 +170,8 @@ public class FileChannelRepository implements ChannelRepository {
         return new ArrayList<>(accessiblePrivateChannel(userName).stream().toList());
     }
 
-    private List<ResponseChannelDto> accessiblePrivateChannel(String userName) {
+    @Override
+    public List<ResponseChannelDto> accessiblePrivateChannel(String userName) {
         List<ResponseChannelDto> requestDto = new ArrayList<>();
         privateChannelIdMap.values().stream()
                 .filter(channel -> channel.getAccessibleUser() != null && channel.getAccessibleUser().containsKey(userName))
@@ -176,7 +180,8 @@ public class FileChannelRepository implements ChannelRepository {
         return requestDto;
     }
 
-    private ResponseChannelDto requestChannelInfo(Channel channel) {
+    @Override
+    public ResponseChannelDto requestChannelInfo(Channel channel) {
         String name = channel.getName();
         UUID id = channel.getId();
         ChannelType type = channel.getChannelType();
@@ -191,10 +196,12 @@ public class FileChannelRepository implements ChannelRepository {
         return new ResponseChannelDto(name, id, type, createAt, updateAt, createUser, accessableUser);
     }
 
+    @Override
     public void includePrivateChannel(String channelName, String userName, UUID userId) {
         privateChannelNameMap.get(channelName).addAccessibleUser(userName, userId);
     }
 
+    @Override
     public void excludePrivateChannel(String channelName, String userName) {
         privateChannelNameMap.get(channelName).removeAccessibleUser(userName);
     }
@@ -226,21 +233,25 @@ public class FileChannelRepository implements ChannelRepository {
         }
     }
 
+    @Override
     public void deleteAllChannel(String name) {
         List<Channel> channels = privateChannelNameMap.values().stream().filter(channel -> channel.getCreateUser().equals(name)).toList();
 
         channels.forEach(channel -> deleteChannel(channel.getName()));
     }
 
-    ///
+
+    @Override
     public boolean isPresentChannel(String name) {
         return publicChannelNameMap.containsKey(name) || privateChannelNameMap.containsKey(name);
     }
 
-    public boolean isCeatePrivateChannel(String name) {
+    @Override
+    public boolean isCreatePrivateChannel(String name) {
         return !privateChannelNameMap.values().stream().filter(channel -> channel.getCreateUser().equals(name)).toList().isEmpty();
     }
 
+    @Override
     public UUID channelNameToId(String name) {
         if(publicChannelNameMap.containsKey(name)) return publicChannelNameMap.get(name).getId();
         if(privateChannelNameMap.containsKey(name)) return privateChannelNameMap.get(name).getId();
@@ -248,6 +259,7 @@ public class FileChannelRepository implements ChannelRepository {
         throw new NotFound("해당 채널을 찾을 수 없습니다");
     }
 
+    @Override
     public String channelIdToName(UUID id) {
         if(publicChannelIdMap.containsKey(id)) return publicChannelIdMap.get(id).getName();
         if(privateChannelIdMap.containsKey(id)) return privateChannelIdMap.get(id).getName();

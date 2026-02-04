@@ -2,12 +2,11 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.CreateMessageDto;
 import com.sprint.mission.discodeit.dto.MessageRequestDto;
-import com.sprint.mission.discodeit.entity.AttachmentType;
 import com.sprint.mission.discodeit.exepction.FailedFound;
-import com.sprint.mission.discodeit.repository.file.FileBinaryContentRepository;
-import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
-import com.sprint.mission.discodeit.repository.file.FileMessageRepository;
-import com.sprint.mission.discodeit.repository.file.FileUserRepository;
+import com.sprint.mission.discodeit.repository.BinaryContentRepository;
+import com.sprint.mission.discodeit.repository.ChannelRepository;
+import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,14 +17,14 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class BasicMessageService implements MessageService {
-    private final FileUserRepository userRepository;
-    private final FileChannelRepository channelRepository;
-    private final FileMessageRepository messageRepository;
-    private final FileBinaryContentRepository binaryContentRepository;
+    private final UserRepository userRepository;
+    private final ChannelRepository channelRepository;
+    private final MessageRepository messageRepository;
+    private final BinaryContentRepository binaryContentRepository;
     private final UUID nullUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     public boolean isPresent(UUID userId, UUID messageId) {
-        return messageRepository.check(userId, messageId);
+        return messageRepository.isPresentMessage(userId, messageId);
     }
 
     @Override
@@ -69,7 +68,7 @@ public class BasicMessageService implements MessageService {
 
     @Override
     public boolean update(UUID userId, UUID messageId, String content) {
-        if (messageRepository.check(userId, messageId)) {
+        if (messageRepository.isPresentMessage(userId, messageId)) {
             throw new FailedFound("해당 ID를 찾지 못했습니다.");
         }
 

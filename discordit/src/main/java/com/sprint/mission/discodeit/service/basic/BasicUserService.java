@@ -4,8 +4,8 @@ import com.sprint.mission.discodeit.dto.CreateUserDto;
 import com.sprint.mission.discodeit.dto.UpdateUserDto;
 import com.sprint.mission.discodeit.dto.UserFinder;
 import com.sprint.mission.discodeit.exepction.FailedFound;
-import com.sprint.mission.discodeit.repository.file.FileBinaryContentRepository;
-import com.sprint.mission.discodeit.repository.file.FileUserRepository;
+import com.sprint.mission.discodeit.repository.BinaryContentRepository;
+import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,8 +16,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class BasicUserService implements UserService {
-    private final FileUserRepository userRepository;
-    private final FileBinaryContentRepository binaryContentRepository;
+    private final UserRepository userRepository;
+    private final BinaryContentRepository binaryContentRepository;
     private final UUID nullUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     public UUID userNameToId(String name) {
@@ -31,7 +31,7 @@ public class BasicUserService implements UserService {
 
     @Override
     public boolean isValid(UUID userId, String password) {
-        return userRepository.check(userId, password);
+        return userRepository.checkInvalid(userId, password);
     }
 
     @Override

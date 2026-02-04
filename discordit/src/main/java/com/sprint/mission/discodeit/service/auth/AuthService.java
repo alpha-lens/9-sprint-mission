@@ -20,7 +20,7 @@ public class AuthService {
         try {
             UUID id = userRepository.userNameToId(requestDto.name());
 
-            if(!userRepository.check(id, requestDto.password())) {
+            if(!userRepository.checkInvalid(id, requestDto.password())) {
                 userState.userState(requestDto.name(), id);
             } else throw new Exception();
         } catch (Exception ignore) {

@@ -6,6 +6,7 @@ import com.sprint.mission.discodeit.dto.UserFinder;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exepction.*;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.io.*;
@@ -16,12 +17,12 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
+@Profile("file")
 public class FileUserRepository implements UserRepository {
     private final Map<UUID, User> idUserMap = new ConcurrentHashMap<>();
     private final Map<String, UUID> userNameIdMap = new ConcurrentHashMap<>();
     private final Path DIRECTORY;
     private final String EXTENSION = ".ser";
-    private final UUID nullUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     public FileUserRepository() {
         this.DIRECTORY = Paths.get(System.getProperty("user.dir"), "file-data-map", User.class.getSimpleName());
@@ -131,6 +132,7 @@ public class FileUserRepository implements UserRepository {
         return true;
     }
 
+    @Override
     public UUID userNameToId(String name) {
         try {
             return userNameIdMap.get(name);
@@ -139,6 +141,7 @@ public class FileUserRepository implements UserRepository {
         }
     }
 
+    @Override
     public String userIdToName(UUID id) {
         try {
             return idUserMap.get(id).getName();
@@ -147,7 +150,8 @@ public class FileUserRepository implements UserRepository {
         }
     }
 
-    public boolean check(UUID id, String pw) {
+    @Override
+    public boolean checkInvalid(UUID id, String pw) {
         try {
             return !idUserMap.get(id).getPassword().equals(pw);
         } catch (Exception e) {
@@ -155,6 +159,7 @@ public class FileUserRepository implements UserRepository {
         }
     }
 
+    @Override
     public boolean duplicateChecker(String checkThis, String findThis) {
         try {
             if (checkThis.equals("이메일") && idUserMap.values().stream().anyMatch(u -> u.getEmail().equals(findThis))) return true;

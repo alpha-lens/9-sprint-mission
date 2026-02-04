@@ -210,21 +210,25 @@ public class RouteUser {
 
         UUID profileId = userService.find(userName).profileId();
 
-        if(userService.delete(userId)) { // FIXME: BinaryContent, 채널 삭제로 인한 타인의 메시지 삭제
-            messageService.deleteAll(userId);
-            userStatusService.delete(new DeleteUserStatusDto(userId, userName));
-            readStatusService.deleteForUser(userId);
-            binaryContentService.delete(profileId);
-            if(!allPrivateChannelDto.isEmpty())
-                allPrivateChannelDto.forEach(req -> {
-                    channelService.excludePrivateChannel(req.channelName(), userName);
-                });
-            if(channelService.isCeatePrivateChannel(userName)) {
-                channelService.deleteAll(userName);
-                messageService.deleteAll(channelService.findChannelId(userName));
+        try {
+            if(userService.delete(userId)) { // FIXME: BinaryContent, 채널 삭제로 인한 타인의 메시지 삭제
+                messageService.deleteAll(userId);
+                userStatusService.delete(new DeleteUserStatusDto(userId, userName));
+                readStatusService.deleteForUser(userId);
+                binaryContentService.delete(profileId);
+                if(!allPrivateChannelDto.isEmpty())
+                    allPrivateChannelDto.forEach(req -> {
+                        channelService.excludePrivateChannel(req.channelName(), userName);
+                    });
+                if(channelService.isCeatePrivateChannel(userName)) {
+                    messageService.deleteAll(channelService.findChannelId(userName));
+                    channelService.deleteAll(userName);
+                }
+                userState.userState("");
+                System.out.println("성공적으로 삭제되었습니다.");
             }
-            userState.userState("");
-            System.out.println("성공적으로 삭제되었습니다.");
+        } catch (Exception e) {
+            System.err.println("[ERROR] " + e);
         }
     }
 

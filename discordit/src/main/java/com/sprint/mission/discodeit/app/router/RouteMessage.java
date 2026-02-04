@@ -6,7 +6,6 @@ import com.sprint.mission.discodeit.dto.CreateMessageDto;
 import com.sprint.mission.discodeit.dto.UserStatusUpdateDto;
 import com.sprint.mission.discodeit.entity.AttachmentType;
 import com.sprint.mission.discodeit.exepction.FailedFound;
-import com.sprint.mission.discodeit.exepction.NotFound;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
 import com.sprint.mission.discodeit.service.basic.BasicMessageService;

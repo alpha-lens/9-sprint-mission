@@ -7,7 +7,7 @@ import com.sprint.mission.discodeit.exepction.FailedUpdate;
 import com.sprint.mission.discodeit.exepction.NotFound;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.io.*;
@@ -19,7 +19,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-@RequiredArgsConstructor
+@Profile("file")
 public class FileReadStatusRepository implements ReadStatusRepository {
     private final Map<UUID, ReadStatus> idReadStatusMap = new ConcurrentHashMap<>();
     private final Map<UUID, List<ReadStatus>> userIdReadStatusMap = new ConcurrentHashMap<>();
@@ -61,6 +61,7 @@ public class FileReadStatusRepository implements ReadStatusRepository {
         }
     }
 
+    @Override
     public void create(UUID userId, UUID channelId) {
         ReadStatus readStatus = new ReadStatus(userId, channelId);
         idReadStatusMap.put(readStatus.getId(), readStatus);
@@ -75,10 +76,12 @@ public class FileReadStatusRepository implements ReadStatusRepository {
         }
     }
 
+    @Override
     public Instant find(UUID id) {
         return idReadStatusMap.get(id).getUpdateAt();
     }
 
+    @Override
     public Map<UUID, Instant> findAllByUserId(UUID userId) {
         List<ReadStatus> tempList = userIdReadStatusMap.get(userId);
         Map<UUID, Instant> result = new HashMap<>();
@@ -89,6 +92,7 @@ public class FileReadStatusRepository implements ReadStatusRepository {
         return result;
     }
 
+    @Override
     public boolean update(UUID userId, UUID channelId) {
         ReadStatus temp = userIdReadStatusMap.get(userId).stream().filter(readStatus -> readStatus.getChannelId().equals(channelId)).findFirst().orElse(null);
 
@@ -105,6 +109,7 @@ public class FileReadStatusRepository implements ReadStatusRepository {
         }
     }
 
+    @Override
     public boolean delete(UUID id) {
         Path path = resolvePath(id);
         try {
@@ -118,11 +123,13 @@ public class FileReadStatusRepository implements ReadStatusRepository {
         }
     }
 
+    @Override
     public void deleteForChannel(UUID channelId) {
         List<ReadStatus> temp = channelIdReadStatusMap.get(channelId);
         temp.forEach(readStatus -> delete(readStatus.getId()));
     }
 
+    @Override
     public void deleteForUser(UUID userId) {
         List<ReadStatus> temp = userIdReadStatusMap.get(userId);
         temp.forEach(readStatus -> delete(readStatus.getId()));

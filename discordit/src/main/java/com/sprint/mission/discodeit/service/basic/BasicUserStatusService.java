@@ -6,8 +6,8 @@ import com.sprint.mission.discodeit.dto.FindUserStatusDto;
 import com.sprint.mission.discodeit.dto.UserStatusUpdateDto;
 import com.sprint.mission.discodeit.exepction.DoNotDuplicate;
 import com.sprint.mission.discodeit.exepction.NotFound;
-import com.sprint.mission.discodeit.repository.file.FileUserRepository;
-import com.sprint.mission.discodeit.repository.file.FileUserStatusRepository;
+import com.sprint.mission.discodeit.repository.UserRepository;
+import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserStatusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class BasicUserStatusService implements UserStatusService {
-    private final FileUserStatusRepository userStatusRepository;
-    private final FileUserRepository userRepository;
+    private final UserStatusRepository userStatusRepository;
+    private final UserRepository userRepository;
 
     public void create(CreateUserStatusDto requestDto){
         FindUserStatusDto dto = new FindUserStatusDto(requestDto.id(), requestDto.name());

@@ -8,7 +8,8 @@ import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.exepction.FailedCreate;
 import com.sprint.mission.discodeit.exepction.FailedDelete;
 import com.sprint.mission.discodeit.exepction.FailedInit;
-import com.sprint.mission.discodeit.repository.userStatusRepository;
+import com.sprint.mission.discodeit.repository.UserStatusRepository;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.io.*;
@@ -22,7 +23,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-public class FileUserStatusRepository implements userStatusRepository {
+@Profile("file")
+public class FileUserStatusRepository implements UserStatusRepository {
     private final Map<UUID, UserStatus> idMap = new ConcurrentHashMap<>();
     private final Map<UUID, UserStatus> userIdMap = new ConcurrentHashMap<>();
     private final Map<String, UserStatus> userNameMap = new ConcurrentHashMap<>();
@@ -66,6 +68,7 @@ public class FileUserStatusRepository implements userStatusRepository {
         return DIRECTORY.resolve(id + EXTENSION);
     }
 
+    @Override
     public boolean create(CreateUserStatusDto requestDto){
         UserStatus userStatus = new UserStatus(requestDto.id(), requestDto.name());
         idMap.put(userStatus.getId(), userStatus);
@@ -74,16 +77,22 @@ public class FileUserStatusRepository implements userStatusRepository {
 
         return save(userStatus);
     }
+
+    @Override
     public String find(FindUserStatusDto requestDto) {
         if(!userIdMap.containsKey(requestDto.id()))
             return "";
         return userIdMap.get(requestDto.id()).isOnline();
     }
+
+    @Override
     public List<String> findAll(List<FindUserStatusDto> requestDto) {
         List<String> result = new ArrayList<>();
         requestDto.forEach(req -> result.add(find(req)));
         return result;
     }
+
+    @Override
     public boolean update(UserStatusUpdateDto requestDto) {
         UserStatus userStatus = userIdMap.get(requestDto.id());
 
@@ -96,6 +105,7 @@ public class FileUserStatusRepository implements userStatusRepository {
         return save(userStatus);
     }
 
+    @Override
     public boolean delete(DeleteUserStatusDto requestDto) {
         UUID id = userIdMap.get(requestDto.id()).getId();
 

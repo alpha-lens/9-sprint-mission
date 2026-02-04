@@ -6,7 +6,7 @@ import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.exepction.*;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.io.*;
@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-@RequiredArgsConstructor
+@Profile("file")
 public class FileMessageRepository implements MessageRepository {
     private final Map<UUID, List<Message>> channelIdMessageMap = new ConcurrentHashMap<>();
     private final Map<UUID, List<Message>> userIdMessageMap = new ConcurrentHashMap<>();
@@ -115,6 +115,7 @@ public class FileMessageRepository implements MessageRepository {
         }
     }
 
+    @Override
     public Instant getLastMessageInChannel(UUID channelId) {
         try {
             return channelIdMessageMap.get(channelId)
@@ -209,7 +210,8 @@ public class FileMessageRepository implements MessageRepository {
         return result;
     }
 
-    public boolean check(UUID userId, UUID id) {
+    @Override
+    public boolean isPresentMessage(UUID userId, UUID id) {
         List<Message> messages = userIdMessageMap.get(userId);
         if(messages == null) return false;
 

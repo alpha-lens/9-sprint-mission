@@ -17,4 +17,12 @@ public interface UserRepository {
     List<UserFinder> findAll();
 
     boolean delete(UUID id);
+
+    UUID userNameToId(String name);
+
+    String userIdToName(UUID id);
+
+    boolean checkInvalid(UUID id, String pw);
+
+    boolean duplicateChecker(String checkThis, String findThis);
 }
