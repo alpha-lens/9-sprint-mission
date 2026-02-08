@@ -1,6 +1,6 @@
 package com.sprint.mission.discodeit;
 
-import com.sprint.mission.discodeit.repository.file.FileUserRepository;
+import com.sprint.mission.discodeit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +10,7 @@ import java.util.Scanner;
 @RequiredArgsConstructor
 public class Input {
     private final Scanner scanner;
-    private final FileUserRepository userRepository;
+    private final UserRepository userRepository;
 
     private String inputChecker(String text, String regexRule) {
         String inputString;

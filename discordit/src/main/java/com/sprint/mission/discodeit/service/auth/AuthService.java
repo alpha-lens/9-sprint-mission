@@ -3,7 +3,7 @@ package com.sprint.mission.discodeit.service.auth;
 import com.sprint.mission.discodeit.UserState;
 import com.sprint.mission.discodeit.dto.LoginDto;
 import com.sprint.mission.discodeit.exepction.NotFound;
-import com.sprint.mission.discodeit.repository.file.FileUserRepository;
+import com.sprint.mission.discodeit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +12,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private final FileUserRepository userRepository;
+    private final UserRepository userRepository;
     private final UserState userState;
 
     public void login(LoginDto requestDto) {
