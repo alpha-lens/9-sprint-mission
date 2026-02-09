@@ -1,7 +1,9 @@
 package com.sprint.mission.discodeit.controller;
 
+import com.sprint.mission.discodeit.UserState;
 import com.sprint.mission.discodeit.dto.CreateBinaryContentDto;
 import com.sprint.mission.discodeit.dto.CreateUserDto;
+import com.sprint.mission.discodeit.dto.UpdateUserDto;
 import com.sprint.mission.discodeit.entity.AttachmentType;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
@@ -21,6 +23,7 @@ import java.util.UUID;
 public class UserController {
     private final BasicBinaryContentService binaryContentService;
     private final UserService userService;
+    private final UserState userState;
 
     @RequestMapping(value="/create", method= RequestMethod.POST)
     public ResponseEntity<String> handleCreateUser(
@@ -33,7 +36,7 @@ public class UserController {
         CreateBinaryContentDto binaryContentCreateRequestDto;
         CreateUserDto userCreateRequestDto;
 
-        if(file.isEmpty()) {
+        if(file == null || file.isEmpty()) {
             userCreateRequestDto = new CreateUserDto(userName, password, email, null);
         } else {
             binaryContentCreateRequestDto = new CreateBinaryContentDto(AttachmentType.USER, file.getName(), file.getBytes());
@@ -45,11 +48,34 @@ public class UserController {
 
         return new ResponseEntity<>(userName + "has been created!", HttpStatus.CREATED);
     }
+
+    @RequestMapping(value="/update", method= RequestMethod.PUT)
+    public ResponseEntity<String> handleUpdateUser(
+            @RequestParam(value = "userName", required = false) String userName,
+            @RequestParam(value = "password", required = false) String password,
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam(value = "phoneNumber", required = false) String phoneNumber,
+            @RequestPart(value = "file", required = false) MultipartFile file
+    ) throws IOException {
+        UpdateUserDto updateUserRequestDto;
+        CreateBinaryContentDto binaryContentCreateRequestDto;
+
+        if(file == null || file.isEmpty()) {
+            updateUserRequestDto = new UpdateUserDto(userState.getUserId(), userName, password, email, phoneNumber, null);;
+        } else {
+            binaryContentCreateRequestDto = new CreateBinaryContentDto(AttachmentType.USER, file.getName(), file.getBytes());
+            UUID profileId = binaryContentService.create(binaryContentCreateRequestDto);
+            updateUserRequestDto = new UpdateUserDto(userState.getUserId(), userName, password, email, phoneNumber, profileId);
+        }
+
+        userService.update(updateUserRequestDto);
+        return new ResponseEntity<>(userState.getUserName() + " has been updated!", HttpStatus.OK);
+    }
 }
 
 /*
 * 사용자 관리
-* [ ] 사용자를 등록할 수 있다.
+* [x] 사용자를 등록할 수 있다.
 * [ ] 사용자 정보를 수정할 수 있다.
 * [ ] 사용자를 삭제할 수 있다.
 * [ ] 모든 사용자를 조회할 수 있다.
