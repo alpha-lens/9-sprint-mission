@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.dto.UpdateUserDto;
 import com.sprint.mission.discodeit.dto.UserFinder;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exepction.DoNotDuplicate;
+import com.sprint.mission.discodeit.exepction.FailedDelete;
 import com.sprint.mission.discodeit.exepction.FailedFound;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import org.springframework.context.annotation.Profile;
@@ -63,8 +64,13 @@ public class JCFUserRepository implements UserRepository {
 
     @Override
     public boolean delete(UUID id) {
-        userNameIdMap.remove(idUserMap.get(id).getName());
-        idUserMap.remove(id);
+        String name = idUserMap.get(id).getName();
+        try {
+            userNameIdMap.remove(idUserMap.get(id).getName());
+            idUserMap.remove(id);
+        } catch (Exception e) {
+            throw new FailedDelete("Delete is failed : " + name);
+        }
         return true;
     }
 

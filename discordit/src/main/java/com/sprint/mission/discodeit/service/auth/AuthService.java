@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.service.auth;
 
 import com.sprint.mission.discodeit.UserState;
 import com.sprint.mission.discodeit.dto.LoginDto;
+import com.sprint.mission.discodeit.exepction.FailedLogin;
 import com.sprint.mission.discodeit.exepction.NotFound;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class AuthService {
                 userState.userState(requestDto.name(), id);
             } else throw new Exception();
         } catch (Exception ignore) {
-            throw new NotFound("해당 사용자를 찾지 못했습니다.");
+            throw new FailedLogin("Invalid username or password");
         }
     }
 

@@ -24,5 +24,5 @@ public interface UserRepository {
 
     boolean checkInvalid(UUID id, String pw);
 
-    boolean duplicateChecker(String checkThis, String findThis);
+    void duplicateChecker(String checkThis, String findThis);
 }

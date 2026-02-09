@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface UserService {
+    UUID userNameToId(String name);
+
     boolean isPresent(String name);
 
     boolean isValid(UUID userId, String password);

@@ -124,11 +124,11 @@ public class FileUserRepository implements UserRepository {
         Path path = resolvePath(id);
         try {
             Files.delete(path);
+            userNameIdMap.remove(idUserMap.get(id).getName());
+            idUserMap.remove(id);
         } catch (IOException e) {
             throw new FailedDelete("User delete failed");
         }
-        userNameIdMap.remove(idUserMap.get(id).getName());
-        idUserMap.remove(id);
         return true;
     }
 

@@ -20,6 +20,7 @@ public class BasicUserService implements UserService {
     private final BinaryContentRepository binaryContentRepository;
     private final UUID nullUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
+    @Override
     public UUID userNameToId(String name) {
         return userRepository.userNameToId(name);
     }
@@ -47,6 +48,11 @@ public class BasicUserService implements UserService {
     /// Update
     @Override
     public boolean update(UpdateUserDto requestDto) {
+        userRepository.duplicateChecker("사용자명", requestDto.reName());
+        userRepository.duplicateChecker("이메일", requestDto.reMail());
+        userRepository.duplicateChecker("전화번호", requestDto.rePhoneNumber());
+
+
         UUID reProfileId = requestDto.reProfileId();
         UUID userId = requestDto.id();
 
