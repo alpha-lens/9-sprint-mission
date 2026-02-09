@@ -24,12 +24,13 @@ public class User implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public User(String name, String password, UUID profileId) {
+    public User(String name, String password, String email, UUID profileId) {
         Instant now = Instant.now();
         this.profileId = profileId;
         this.id = UUID.randomUUID();
         this.name = name;
         this.password = password;
+        this.email = email;
         this.createAt = now;
         this.updateAt = now;
     }

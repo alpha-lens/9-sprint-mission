@@ -16,10 +16,11 @@ public class BinaryContent implements Serializable {
     private final byte[] bytes;
 
     public BinaryContent(AttachmentType type, String fileName, byte[] bytes) {
+        String[] nameParts = fileName.split("\\.", 2);
+        this.fileName = nameParts[0];
+        this.fileExtension = nameParts.length > 1 ? nameParts[1] : "";
         this.id = UUID.randomUUID();
         this.createAt = Instant.now();
-        this.fileName = fileName.split("\\.")[0];
-        this.fileExtension = fileName.split("\\.")[1];
         this.bytes = bytes;
         this.type = type;
     }

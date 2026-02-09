@@ -161,11 +161,9 @@ public class FileUserRepository implements UserRepository {
 
     @Override
     public boolean duplicateChecker(String checkThis, String findThis) {
-        try {
-            if (checkThis.equals("이메일") && idUserMap.values().stream().anyMatch(u -> u.getEmail().equals(findThis))) return true;
-            if (checkThis.equals("전화번호") && idUserMap.values().stream().anyMatch(u -> u.getPhoneNumber().equals(findThis))) return true;
-            if (checkThis.equals("사용자명") && userNameIdMap.get(findThis) != null) return true;
-        } catch (Exception ignored) {}
+        if (checkThis.equals("이메일") && idUserMap.values().stream().anyMatch(u -> u.getEmail().equals(findThis))) throw new DoNotDuplicate("This email already exists.");
+        if (checkThis.equals("전화번호") && idUserMap.values().stream().anyMatch(u -> u.getPhoneNumber().equals(findThis))) throw new DoNotDuplicate("This phoneNumber already exists.");
+        if (checkThis.equals("사용자명") && userNameIdMap.get(findThis) != null) throw new DoNotDuplicate("This userName already exists.");
         return false;
     }
 }

@@ -7,10 +7,11 @@ import java.util.UUID;
 public record CreateUserDto(
         String username,
         String password,
+        String email,
         UUID profileId
 ) {
     public User toEntity() {
 
-        return new User(username, password, profileId);
+        return new User(username, password, email, profileId);
     }
 }

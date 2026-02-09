@@ -4,6 +4,7 @@ import com.sprint.mission.discodeit.dto.CreateUserDto;
 import com.sprint.mission.discodeit.dto.UpdateUserDto;
 import com.sprint.mission.discodeit.dto.UserFinder;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.exepction.DoNotDuplicate;
 import com.sprint.mission.discodeit.exepction.FailedFound;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import org.springframework.context.annotation.Profile;
@@ -96,11 +97,9 @@ public class JCFUserRepository implements UserRepository {
 
     @Override
     public boolean duplicateChecker(String checkThis, String findThis) {
-        try {
-            if (checkThis.equals("이메일") && idUserMap.values().stream().anyMatch(u -> u.getEmail().equals(findThis))) return true;
-            if (checkThis.equals("전화번호") && idUserMap.values().stream().anyMatch(u -> u.getPhoneNumber().equals(findThis))) return true;
-            if (checkThis.equals("사용자명") && userNameIdMap.get(findThis) != null) return true;
-        } catch (Exception ignored) {}
+        if (checkThis.equals("이메일") && idUserMap.values().stream().anyMatch(u -> u.getEmail().equals(findThis))) throw new DoNotDuplicate("This email already exists: " + findThis);
+        if (checkThis.equals("전화번호") && idUserMap.values().stream().anyMatch(u -> u.getPhoneNumber().equals(findThis))) throw new DoNotDuplicate("This phoneNumber already exists: " + findThis);
+        if (checkThis.equals("사용자명") && userNameIdMap.get(findThis) != null) throw new DoNotDuplicate("This userName already exists: " + findThis);
         return false;
     }
 }

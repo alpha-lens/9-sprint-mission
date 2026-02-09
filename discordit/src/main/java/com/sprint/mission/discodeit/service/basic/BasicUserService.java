@@ -36,6 +36,9 @@ public class BasicUserService implements UserService {
 
     @Override
     public boolean create(CreateUserDto requestDto) {
+        userRepository.duplicateChecker("사용자명", requestDto.username());
+        userRepository.duplicateChecker("이메일", requestDto.email());
+
         UUID userId = userRepository.create(requestDto);
 
         return userId != nullUUID;
