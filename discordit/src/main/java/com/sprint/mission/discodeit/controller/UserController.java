@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Controller
@@ -123,6 +125,25 @@ public class UserController {
     ) {
         userService.delete(userService.userNameToId(userName));
         return new ResponseEntity<>("Success deleted! : " + userName, HttpStatus.OK);
+    }
+
+    // ONLY TEST
+    // 사용자 온라인 상태 정보 업데이트용.
+    @RequestMapping(value = "/debug/userstatus")
+    public ResponseEntity<String> handleUserStatus(
+            @RequestParam("userName") String userName,
+            @RequestParam(value = "minute") int minute
+    ) {
+        UUID userId = userService.userNameToId(userName);
+        Instant now = Instant.now();
+        Instant adjustedTime = now.minus(minute, ChronoUnit.MINUTES);
+
+        UserStatusUpdateDto updateRequestDto = new UserStatusUpdateDto(userId, userName, adjustedTime);
+
+        userStatusService.update(updateRequestDto);
+        return new  ResponseEntity<>(userName + " status updated!\n"
+                + "User Status : " +  userStatusService.find(new FindUserStatusDto(userId, userName))
+                , HttpStatus.OK);
     }
 }
 
