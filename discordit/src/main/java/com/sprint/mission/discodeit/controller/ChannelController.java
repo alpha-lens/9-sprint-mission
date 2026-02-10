@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.UUID;
+
 @Controller
 @RequestMapping("/api/channel")
 @RequiredArgsConstructor
@@ -48,6 +50,13 @@ public class ChannelController {
         channelService.create("private", channelName, userState.getUserName());
         return new ResponseEntity<>("Success: " + channelName + " private channel has been created!", HttpStatus.OK);
     }
+
+//    @RequestMapping(value = "/find", method = RequestMethod.GET)
+//    public ResponseEntity<String> findChannel(
+//            @RequestParam("id") UUID id
+//    ){
+//
+//    }
 
     @RequestMapping(value = "/update", method = RequestMethod.PUT)
     public ResponseEntity<String> handleUpdateChannel(
@@ -89,7 +98,7 @@ public class ChannelController {
 * 채널 관리
 * [X] 공개 채널을 생성할 수 있다.
 * [X] 비공개 채널을 생성할 수 있다.
-* [ ] 공개 채널의 정보를 수정할 수 있다.
-* [ ] 채널을 삭제할 수 있다.
+* [X] 공개 채널의 정보를 수정할 수 있다.
+* [X] 채널을 삭제할 수 있다.
 * [ ] 특정 사용자가 볼 수 있는 모든 채널 목록을 조회할 수 있다.
 * */

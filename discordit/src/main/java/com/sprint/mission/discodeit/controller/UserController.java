@@ -28,13 +28,13 @@ public class UserController {
     private final UserStatusService userStatusService;
 
     @RequestMapping(value="/create", method= RequestMethod.POST)
-    public ResponseEntity<String> handleCreateUser(
+    public ResponseEntity<Map<String, String>> handleCreateUser(
             @RequestParam("userName") String userName,
             @RequestParam("password") String password,
             @RequestParam("email") String email,
             @RequestPart(value = "file", required = false) MultipartFile file
     ) throws IOException {
-
+        Map<String, String> result = new HashMap<>();
         CreateBinaryContentDto binaryContentCreateRequestDto;
         CreateUserDto userCreateRequestDto;
 
@@ -52,22 +52,22 @@ public class UserController {
 
         userStatusService.create(new CreateUserStatusDto(userName, userId));
 
-        return new ResponseEntity<>(userName + " has been created!\n"
-                + "User ID: " + userId.toString()
-                , HttpStatus.CREATED);
+        result.put("id", userId.toString());
+
+        return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
-    @RequestMapping(value = "/find/{userName}", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, String>> handleFindUserByName(@PathVariable String userName) {
+    @RequestMapping(value = "/find/{id}", method = RequestMethod.GET)
+    public ResponseEntity<Map<String, String>> handleFindUserByName(@PathVariable UUID id) {
         Map<String, String> result = new HashMap<>();
-        UserFinder userFinder = userService.find(userName);
-        String userStatus = userStatusService.find(new FindUserStatusDto(userFinder.id(), userName));
+        UserFinder userFinder = userService.find(id);
+        String userStatus = userStatusService.find(new FindUserStatusDto(userFinder.id(), userFinder.name()));
         UUID profileId = userFinder.profileId();
 
         result.put("userId", userFinder.id().toString());
         if(profileId != null)
             result.put("userProfile", profileId.toString());;
-        result.put("userName", userName);
+        result.put("userName", userFinder.name());
         result.put("userInfo", userFinder.userInfo());
         result.put("userStatus", userStatus);
 

@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exepction.DoNotDuplicate;
 import com.sprint.mission.discodeit.exepction.FailedDelete;
 import com.sprint.mission.discodeit.exepction.FailedFound;
+import com.sprint.mission.discodeit.exepction.NotFound;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
@@ -49,6 +50,17 @@ public class JCFUserRepository implements UserRepository {
         String userName = user.getName();
 
         return new UserFinder(id, userName, user.toString(), user.getProfileId());
+    }
+
+    @Override
+    public UserFinder find(UUID userId) {
+        User user = idUserMap.getOrDefault(userId, null);
+        if(user == null) {
+            throw new NotFound("Not Found This User Id");
+        }
+        String userName = user.getName();
+
+        return new UserFinder(userId, userName, user.toString(), user.getProfileId());
     }
 
     @Override

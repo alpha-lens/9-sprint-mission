@@ -109,6 +109,17 @@ public class FileUserRepository implements UserRepository {
     }
 
     @Override
+    public UserFinder find(UUID userId) {
+        User user = idUserMap.getOrDefault(userId, null);
+        if(user == null) {
+            throw new NotFound("Not Found This User Id");
+        }
+        String userName = user.getName();
+
+        return new UserFinder(userId, userName, user.toString(), user.getProfileId());
+    }
+
+    @Override
     public List<UserFinder> findAll() {
         List<UserFinder> result = new ArrayList<>();
         idUserMap.values().stream().sorted(Comparator.comparing(User::getName)).forEach(user -> {

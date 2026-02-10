@@ -3,7 +3,6 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.dto.CreateUserDto;
 import com.sprint.mission.discodeit.dto.UpdateUserDto;
 import com.sprint.mission.discodeit.dto.UserFinder;
-import com.sprint.mission.discodeit.exepction.FailedFound;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
@@ -68,9 +67,12 @@ public class BasicUserService implements UserService {
     /// Read
     @Override
     public UserFinder find(String name) {
-        if(userRepository.userNameToId(name) == null)
-            throw new FailedFound("해당 사용자를 찾지 못했습니다");
         return userRepository.find(name);
+    }
+
+    @Override
+    public UserFinder find(UUID id) {
+        return userRepository.find(id);
     }
 
     @Override

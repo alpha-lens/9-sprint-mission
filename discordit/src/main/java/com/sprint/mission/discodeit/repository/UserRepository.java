@@ -14,6 +14,8 @@ public interface UserRepository {
 
     UserFinder find(String name);
 
+    UserFinder find(UUID userId);
+
     List<UserFinder> findAll();
 
     boolean delete(UUID id);

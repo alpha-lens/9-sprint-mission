@@ -17,6 +17,9 @@ public interface UserService {
     boolean create(CreateUserDto requestDto);
     boolean update(UpdateUserDto requestDto);
     UserFinder find(String name);
+
+    UserFinder find(UUID id);
+
     List<UserFinder> findAll();
     boolean delete(UUID id);
 }
