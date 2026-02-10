@@ -12,9 +12,9 @@ public interface ChannelService {
     UUID create(String type, String name, String createUserName);
     FindChannelDto find(UUID id);
 
-    List<ResponseChannelDto> findAllPrivateChannel(String userName);
+    List<ResponseChannelDto> findAllPrivateChannel(UUID userId);
 
-    List<ResponseChannelDto> findAll(String userName);
+    List<ResponseChannelDto> findAll(UUID userId);
     boolean update(UpdateChannelDto requestDto);
     boolean delete(UUID id);
 

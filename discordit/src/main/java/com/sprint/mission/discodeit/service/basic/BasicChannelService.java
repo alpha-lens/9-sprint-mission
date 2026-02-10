@@ -55,8 +55,8 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public List<ResponseChannelDto> findAllPrivateChannel(String userName) {
-        return channelRepository.findAllPrivateChannel(userName);
+    public List<ResponseChannelDto> findAllPrivateChannel(UUID userId) {
+        return channelRepository.findAllPrivateChannel(userId);
     }
 
     public UUID findChannelId(String channelName) {
@@ -64,8 +64,8 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public List<ResponseChannelDto> findAll(String userName) {
-        return channelRepository.findAllChannel(userName);
+    public List<ResponseChannelDto> findAll(UUID userId) {
+        return channelRepository.findAllChannel(userId);
     }
 
     @Override

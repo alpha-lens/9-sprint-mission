@@ -155,30 +155,31 @@ public class FileChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public List<ResponseChannelDto> findAllChannel(String userName) {
+    public List<ResponseChannelDto> findAllChannel(UUID userId) {
         List<ResponseChannelDto> result = new ArrayList<>();
 
         /// public
         result.addAll(publicChannelNameMap.values().stream().map(this::requestChannelInfo).toList());
 
         /// private
-        result.addAll(accessiblePrivateChannel(userName).stream().toList());
+        result.addAll(accessiblePrivateChannel(userId).stream().toList());
         return result;
     }
 
     @Override
-    public List<ResponseChannelDto> findAllPrivateChannel(String userName) {
-        if(accessiblePrivateChannel(userName).isEmpty())
+    public List<ResponseChannelDto> findAllPrivateChannel(UUID userId) {
+        if(accessiblePrivateChannel(userId).isEmpty())
             throw new NotFound("권한이 있는 Private Channel이 없습니다!");
 
-        return new ArrayList<>(accessiblePrivateChannel(userName).stream().toList());
+        return new ArrayList<>(accessiblePrivateChannel(userId).stream().toList());
     }
 
     @Override
-    public List<ResponseChannelDto> accessiblePrivateChannel(String userName) {
+    public List<ResponseChannelDto> accessiblePrivateChannel(UUID userId) {
         List<ResponseChannelDto> requestDto = new ArrayList<>();
         privateChannelIdMap.values().stream()
-                .filter(channel -> channel.getAccessibleUser() != null && channel.getAccessibleUser().containsKey(userName))
+                .filter(channel -> channel.getChannelType().equals(ChannelType.PRIVATE))
+                .filter(channel -> channel.getAccessibleUser().containsValue(userId))
                 .forEach(channel -> requestDto.add(requestChannelInfo(channel)));
 
         return requestDto;

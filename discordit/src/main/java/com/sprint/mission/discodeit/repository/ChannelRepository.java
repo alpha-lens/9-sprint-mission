@@ -18,11 +18,11 @@ public interface ChannelRepository {
 
     UUID getChannelId(String name);
 
-    List<ResponseChannelDto> findAllChannel(String userName);
+    List<ResponseChannelDto> findAllChannel(UUID userId);
 
-    List<ResponseChannelDto> findAllPrivateChannel(String userName);
+    List<ResponseChannelDto> findAllPrivateChannel(UUID userId);
 
-    List<ResponseChannelDto> accessiblePrivateChannel(String userName);
+    List<ResponseChannelDto> accessiblePrivateChannel(UUID userId);
 
     ResponseChannelDto requestChannelInfo(Channel channel);
 

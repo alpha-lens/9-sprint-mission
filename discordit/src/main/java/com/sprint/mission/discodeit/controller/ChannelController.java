@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.UserState;
+import com.sprint.mission.discodeit.dto.ResponseChannelDto;
 import com.sprint.mission.discodeit.dto.UpdateChannelDto;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.exepction.FailedCreate;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -45,12 +47,13 @@ public class ChannelController {
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
-//    @RequestMapping(value = "/find", method = RequestMethod.GET)
-//    public ResponseEntity<String> findChannel(
-//            @RequestParam("id") UUID id
-//    ){
-//
-//    }
+    @RequestMapping(value = "/find", method = RequestMethod.GET)
+    public ResponseEntity<List<ResponseChannelDto>> findChannel(
+            @RequestParam("id") UUID userId
+    ){
+        List<ResponseChannelDto> result = channelService.findAll(userId);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 
     @RequestMapping(value = "/update", method = RequestMethod.PUT)
     public ResponseEntity<String> handleUpdateChannel(
