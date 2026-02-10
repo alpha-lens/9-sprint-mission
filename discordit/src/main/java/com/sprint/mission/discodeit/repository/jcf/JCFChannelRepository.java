@@ -177,6 +177,16 @@ public class JCFChannelRepository implements ChannelRepository {
     }
 
     @Override
+    public boolean findChannelCreator(String channelName, String userName) {
+        if(publicChannelNameMap.containsKey(channelName))
+            return publicChannelNameMap.get(channelName).getCreateUser().equals(userName);
+        if(privateChannelNameMap.containsKey(channelName))
+            return privateChannelNameMap.get(channelName).getCreateUser().equals(userName);
+
+        return false;
+    }
+
+    @Override
     public UUID channelNameToId(String name) {
         if(publicChannelNameMap.containsKey(name)) return publicChannelNameMap.get(name).getId();
         if(privateChannelNameMap.containsKey(name)) return privateChannelNameMap.get(name).getId();

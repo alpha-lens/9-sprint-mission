@@ -47,7 +47,10 @@ public class BasicChannelService implements ChannelService {
 
         String channelInfo = channelRepository.findChannel(name);
         ChannelType channelType = channelRepository.getChannelType(name);
-        Instant lastMessageTime = messageRepository.getLastMessageInChannel(channelId);
+        Instant lastMessageTime = null;
+        try {
+            lastMessageTime = messageRepository.getLastMessageInChannel(channelId);
+        } catch (Exception ignore){}
 
         return new FindChannelDto(channelInfo, channelType, lastMessageTime);
     }
@@ -95,5 +98,10 @@ public class BasicChannelService implements ChannelService {
     @Override
     public boolean isCeatePrivateChannel(String userName) {
         return channelRepository.isCreatePrivateChannel(userName);
+    }
+
+    @Override
+    public boolean findChannelCreator(String channelName, String userName) {
+        return channelRepository.findChannelCreator(channelName, userName);
     }
 }

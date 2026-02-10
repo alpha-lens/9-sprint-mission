@@ -55,15 +55,33 @@ public class ChannelController {
             @RequestParam("newChannelName") String newChannelName
     ) {
         if(channelService.find(oldChannelName).channelType() == ChannelType.PRIVATE){
-            return new  ResponseEntity<>("Failed: Private channel cannot update!", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Failed: Private channel cannot update!", HttpStatus.BAD_REQUEST);
         }
 
         if(!channelService.isPresent(oldChannelName)){
-            return new  ResponseEntity<>("Failed: This channel not found.", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Failed: This channel not found.", HttpStatus.BAD_REQUEST);
         }
 
         channelService.update(new UpdateChannelDto(oldChannelName, newChannelName));
         return new ResponseEntity<>("Success: " + oldChannelName + " -> " + newChannelName + " changed.", HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
+    public ResponseEntity<String> handleDeleteChannel(
+            @RequestParam("channelName") String channelName
+    ) {
+        String userName = userState.getUserName();
+
+        if(!channelService.isPresent(channelName)){
+            return new ResponseEntity<>("Failed: This channel not found.", HttpStatus.BAD_REQUEST);
+        }
+
+        if(!channelService.findChannelCreator(channelName, userName)) {
+            return new ResponseEntity<>("Failed: You didn't create this channel", HttpStatus.UNAUTHORIZED);
+        }
+
+        channelService.delete(channelName);
+        return new ResponseEntity<>("Success: " + channelName + " has been deleted.", HttpStatus.OK);
     }
 }
 

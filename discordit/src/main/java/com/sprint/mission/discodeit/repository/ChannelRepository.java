@@ -37,6 +37,8 @@ public interface ChannelRepository {
 
     boolean isCreatePrivateChannel(String name);
 
+    boolean findChannelCreator(String channelName, String userName);
+
     UUID channelNameToId(String name);
 
     String channelIdToName(UUID id);

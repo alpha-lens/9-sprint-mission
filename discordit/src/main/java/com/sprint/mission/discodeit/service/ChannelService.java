@@ -25,4 +25,6 @@ public interface ChannelService {
     void excludePrivateChannel(String channelName, String userName);
 
     boolean isCeatePrivateChannel(String userName);
+
+    boolean findChannelCreator(String channelName, String userName);
 }
