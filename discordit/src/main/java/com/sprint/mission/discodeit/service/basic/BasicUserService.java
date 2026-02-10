@@ -30,7 +30,7 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public boolean isValid(UUID userId, String password) {
+    public boolean isInvalid(UUID userId, String password) {
         return userRepository.checkInvalid(userId, password);
     }
 

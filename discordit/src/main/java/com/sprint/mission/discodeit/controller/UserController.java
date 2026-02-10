@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -100,6 +101,8 @@ public class UserController {
 
     @RequestMapping(value="/update", method= RequestMethod.PUT)
     public ResponseEntity<String> handleUpdateUser(
+            @RequestParam(value = "id") UUID id,
+            @RequestParam(value = "oldPassword")  String oldPassword,
             @RequestParam(value = "userName", required = false) String userName,
             @RequestParam(value = "password", required = false) String password,
             @RequestParam(value = "email", required = false) String email,
@@ -109,23 +112,27 @@ public class UserController {
         UpdateUserDto updateUserRequestDto;
         CreateBinaryContentDto binaryContentCreateRequestDto;
 
+        if(userService.isInvalid(id, oldPassword))
+            throw new InvalidParameterException("Invalid user id or password");
+
         if(file == null || file.isEmpty()) {
-            updateUserRequestDto = new UpdateUserDto(userState.getUserId(), userName, password, email, phoneNumber, null);;
+            updateUserRequestDto = new UpdateUserDto(id, userName, password, email, phoneNumber, null);;
         } else {
             binaryContentCreateRequestDto = new CreateBinaryContentDto(AttachmentType.USER, file.getName(), file.getBytes());
             UUID profileId = binaryContentService.create(binaryContentCreateRequestDto);
-            updateUserRequestDto = new UpdateUserDto(userState.getUserId(), userName, password, email, phoneNumber, profileId);
+            updateUserRequestDto = new UpdateUserDto(id, userName, password, email, phoneNumber, profileId);
         }
 
         userService.update(updateUserRequestDto);
-        return new ResponseEntity<>(userState.getUserName() + " has been updated!", HttpStatus.OK);
+        return new ResponseEntity<>(userName + " has been updated!", HttpStatus.OK);
     }
 
     @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
     public ResponseEntity<String> handleDeleteUser(
-            @RequestParam("userName") String userName
+            @RequestParam("id") UUID id
     ) {
-        userService.delete(userService.userNameToId(userName));
+        String userName = userService.find(id).name();
+        userService.delete(id);
         return new ResponseEntity<>("Success deleted! : " + userName, HttpStatus.OK);
     }
 
@@ -133,18 +140,18 @@ public class UserController {
     // 사용자 온라인 상태 정보 업데이트용.
     @RequestMapping(value = "/debug/userstatus")
     public ResponseEntity<String> handleUserStatus(
-            @RequestParam("userName") String userName,
+            @RequestParam("id") UUID id,
             @RequestParam(value = "minute") int minute
     ) {
-        UUID userId = userService.userNameToId(userName);
+        String userName = userService.find(id).name();
         Instant now = Instant.now();
         Instant adjustedTime = now.minus(minute, ChronoUnit.MINUTES);
 
-        UserStatusUpdateDto updateRequestDto = new UserStatusUpdateDto(userId, userName, adjustedTime);
+        UserStatusUpdateDto updateRequestDto = new UserStatusUpdateDto(id, userName, adjustedTime);
 
         userStatusService.update(updateRequestDto);
         return new  ResponseEntity<>(userName + " status updated!\n"
-                + "User Status : " +  userStatusService.find(new FindUserStatusDto(userId, userName))
+                + "User Status : " +  userStatusService.find(new FindUserStatusDto(id, userName))
                 , HttpStatus.OK);
     }
 }

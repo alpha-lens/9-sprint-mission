@@ -39,7 +39,14 @@ public class JCFUserRepository implements UserRepository {
         String rePhoneNumber = requestDto.rePhoneNumber();
         UUID reProfileId = requestDto.reProfileId();
 
-        idUserMap.get(userId).updateUser(reName, rePassword, reMail, rePhoneNumber, reProfileId);
+        User user = null;
+        try {
+            user = idUserMap.get(userId);
+        } catch (Exception e) {
+            throw new RuntimeException("NPE 발생!" + e);
+        }
+
+        user.updateUser(reName, rePassword, reMail, rePhoneNumber, reProfileId);
         return true;
     }
 

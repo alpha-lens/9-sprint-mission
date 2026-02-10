@@ -12,7 +12,7 @@ public interface UserService {
 
     boolean isPresent(String name);
 
-    boolean isValid(UUID userId, String password);
+    boolean isInvalid(UUID userId, String password);
 
     boolean create(CreateUserDto requestDto);
     boolean update(UpdateUserDto requestDto);
