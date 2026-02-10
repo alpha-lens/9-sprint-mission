@@ -1,6 +1,8 @@
 package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.UserState;
+import com.sprint.mission.discodeit.dto.UpdateChannelDto;
+import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.checker.CheckService;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +47,23 @@ public class ChannelController {
 
         channelService.create("private", channelName, userState.getUserName());
         return new ResponseEntity<>("Success: " + channelName + " private channel has been created!", HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/update", method = RequestMethod.PUT)
+    public ResponseEntity<String> handleUpdateChannel(
+            @RequestParam("oldChannelName") String oldChannelName,
+            @RequestParam("newChannelName") String newChannelName
+    ) {
+        if(channelService.find(oldChannelName).channelType() == ChannelType.PRIVATE){
+            return new  ResponseEntity<>("Failed: Private channel cannot update!", HttpStatus.BAD_REQUEST);
+        }
+
+        if(!channelService.isPresent(oldChannelName)){
+            return new  ResponseEntity<>("Failed: This channel not found.", HttpStatus.BAD_REQUEST);
+        }
+
+        channelService.update(new UpdateChannelDto(oldChannelName, newChannelName));
+        return new ResponseEntity<>("Success: " + oldChannelName + " -> " + newChannelName + " changed.", HttpStatus.OK);
     }
 }
 
