@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.CreateChannelDto;
 import com.sprint.mission.discodeit.dto.FindChannelDto;
 import com.sprint.mission.discodeit.dto.ResponseChannelDto;
 import com.sprint.mission.discodeit.dto.UpdateChannelDto;
@@ -24,32 +25,30 @@ public class BasicChannelService implements ChannelService {
     private final MessageRepository messageRepository;
 
     @Override
-    public boolean isPresent(String name) {
-        return channelRepository.isPresentChannel(name);
+    public boolean isPresent(UUID id) {
+        return channelRepository.isPresentChannel(id);
     }
 
     @Override
-    public boolean create(String type, String name, String createUserName) {
+    public UUID create(String type, String name, String createUserName) {
         UUID createUserId = userRepository.userNameToId(createUserName);
 
         if(type.equalsIgnoreCase("public") || type.equals("1")) {
-            channelRepository.save(new Channel(name, createUserName, createUserId));
+            return channelRepository.save(new CreateChannelDto(name, createUserName, createUserId, ChannelType.PUBLIC));
         } else if (type.equalsIgnoreCase("private") || type.equals("2")) {
-            channelRepository.save(new Channel(name, createUserName, createUserId, ChannelType.PRIVATE));
-        } else return false;
+            return channelRepository.save(new CreateChannelDto(name, createUserName, createUserId, ChannelType.PRIVATE));
+        }
 
-        return true;
+        return null;
     }
 
     @Override
-    public FindChannelDto find(String name) {
-        UUID channelId = channelRepository.channelNameToId(name);
-
-        String channelInfo = channelRepository.findChannel(name);
-        ChannelType channelType = channelRepository.getChannelType(name);
+    public FindChannelDto find(UUID id) {
+        ResponseChannelDto channelInfo = channelRepository.findChannel(id);
+        ChannelType channelType = channelRepository.getChannelType(id);
         Instant lastMessageTime = null;
         try {
-            lastMessageTime = messageRepository.getLastMessageInChannel(channelId);
+            lastMessageTime = messageRepository.getLastMessageInChannel(id);
         } catch (Exception ignore){}
 
         return new FindChannelDto(channelInfo, channelType, lastMessageTime);
@@ -66,7 +65,7 @@ public class BasicChannelService implements ChannelService {
 
     @Override
     public List<ResponseChannelDto> findAll(String userName) {
-        return channelRepository.readAllChannel(userName);
+        return channelRepository.findAllChannel(userName);
     }
 
     @Override
@@ -75,8 +74,8 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public boolean delete(String name) {
-        return channelRepository.deleteChannel(name);
+    public boolean delete(UUID id) {
+        return channelRepository.deleteChannel(id);
     }
 
     @Override
@@ -96,12 +95,12 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public boolean isCeatePrivateChannel(String userName) {
+    public boolean isCreatePrivateChannel(String userName) {
         return channelRepository.isCreatePrivateChannel(userName);
     }
 
     @Override
-    public boolean findChannelCreator(String channelName, String userName) {
-        return channelRepository.findChannelCreator(channelName, userName);
+    public boolean findChannelCreator(UUID id, String userName) {
+        return channelRepository.findChannelCreator(id, userName);
     }
 }

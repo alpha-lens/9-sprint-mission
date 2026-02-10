@@ -8,7 +8,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 public record FindChannelDto(
-        String channelInfo,
+        ResponseChannelDto channelInfo,
         ChannelType channelType,
         Instant lastMessage
 ) {

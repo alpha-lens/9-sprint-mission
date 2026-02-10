@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.repository;
 
+import com.sprint.mission.discodeit.dto.CreateChannelDto;
 import com.sprint.mission.discodeit.dto.ResponseChannelDto;
 import com.sprint.mission.discodeit.dto.UpdateChannelDto;
 import com.sprint.mission.discodeit.entity.Channel;
@@ -9,15 +10,15 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ChannelRepository {
-    boolean save(Channel channel);
+    UUID save(CreateChannelDto requestDto);
     boolean save(UpdateChannelDto requestDto);
-    String findChannel(String name);
+    ResponseChannelDto findChannel(UUID id);
 
-    ChannelType getChannelType(String name);
+    ChannelType getChannelType(UUID id);
 
     UUID getChannelId(String name);
 
-    List<ResponseChannelDto> readAllChannel(String userName);
+    List<ResponseChannelDto> findAllChannel(String userName);
 
     List<ResponseChannelDto> findAllPrivateChannel(String userName);
 
@@ -29,15 +30,15 @@ public interface ChannelRepository {
 
     void excludePrivateChannel(String channelName, String userName);
 
-    boolean deleteChannel(String name);
+    boolean deleteChannel(UUID id);
 
     void deleteAllChannel(String name);
 
-    boolean isPresentChannel(String name);
+    boolean isPresentChannel(UUID id);
 
     boolean isCreatePrivateChannel(String name);
 
-    boolean findChannelCreator(String channelName, String userName);
+    boolean findChannelCreator(UUID id, String userName);
 
     UUID channelNameToId(String name);
 

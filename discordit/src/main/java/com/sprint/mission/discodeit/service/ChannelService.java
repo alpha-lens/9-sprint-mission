@@ -8,15 +8,15 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ChannelService {
-    boolean isPresent(String name);
-    boolean create(String type, String name, String createUserName);
-    FindChannelDto find(String name);
+    boolean isPresent(UUID id);
+    UUID create(String type, String name, String createUserName);
+    FindChannelDto find(UUID id);
 
     List<ResponseChannelDto> findAllPrivateChannel(String userName);
 
     List<ResponseChannelDto> findAll(String userName);
     boolean update(UpdateChannelDto requestDto);
-    boolean delete(String name);
+    boolean delete(UUID id);
 
     void deleteAll(String name);
 
@@ -24,7 +24,7 @@ public interface ChannelService {
 
     void excludePrivateChannel(String channelName, String userName);
 
-    boolean isCeatePrivateChannel(String userName);
+    boolean isCreatePrivateChannel(String userName);
 
-    boolean findChannelCreator(String channelName, String userName);
+    boolean findChannelCreator(UUID id, String userName);
 }

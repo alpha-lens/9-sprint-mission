@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.repository.file;
 
+import com.sprint.mission.discodeit.dto.CreateChannelDto;
 import com.sprint.mission.discodeit.dto.ResponseChannelDto;
 import com.sprint.mission.discodeit.dto.UpdateChannelDto;
 import com.sprint.mission.discodeit.entity.Channel;
@@ -74,7 +75,9 @@ public class FileChannelRepository implements ChannelRepository {
 
     /// interface
     @Override
-    public boolean save(Channel channel) {
+    public UUID save(CreateChannelDto requestDto) {
+        Channel channel = requestDto.toEntity();
+
         Path path = resolvePath(channel.getId());
 
         try(FileOutputStream fos = new FileOutputStream(path.toFile());
@@ -89,7 +92,7 @@ public class FileChannelRepository implements ChannelRepository {
                 privateChannelNameMap.put(channel.getName(), channel);
             }
 
-            return true;
+            return channel.getId();
         } catch (IOException e) {
             throw new FailedCreate("Channel save failed");
         }
@@ -97,13 +100,13 @@ public class FileChannelRepository implements ChannelRepository {
 
     @Override
     public boolean save(UpdateChannelDto requestDto) {
-        String oldName = requestDto.oldName();
+        UUID id = requestDto.id();
         String newName = requestDto.newName();
-        if(!isPresentChannel(oldName)) return false;
-        if(privateChannelNameMap.containsKey(oldName))
+        if(!isPresentChannel(id)) return false;
+        if(privateChannelIdMap.containsKey(id))
             throw new DoNotUpdatePrivateChannel("Do not update private channel");
         Path path;
-        Channel channel = publicChannelNameMap.get(oldName);
+        Channel channel = publicChannelIdMap.get(id);
 
         path = resolvePath(channel.getId());
 
@@ -112,6 +115,7 @@ public class FileChannelRepository implements ChannelRepository {
             oos.writeObject(channel);
             oos.flush();
 
+            String oldName = publicChannelIdMap.get(id).getName();
             publicChannelNameMap.put(newName, channel);
             publicChannelNameMap.remove(oldName);
             channel.channelUpdater(newName);
@@ -123,20 +127,20 @@ public class FileChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public String findChannel(String name) {
-        if(publicChannelNameMap.containsKey(name))
-            return publicChannelNameMap.get(name).toString();
-        if(privateChannelNameMap.containsKey(name))
-            return privateChannelNameMap.get(name).toString();
+    public ResponseChannelDto findChannel(UUID id) {
+        if(publicChannelIdMap.containsKey(id))
+            return requestChannelInfo(publicChannelIdMap.get(id));
+        if(privateChannelIdMap.containsKey(id))
+            return requestChannelInfo(privateChannelIdMap.get(id));
         throw new FailedFound("Channel not found");
     }
 
     @Override
-    public ChannelType getChannelType(String name) {
-        if(publicChannelNameMap.containsKey(name))
-            return publicChannelNameMap.get(name).getChannelType();
-        if(privateChannelNameMap.containsKey(name))
-            return privateChannelNameMap.get(name).getChannelType();
+    public ChannelType getChannelType(UUID id) {
+        if(publicChannelIdMap.containsKey(id))
+            return publicChannelIdMap.get(id).getChannelType();
+        if(privateChannelIdMap.containsKey(id))
+            return privateChannelIdMap.get(id).getChannelType();
         throw new FailedFound("ChannelType not found");
     }
 
@@ -151,7 +155,7 @@ public class FileChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public List<ResponseChannelDto> readAllChannel(String userName) {
+    public List<ResponseChannelDto> findAllChannel(String userName) {
         List<ResponseChannelDto> result = new ArrayList<>();
 
         /// public
@@ -207,14 +211,14 @@ public class FileChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public boolean deleteChannel(String name) {
-        UUID id;
-        boolean isPrivate = privateChannelNameMap.containsKey(name);
+    public boolean deleteChannel(UUID id) {
+        String name;
+        boolean isPrivate = privateChannelIdMap.containsKey(id);
 
         if(isPrivate){
-            id = privateChannelNameMap.get(name).getId();
+            name = privateChannelIdMap.get(id).getName();
         } else {
-            id = publicChannelNameMap.get(name).getId();
+            name = publicChannelIdMap.get(id).getName();
         }
 
         Path path = resolvePath(id);
@@ -237,13 +241,13 @@ public class FileChannelRepository implements ChannelRepository {
     public void deleteAllChannel(String name) {
         List<Channel> channels = privateChannelNameMap.values().stream().filter(channel -> channel.getCreateUser().equals(name)).toList();
 
-        channels.forEach(channel -> deleteChannel(channel.getName()));
+        channels.forEach(channel -> deleteChannel(channel.getId()));
     }
 
 
     @Override
-    public boolean isPresentChannel(String name) {
-        return publicChannelNameMap.containsKey(name) || privateChannelNameMap.containsKey(name);
+    public boolean isPresentChannel(UUID id) {
+        return publicChannelIdMap.containsKey(id) || privateChannelIdMap.containsKey(id);
     }
 
     @Override
@@ -252,11 +256,11 @@ public class FileChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public boolean findChannelCreator(String channelName, String userName) {
-        if(publicChannelNameMap.containsKey(channelName))
-            return publicChannelNameMap.get(channelName).getCreateUser().equals(userName);
-        if(privateChannelNameMap.containsKey(channelName))
-            return privateChannelNameMap.get(channelName).getCreateUser().equals(userName);
+    public boolean findChannelCreator(UUID id, String userName) {
+        if(publicChannelIdMap.containsKey(id))
+            return publicChannelIdMap.get(id).getCreateUser().equals(userName);
+        if(privateChannelIdMap.containsKey(id))
+            return privateChannelIdMap.get(id).getCreateUser().equals(userName);
 
         return false;
     }

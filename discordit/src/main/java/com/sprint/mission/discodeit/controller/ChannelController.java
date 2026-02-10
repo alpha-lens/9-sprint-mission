@@ -3,6 +3,8 @@ package com.sprint.mission.discodeit.controller;
 import com.sprint.mission.discodeit.UserState;
 import com.sprint.mission.discodeit.dto.UpdateChannelDto;
 import com.sprint.mission.discodeit.entity.ChannelType;
+import com.sprint.mission.discodeit.exepction.FailedCreate;
+import com.sprint.mission.discodeit.exepction.Unauthorized;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.checker.CheckService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -25,30 +29,20 @@ public class ChannelController {
     private final UserState userState;
     private final CheckService checkService;
 
-    @RequestMapping(value="/create/public", method= RequestMethod.POST)
-    public ResponseEntity<String> handleCreatePublicChannel(
+    @RequestMapping(value="/create", method= RequestMethod.POST)
+    public ResponseEntity<Map<String, UUID>> handleCreatePublicChannel(
             @RequestParam("channelName") String channelName,
+            @RequestParam("channelType") String type,
             @RequestPart(value = "file", required = false) MultipartFile file
     ) {
         if(checkService.isNotLogin()){
-            return new ResponseEntity<>("Failed: You can access it after you log in.", HttpStatus.UNAUTHORIZED);
+            throw new Unauthorized("Failed: You can access it after you log in.");
         }
 
-        channelService.create("public", channelName, userState.getUserName());
-        return new ResponseEntity<>("Success: " + channelName + " public channel has been created!", HttpStatus.OK);
-    }
-
-    @RequestMapping(value="/create/private", method= RequestMethod.POST)
-    public ResponseEntity<String> handleCreatePrivateChannel(
-            @RequestParam("channelName") String channelName,
-            @RequestPart(value = "file", required = false) MultipartFile file
-    ) {
-        if(checkService.isNotLogin()){
-            return new ResponseEntity<>("Failed: You can access it after you log in.", HttpStatus.UNAUTHORIZED);
-        }
-
-        channelService.create("private", channelName, userState.getUserName());
-        return new ResponseEntity<>("Success: " + channelName + " private channel has been created!", HttpStatus.OK);
+        UUID id = channelService.create(type, channelName, userState.getUserName());
+        Map<String, UUID> map = new HashMap<>();
+        map.put("id", id);
+        return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
 //    @RequestMapping(value = "/find", method = RequestMethod.GET)
@@ -60,37 +54,37 @@ public class ChannelController {
 
     @RequestMapping(value = "/update", method = RequestMethod.PUT)
     public ResponseEntity<String> handleUpdateChannel(
-            @RequestParam("oldChannelName") String oldChannelName,
+            @RequestParam("id") UUID id,
             @RequestParam("newChannelName") String newChannelName
     ) {
-        if(channelService.find(oldChannelName).channelType() == ChannelType.PRIVATE){
+        if(channelService.find(id).channelType() == ChannelType.PRIVATE){
             return new ResponseEntity<>("Failed: Private channel cannot update!", HttpStatus.BAD_REQUEST);
         }
 
-        if(!channelService.isPresent(oldChannelName)){
+        if(!channelService.isPresent(id)){
             return new ResponseEntity<>("Failed: This channel not found.", HttpStatus.BAD_REQUEST);
         }
 
-        channelService.update(new UpdateChannelDto(oldChannelName, newChannelName));
-        return new ResponseEntity<>("Success: " + oldChannelName + " -> " + newChannelName + " changed.", HttpStatus.OK);
+        channelService.update(new UpdateChannelDto(id, newChannelName));
+        return new ResponseEntity<>("Success: " + id + " -> " + newChannelName + " changed.", HttpStatus.OK);
     }
 
     @RequestMapping(value = "/delete", method = RequestMethod.DELETE)
     public ResponseEntity<String> handleDeleteChannel(
-            @RequestParam("channelName") String channelName
+            @RequestParam("id") UUID id
     ) {
         String userName = userState.getUserName();
 
-        if(!channelService.isPresent(channelName)){
+        if(!channelService.isPresent(id)){
             return new ResponseEntity<>("Failed: This channel not found.", HttpStatus.BAD_REQUEST);
         }
 
-        if(!channelService.findChannelCreator(channelName, userName)) {
+        if(!channelService.findChannelCreator(id, userName)) {
             return new ResponseEntity<>("Failed: You didn't create this channel", HttpStatus.UNAUTHORIZED);
         }
 
-        channelService.delete(channelName);
-        return new ResponseEntity<>("Success: " + channelName + " has been deleted.", HttpStatus.OK);
+        channelService.delete(id);
+        return new ResponseEntity<>("Success: " + id + " has been deleted.", HttpStatus.OK);
     }
 }
 
