@@ -62,9 +62,11 @@ public class UserController {
         Map<String, String> result = new HashMap<>();
         UserFinder userFinder = userService.find(userName);
         String userStatus = userStatusService.find(new FindUserStatusDto(userFinder.id(), userName));
+        UUID profileId = userFinder.profileId();
 
         result.put("userId", userFinder.id().toString());
-        result.put("userProfile", userFinder.profileId().toString());
+        if(profileId != null)
+            result.put("userProfile", profileId.toString());;
         result.put("userName", userName);
         result.put("userInfo", userFinder.userInfo());
         result.put("userStatus", userStatus);
