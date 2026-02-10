@@ -46,8 +46,12 @@ public class UserController {
 
         userService.create(userCreateRequestDto);
 
-        return new ResponseEntity<>(userName + "has been created!\n"
-                + "User ID: " + userService.find(userName).id()
+        UUID userId = userService.find(userName).id();
+
+        userStatusService.create(new CreateUserStatusDto(userName, userId));
+
+        return new ResponseEntity<>(userName + " has been created!\n"
+                + "User ID: " + userId.toString()
                 , HttpStatus.CREATED);
     }
 
