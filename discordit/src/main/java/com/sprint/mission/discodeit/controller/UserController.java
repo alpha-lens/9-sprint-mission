@@ -136,18 +136,14 @@ public class UserController {
         return new ResponseEntity<>("Success deleted! : " + userName, HttpStatus.OK);
     }
 
-    // ONLY TEST
-    // 사용자 온라인 상태 정보 업데이트용.
-    @RequestMapping(value = "/debug/userstatus")
+    @RequestMapping(value = "/userstatus/update")
     public ResponseEntity<String> handleUserStatus(
-            @RequestParam("id") UUID id,
-            @RequestParam(value = "minute") int minute
+            @RequestParam("id") UUID id
     ) {
         String userName = userService.find(id).name();
         Instant now = Instant.now();
-        Instant adjustedTime = now.minus(minute, ChronoUnit.MINUTES);
 
-        UserStatusUpdateDto updateRequestDto = new UserStatusUpdateDto(id, userName, adjustedTime);
+        UserStatusUpdateDto updateRequestDto = new UserStatusUpdateDto(id, userName, now);
 
         userStatusService.update(updateRequestDto);
         return new  ResponseEntity<>(userName + " status updated!\n"
