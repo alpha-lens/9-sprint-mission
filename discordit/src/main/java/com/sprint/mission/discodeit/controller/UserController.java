@@ -1,15 +1,12 @@
 package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.UserState;
-import com.sprint.mission.discodeit.dto.CreateBinaryContentDto;
-import com.sprint.mission.discodeit.dto.CreateUserDto;
-import com.sprint.mission.discodeit.dto.UpdateUserDto;
-import com.sprint.mission.discodeit.dto.UserFinder;
+import com.sprint.mission.discodeit.dto.*;
 import com.sprint.mission.discodeit.entity.AttachmentType;
 import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.UserStatusService;
 import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Request;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,8 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Controller
 @RequestMapping("/api/user")
@@ -27,6 +23,7 @@ public class UserController {
     private final BasicBinaryContentService binaryContentService;
     private final UserService userService;
     private final UserState userState;
+    private final UserStatusService userStatusService;
 
     @RequestMapping(value="/create", method= RequestMethod.POST)
     public ResponseEntity<String> handleCreateUser(
@@ -55,15 +52,42 @@ public class UserController {
     }
 
     @RequestMapping(value = "/find/{userName}", method = RequestMethod.GET)
-    public ResponseEntity<UserFinder> handleFindUserByName(@PathVariable String userName) {
+    public ResponseEntity<Map<String, String>> handleFindUserByName(@PathVariable String userName) {
+        Map<String, String> result = new HashMap<>();
         UserFinder userFinder = userService.find(userName);
-        return new ResponseEntity<>(userFinder, HttpStatus.OK);
+        String userStatus = userStatusService.find(new FindUserStatusDto(userFinder.id(), userName));
+
+        result.put("userId", userFinder.id().toString());
+        result.put("userProfile", userFinder.profileId().toString());
+        result.put("userName", userName);
+        result.put("userInfo", userFinder.userInfo());
+        result.put("userStatus", userStatus);
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/findAll", method = RequestMethod.GET)
-    public ResponseEntity<List<UserFinder>> handleFindAllUser() {
+    public ResponseEntity<List<Map<String, String>>> handleFindAllUser() {
         List<UserFinder> userFinders = userService.findAll();
-        return new ResponseEntity<>(userFinders, HttpStatus.OK);
+        List<Map<String, String>> result = new ArrayList<>();
+
+        for(UserFinder userFinder : userFinders) {
+            Map<String, String> temp = new HashMap<>();
+            FindUserStatusDto findUserStatusDto = new FindUserStatusDto(userFinder.id(), userFinder.name());
+
+            UUID profileId = userFinder.profileId();
+
+            temp.put("userId", userFinder.id().toString());
+            if(profileId != null)
+                temp.put("userProfile", profileId.toString());
+            temp.put("userName", userFinder.name());
+            temp.put("userInfo", userFinder.userInfo());
+            temp.put("userStatus", userStatusService.find(findUserStatusDto));
+
+            result.add(temp);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @RequestMapping(value="/update", method= RequestMethod.PUT)

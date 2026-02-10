@@ -18,6 +18,7 @@ public class BasicUserStatusService implements UserStatusService {
     private final UserStatusRepository userStatusRepository;
     private final UserRepository userRepository;
 
+    @Override
     public void create(CreateUserStatusDto requestDto){
         FindUserStatusDto dto = new FindUserStatusDto(requestDto.id(), requestDto.name());
 
@@ -28,13 +29,18 @@ public class BasicUserStatusService implements UserStatusService {
 
         userStatusRepository.create(requestDto);
     }
+    @Override
     public String find(FindUserStatusDto requestDto) {
         return userStatusRepository.find(requestDto);
     }
     public void findAll() {}
+
+    @Override
     public void update(UserStatusUpdateDto requestDto) {
         userStatusRepository.update(requestDto);
     }
+
+    @Override
     public void delete(DeleteUserStatusDto requestDto) {
         userStatusRepository.delete(requestDto);
     }
