@@ -45,7 +45,7 @@ public class BasicChannelService implements ChannelService {
     public FindChannelDto find(String name) {
         UUID channelId = channelRepository.channelNameToId(name);
 
-        String channelInfo = channelRepository.readChannel(name);
+        String channelInfo = channelRepository.findChannel(name);
         ChannelType channelType = channelRepository.getChannelType(name);
         Instant lastMessageTime = messageRepository.getLastMessageInChannel(channelId);
 

@@ -11,7 +11,7 @@ import java.util.UUID;
 public interface ChannelRepository {
     boolean save(Channel channel);
     boolean save(UpdateChannelDto requestDto);
-    String readChannel(String name);
+    String findChannel(String name);
 
     ChannelType getChannelType(String name);
 

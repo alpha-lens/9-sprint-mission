@@ -55,7 +55,7 @@ public class JCFChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public String readChannel(String name) {
+    public String findChannel(String name) {
         if(publicChannelNameMap.containsKey(name))
             return publicChannelNameMap.get(name).toString();
         if(privateChannelNameMap.containsKey(name))

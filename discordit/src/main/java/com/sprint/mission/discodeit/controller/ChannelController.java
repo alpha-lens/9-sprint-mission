@@ -1,11 +1,41 @@
 package com.sprint.mission.discodeit.controller;
 
+import com.sprint.mission.discodeit.UserState;
+import com.sprint.mission.discodeit.service.ChannelService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
+
+@Controller
+@RequestMapping("/api/channel")
+@RequiredArgsConstructor
 public class ChannelController {
+    private final ChannelService channelService;
+    private final UserState userState;
+
+    @RequestMapping(value="/create/public", method= RequestMethod.POST)
+    public ResponseEntity<String> handleCreatePublicChannel(
+            @RequestParam("channelName") String channelName,
+            @RequestPart(value = "file", required = false) MultipartFile file
+    ) {
+        if(userState.getUserName() == null ||  userState.getUserName().isEmpty()){
+            return new ResponseEntity<>("Failed: You can access it after you log in.", HttpStatus.UNAUTHORIZED);
+        }
+
+        channelService.create("public", channelName, userState.getUserName());
+        return new ResponseEntity<>("Success: " + channelName + " has been created!", HttpStatus.OK);
+    }
 }
 
 /*
 * 채널 관리
-* [ ] 공개 채널을 생성할 수 있다.
+* [X] 공개 채널을 생성할 수 있다.
 * [ ] 비공개 채널을 생성할 수 있다.
 * [ ] 공개 채널의 정보를 수정할 수 있다.
 * [ ] 채널을 삭제할 수 있다.
