@@ -20,6 +20,8 @@ public interface UserRepository {
 
     boolean delete(UUID id);
 
+    boolean isPresent(UUID id);
+
     UUID userNameToId(String name);
 
     String userIdToName(UUID id);

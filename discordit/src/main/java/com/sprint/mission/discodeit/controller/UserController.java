@@ -33,7 +33,7 @@ public class UserController {
             @RequestParam("userName") String userName,
             @RequestParam("password") String password,
             @RequestParam("email") String email,
-            @RequestPart(value = "file", required = false) MultipartFile file
+            @RequestParam(value = "file", required = false) MultipartFile file
     ) throws IOException {
         Map<String, String> result = new HashMap<>();
         CreateBinaryContentDto binaryContentCreateRequestDto;
@@ -107,7 +107,7 @@ public class UserController {
             @RequestParam(value = "password", required = false) String password,
             @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "phoneNumber", required = false) String phoneNumber,
-            @RequestPart(value = "file", required = false) MultipartFile file
+            @RequestParam(value = "file", required = false) MultipartFile file
     ) throws IOException {
         UpdateUserDto updateUserRequestDto;
         CreateBinaryContentDto binaryContentCreateRequestDto;

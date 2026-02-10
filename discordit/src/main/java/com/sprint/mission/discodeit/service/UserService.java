@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface UserService {
     UUID userNameToId(String name);
 
-    boolean isPresent(String name);
+    boolean isPresent(UUID id);
 
     boolean isInvalid(UUID userId, String password);
 

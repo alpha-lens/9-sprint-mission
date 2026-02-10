@@ -25,8 +25,8 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public boolean isPresent(String name) {
-        return userRepository.userNameToId(name) != null;
+    public boolean isPresent(UUID id) {
+        return userRepository.isPresent(id);
     }
 
     @Override

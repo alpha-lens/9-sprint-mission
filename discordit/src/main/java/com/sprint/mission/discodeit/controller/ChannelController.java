@@ -35,7 +35,7 @@ public class ChannelController {
     public ResponseEntity<Map<String, UUID>> handleCreatePublicChannel(
             @RequestParam("channelName") String channelName,
             @RequestParam("channelType") String type,
-            @RequestPart(value = "file", required = false) MultipartFile file
+            @RequestParam(value = "file", required = false) MultipartFile file
     ) {
         if(checkService.isNotLogin()){
             throw new Unauthorized("Failed: You can access it after you log in.");

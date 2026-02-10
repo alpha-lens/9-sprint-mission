@@ -144,6 +144,11 @@ public class FileUserRepository implements UserRepository {
     }
 
     @Override
+    public boolean isPresent(UUID id) {
+        return idUserMap.containsKey(id);
+    }
+
+    @Override
     public UUID userNameToId(String name) {
         try {
             return userNameIdMap.get(name);

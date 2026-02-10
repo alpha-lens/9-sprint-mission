@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface MessageService {
 
-    boolean create(CreateMessageDto requestDto);
+    UUID create(CreateMessageDto requestDto);
 
     boolean update(UUID userId, UUID messageId, String content);
 

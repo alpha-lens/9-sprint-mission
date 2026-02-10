@@ -28,17 +28,13 @@ public class BasicMessageService implements MessageService {
     }
 
     @Override
-    public boolean create(CreateMessageDto requestDto) {
+    public UUID create(CreateMessageDto requestDto) {
         String text = requestDto.text();
-        String sendeeChannelName = requestDto.sendeeChannelName();
-        String senderUserName = requestDto.senderUserName();
+        UUID channelId = requestDto.channelId();
+        UUID userId = requestDto.userId();
         List<UUID> binaryContentIds = requestDto.binaryContentIds();
 
-        UUID channelId = channelRepository.getChannelId(sendeeChannelName);
-        UUID userId = userRepository.userNameToId(senderUserName);
-        messageRepository.create(text, channelId, userId, binaryContentIds);
-
-        return true;
+        return messageRepository.create(text, channelId, userId, binaryContentIds);
     }
 
     @Override

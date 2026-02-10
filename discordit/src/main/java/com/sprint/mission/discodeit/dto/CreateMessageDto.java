@@ -5,8 +5,8 @@ import java.util.UUID;
 
 public record CreateMessageDto(
         String text,
-        String sendeeChannelName,
-        String senderUserName,
+        UUID channelId,
+        UUID userId,
         List<UUID> binaryContentIds
 ) {
 }
