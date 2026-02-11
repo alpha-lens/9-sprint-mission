@@ -1,6 +1,25 @@
 package com.sprint.mission.discodeit.controller;
 
+import com.sprint.mission.discodeit.dto.response.ResponseBinaryContentDto;
+import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/binarycontent")
+@RequiredArgsConstructor
 public class BinaryContentController {
+    private final BasicBinaryContentService basicBinaryContentService;
+
+    @RequestMapping(value = "/find", method = RequestMethod.GET)
+    public List<ResponseBinaryContentDto> handleFindBinaryContents(
+            @RequestParam("binaryContentIds") List<UUID> binaryContentIds
+    ) {
+        return basicBinaryContentService.findAllByIdIn(binaryContentIds);
+    }
 }
 
 /*
