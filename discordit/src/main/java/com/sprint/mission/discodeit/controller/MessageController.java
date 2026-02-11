@@ -51,7 +51,7 @@ public class MessageController {
         for (MultipartFile file : files) {
             String fileName = file.getOriginalFilename();
             String extension = fileName.substring(fileName.lastIndexOf("."));
-            if(List.of("jpg", "jpeg", "png").contains(extension)) {
+            if(List.of(".jpg", ".jpeg", ".png").contains(extension)) {
                 byte[] bytes = file.getBytes();
                 CreateBinaryContentDto requestBinaryContentDto = new CreateBinaryContentDto(AttachmentType.MESSAGE, file.getOriginalFilename(), bytes);
                 binaryContentIds.add(binaryContentService.create(requestBinaryContentDto));
