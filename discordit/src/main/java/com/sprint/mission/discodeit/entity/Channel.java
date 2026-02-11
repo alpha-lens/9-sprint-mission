@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.entity;
 
 import lombok.Getter;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -10,6 +11,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
+@EntityScan
 public class Channel implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

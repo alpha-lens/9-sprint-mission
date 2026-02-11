@@ -31,7 +31,7 @@ public record ResponseChannelInfoDto(
                 + "채널 ID: " + channelId.toString() + "\n"
                 + "채널명: " + channelName + "\n"
                 + "생성자: " + creator + "\n"
-                + accessibleUserList.toString()
+                + accessibleUserList
                 + "생성일: " + FORMATTER.format(createAt) + "\n"
                 + "수정일: " + FORMATTER.format(updateAt) + "\n";
     }

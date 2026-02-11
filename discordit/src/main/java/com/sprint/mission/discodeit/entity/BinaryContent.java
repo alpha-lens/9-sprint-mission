@@ -1,12 +1,14 @@
 package com.sprint.mission.discodeit.entity;
 
 import lombok.Getter;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
 
 @Getter
+@EntityScan
 public class BinaryContent implements Serializable {
     private final UUID id;
     private final Instant createAt;

@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.entity;
 
 import lombok.Getter;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -10,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @Getter
+@EntityScan
 public class User implements Serializable {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분 ss초")
             .withZone(ZoneId.of("Asia/Seoul"));

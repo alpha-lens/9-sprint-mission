@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.entity;
 
 import lombok.Getter;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Getter
+@EntityScan
 public class Message implements Serializable {
     private final UUID id;
     private final Instant createAt;

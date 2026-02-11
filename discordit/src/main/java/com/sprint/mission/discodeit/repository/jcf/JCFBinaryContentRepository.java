@@ -3,7 +3,6 @@ package com.sprint.mission.discodeit.repository.jcf;
 import com.sprint.mission.discodeit.dto.request.RequestCreateBinaryContentDto;
 import com.sprint.mission.discodeit.dto.response.ResponseBinaryContentDto;
 import com.sprint.mission.discodeit.entity.BinaryContent;
-import com.sprint.mission.discodeit.entity.BinaryContentType;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
