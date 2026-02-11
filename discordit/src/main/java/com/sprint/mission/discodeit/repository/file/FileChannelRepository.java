@@ -10,7 +10,7 @@ import com.sprint.mission.discodeit.exepction.global.Forbidden;
 import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import jakarta.annotation.PostConstruct;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.io.*;
@@ -25,7 +25,12 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-@Profile("file")
+@ConditionalOnProperty(
+        prefix = "discodeit.repository",
+        name = "type",
+        havingValue = "file",
+        matchIfMissing = false
+)
 public class FileChannelRepository implements ChannelRepository {
     private final Map<String, Channel> publicChannelNameMap = new ConcurrentHashMap<>();
     private final Map<UUID, Channel> publicChannelIdMap = new ConcurrentHashMap<>();

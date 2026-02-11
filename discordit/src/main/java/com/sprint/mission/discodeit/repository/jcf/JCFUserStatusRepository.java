@@ -6,7 +6,7 @@ import com.sprint.mission.discodeit.dto.request.RequestFindUserStatusDto;
 import com.sprint.mission.discodeit.dto.request.RequestUpdateUserStatusDto;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -16,7 +16,12 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-@Profile("jcf")
+@ConditionalOnProperty(
+        prefix = "discodeit.repository",
+        name = "type",
+        havingValue = "jcf",
+        matchIfMissing = true
+)
 public class JCFUserStatusRepository implements UserStatusRepository {
     private final Map<UUID, UserStatus> idMap = new ConcurrentHashMap<>();
     private final Map<UUID, UserStatus> userIdMap = new ConcurrentHashMap<>();

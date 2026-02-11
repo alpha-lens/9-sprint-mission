@@ -8,14 +8,19 @@ import com.sprint.mission.discodeit.exepction.DoNotDuplicate;
 import com.sprint.mission.discodeit.exepction.FailedDelete;
 import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.repository.UserRepository;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-@Profile("jcf")
+@ConditionalOnProperty(
+        prefix = "discodeit.repository",
+        name = "type",
+        havingValue = "jcf",
+        matchIfMissing = true
+)
 public class JCFUserRepository implements UserRepository {
     private final Map<UUID, User> idUserMap = new ConcurrentHashMap<>();
     private final Map<String, UUID> userNameIdMap = new ConcurrentHashMap<>();

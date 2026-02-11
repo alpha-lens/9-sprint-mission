@@ -9,7 +9,7 @@ import com.sprint.mission.discodeit.exepction.DoNotUpdatePrivateChannel;
 import com.sprint.mission.discodeit.exepction.global.Forbidden;
 import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
@@ -20,7 +20,12 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-@Profile("jcf")
+@ConditionalOnProperty(
+        prefix = "discodeit.repository",
+        name = "type",
+        havingValue = "jcf",
+        matchIfMissing = true
+)
 public class JCFChannelRepository implements ChannelRepository {
     private final Map<String, Channel> publicChannelNameMap = new ConcurrentHashMap<>();
     private final Map<UUID, Channel> publicChannelIdMap = new ConcurrentHashMap<>();

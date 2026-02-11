@@ -8,7 +8,7 @@ import com.sprint.mission.discodeit.exepction.FailedDelete;
 import com.sprint.mission.discodeit.exepction.FailedInit;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import jakarta.annotation.PostConstruct;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.io.*;
@@ -22,7 +22,12 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-@Profile("file")
+@ConditionalOnProperty(
+        prefix = "discodeit.repository",
+        name = "type",
+        havingValue = "file",
+        matchIfMissing = false
+)
 public class FileBinaryContentRepository implements BinaryContentRepository {
     private final Map<UUID, BinaryContent> fileIdMap = new ConcurrentHashMap<>();
     private Path DIRECTORY;

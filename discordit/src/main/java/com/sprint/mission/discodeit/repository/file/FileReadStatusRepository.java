@@ -9,7 +9,7 @@ import com.sprint.mission.discodeit.exepction.FailedUpdate;
 import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import jakarta.annotation.PostConstruct;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.io.*;
@@ -24,7 +24,12 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-@Profile("file")
+@ConditionalOnProperty(
+        prefix = "discodeit.repository",
+        name = "type",
+        havingValue = "file",
+        matchIfMissing = false
+)
 public class FileReadStatusRepository implements ReadStatusRepository {
     private final Map<UUID, ReadStatus> idReadStatusMap = new ConcurrentHashMap<>();
     private final Map<UUID, List<ReadStatus>> userIdReadStatusMap = new ConcurrentHashMap<>();
