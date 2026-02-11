@@ -2,19 +2,15 @@ package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.dto.CreateBinaryContentDto;
 import com.sprint.mission.discodeit.dto.CreateMessageDto;
-import com.sprint.mission.discodeit.dto.apiresponse.ResponseCreateMessage;
+import com.sprint.mission.discodeit.dto.apiresponse.ResponseMessage;
 import com.sprint.mission.discodeit.entity.AttachmentType;
-import com.sprint.mission.discodeit.exepction.NotAllowedFileExtOrSize;
 import com.sprint.mission.discodeit.exepction.NotFound;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -32,7 +28,7 @@ public class MessageController {
     private final UserService userService;
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
-    public ResponseCreateMessage handleCreateMessage(
+    public ResponseMessage handleCreateMessage(
             @RequestParam("channelId") UUID channelId,
             @RequestParam("userId") UUID userId,
             @RequestParam("content") String content,
@@ -49,7 +45,7 @@ public class MessageController {
         if(files == null || files.isEmpty()){
             CreateMessageDto requestMessageDto = new CreateMessageDto(content, channelId, userId, null);
             UUID messageId = messageService.create(requestMessageDto);
-            return new ResponseCreateMessage(messageId, binaryContentIds, content);
+            return new ResponseMessage(messageId, binaryContentIds, content);
         }
 
         for (MultipartFile file : files) {
@@ -65,7 +61,16 @@ public class MessageController {
         CreateMessageDto requestMessageDto = new CreateMessageDto(content, channelId, userId, binaryContentIds);
         UUID messageId = messageService.create(requestMessageDto);
 
-        return new ResponseCreateMessage(messageId, binaryContentIds, content);
+        return new ResponseMessage(messageId, binaryContentIds, content);
+    }
+
+    @RequestMapping(value = "/update/{id}", method = RequestMethod.PUT)
+    public ResponseMessage handleUpdateMessage(
+            @PathVariable("id") UUID messageId,
+            @RequestParam("userId") UUID userId,
+            @RequestParam("new_content") String newContent
+    ) {
+        return messageService.update(userId, messageId, newContent);
     }
 }
 

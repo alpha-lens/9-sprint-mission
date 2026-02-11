@@ -1,7 +1,8 @@
 package com.sprint.mission.discodeit.repository.jcf;
 
 
-import com.sprint.mission.discodeit.dto.MessageRequestDto;
+import com.sprint.mission.discodeit.dto.MessageResponseDto;
+import com.sprint.mission.discodeit.dto.apiresponse.ResponseMessage;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.exepction.FailedDelete;
 import com.sprint.mission.discodeit.exepction.FailedFound;
@@ -35,13 +36,13 @@ public class JCFMessageRepository implements MessageRepository {
     }
 
     @Override
-    public List<MessageRequestDto> findAllInChannel(UUID channelId) {
-        List<MessageRequestDto> result = new ArrayList<>();
+    public List<MessageResponseDto> findAllInChannel(UUID channelId) {
+        List<MessageResponseDto> result = new ArrayList<>();
         try{
             List<Message> messages = channelIdMessageMap.get(channelId);
             messages.stream().sorted(Comparator.comparing(Message::getCreateAt))
                     .forEach(message -> {
-                        result.add(new MessageRequestDto(
+                        result.add(new MessageResponseDto(
                                 message.getId(),
                                 message.getChannelId(),
                                 message.getUserId(),
@@ -67,14 +68,14 @@ public class JCFMessageRepository implements MessageRepository {
     }
 
     @Override
-    public List<MessageRequestDto> findAllForSender(UUID userId) {
-        List<MessageRequestDto> result = new ArrayList<>();
+    public List<MessageResponseDto> findAllForSender(UUID userId) {
+        List<MessageResponseDto> result = new ArrayList<>();
         List<Message> messages = userIdMessageMap.get(userId);
         try{
             if(messages != null) {
                 messages.stream().sorted(Comparator.comparing(Message::getCreateAt))
                         .forEach(message -> {
-                            result.add(new MessageRequestDto(
+                            result.add(new MessageResponseDto(
                                     message.getId(),
                                     message.getChannelId(),
                                     message.getUserId(),
@@ -92,13 +93,17 @@ public class JCFMessageRepository implements MessageRepository {
     }
 
     @Override
-    public boolean updateMessage(UUID id, String content) {
+    public ResponseMessage updateMessage(UUID id, String content) {
         Message message = messageIdMap.get(id);
         if (message == null) throw new FailedFound("Message not found");
 
         message.updateMessage(content);
 
-        return true;
+        return new ResponseMessage(
+                message.getId(),
+                message.getAttachmentIds(),
+                message.getContent()
+        );
     }
 
     @Override
