@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/message")
+@RequestMapping("/api/{channelId}/message")
 @RequiredArgsConstructor
 public class MessageController {
     private final BasicBinaryContentService binaryContentService;
@@ -31,7 +31,7 @@ public class MessageController {
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public MessageResponseDto handleCreateMessage(
-            @RequestParam("channelId") UUID channelId,
+            @PathVariable UUID channelId,
             @RequestParam("userId") UUID userId,
             @RequestParam("content") String content,
             @RequestParam(value = "files", required = false) List<MultipartFile> files
@@ -72,7 +72,7 @@ public class MessageController {
         return messageService.update(userId, messageId, newContent);
     }
 
-    @RequestMapping(value = "delete/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<String> handleDeleteMessage(
             @PathVariable("id") UUID messageId,
             @RequestParam("userId") UUID userId
@@ -82,7 +82,7 @@ public class MessageController {
         } else return new ResponseEntity<>(HttpStatus.CONFLICT);
     }
 
-    @RequestMapping(value = "find/{channelId}")
+    @RequestMapping(value = "/find")
     public List<MessageResponseDto> handleFindMessage(
             @PathVariable UUID channelId,
             @RequestParam("userId") UUID userId
