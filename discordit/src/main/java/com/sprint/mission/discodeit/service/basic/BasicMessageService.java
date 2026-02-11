@@ -44,8 +44,7 @@ public class BasicMessageService implements MessageService {
     }
 
     @Override
-    public List<String> findAllInChannel(String channelName) {
-        UUID channelId = channelRepository.channelNameToId(channelName);
+    public List<String> findAllInChannel(UUID channelId) {
         return messageRepository.findAllInChannel(channelId).stream().map(this::formattingMessage).toList();
     }
 
@@ -86,8 +85,7 @@ public class BasicMessageService implements MessageService {
     }
 
     @Override
-    public String lastMessageTime(String channelName) {
-        UUID channelId = channelRepository.channelNameToId(channelName);
+    public String lastMessageTime(UUID channelId) {
         return messageRepository.findAllInChannel(channelId).stream().map(MessageResponseDto::createAt).max(String::compareTo).orElse("없음");
     }
 }

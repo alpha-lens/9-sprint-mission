@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface ChannelService {
     boolean isPresent(UUID id);
     UUID create(String type, String name, String createUserName);
-    FindChannelDto find(UUID id);
+    FindChannelDto find(UUID channelId, UUID userId);
 
     List<ResponseChannelDto> findAllPrivateChannel(UUID userId);
 

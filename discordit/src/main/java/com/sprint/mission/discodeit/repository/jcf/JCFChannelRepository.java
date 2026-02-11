@@ -8,6 +8,7 @@ import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.exepction.DoNotUpdatePrivateChannel;
 import com.sprint.mission.discodeit.exepction.FailedFound;
 import com.sprint.mission.discodeit.exepction.NotFound;
+import com.sprint.mission.discodeit.exepction.Unauthorized;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
@@ -58,11 +59,13 @@ public class JCFChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public ResponseChannelDto findChannel(UUID id) {
-        if(publicChannelIdMap.containsKey(id))
-            return requestChannelInfo(publicChannelIdMap.get(id));
-        if(privateChannelIdMap.containsKey(id))
-            return requestChannelInfo(privateChannelIdMap.get(id));
+    public ResponseChannelDto findChannel(UUID channelId, UUID userId) {
+        if(publicChannelIdMap.containsKey(channelId))
+            return requestChannelInfo(publicChannelIdMap.get(channelId));
+        if(privateChannelIdMap.containsKey(channelId))
+            if (privateChannelIdMap.get(channelId).getAccessibleUser().containsValue(userId))
+                return requestChannelInfo(privateChannelIdMap.get(channelId));
+            else throw new Unauthorized("Cannot accessible this channel!");
         throw new FailedFound("Channel not found");
     }
 

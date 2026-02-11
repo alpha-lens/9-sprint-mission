@@ -43,12 +43,12 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public FindChannelDto find(UUID id) {
-        ResponseChannelDto channelInfo = channelRepository.findChannel(id);
-        ChannelType channelType = channelRepository.getChannelType(id);
+    public FindChannelDto find(UUID channelId, UUID userId) {
+        ResponseChannelDto channelInfo = channelRepository.findChannel(channelId, userId);
+        ChannelType channelType = channelRepository.getChannelType(channelId);
         Instant lastMessageTime = null;
         try {
-            lastMessageTime = messageRepository.getLastMessageInChannel(id);
+            lastMessageTime = messageRepository.getLastMessageInChannel(channelId);
         } catch (Exception ignore){}
 
         return new FindChannelDto(channelInfo, channelType, lastMessageTime);

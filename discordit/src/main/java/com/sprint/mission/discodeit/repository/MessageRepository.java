@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface MessageRepository {
     UUID create(String content, UUID channelId, UUID userId, List<UUID> attachmentIdList);
 
-    List<MessageResponseDto> findAllInChannel(UUID userId);
+    List<MessageResponseDto> findAllInChannel(UUID channelId);
 
     Instant getLastMessageInChannel(UUID channelId);
 

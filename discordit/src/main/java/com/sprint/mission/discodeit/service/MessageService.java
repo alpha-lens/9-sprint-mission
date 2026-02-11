@@ -14,11 +14,11 @@ public interface MessageService {
 
     List<String> findAllForSender(UUID userId);
 
-    List<String> findAllInChannel(String name);
+    List<String> findAllInChannel(UUID channelId);
 
     boolean delete(UUID userId, UUID messageId);
 
     void deleteAll(UUID channelId);
 
-    String lastMessageTime(String channelName);
+    String lastMessageTime(UUID channelId);
 }
