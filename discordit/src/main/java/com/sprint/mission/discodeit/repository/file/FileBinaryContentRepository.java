@@ -2,8 +2,8 @@ package com.sprint.mission.discodeit.repository.file;
 
 import com.sprint.mission.discodeit.dto.request.RequestCreateBinaryContentDto;
 import com.sprint.mission.discodeit.dto.response.ResponseBinaryContentDto;
-import com.sprint.mission.discodeit.entity.BinaryContentType;
 import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.entity.BinaryContentType;
 import com.sprint.mission.discodeit.exepction.FailedCreate;
 import com.sprint.mission.discodeit.exepction.FailedDelete;
 import com.sprint.mission.discodeit.exepction.FailedInit;
@@ -64,7 +64,7 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
 
     @Override
     public UUID create(RequestCreateBinaryContentDto requestDto) {
-        BinaryContentType type = requestDto.type();
+        String type = requestDto.contentType();
         String file = requestDto.filename();
         BinaryContent binaryContent = new BinaryContent(type, file, null);
         

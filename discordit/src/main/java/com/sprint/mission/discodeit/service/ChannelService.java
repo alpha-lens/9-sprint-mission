@@ -1,8 +1,8 @@
 package com.sprint.mission.discodeit.service;
 
-import com.sprint.mission.discodeit.dto.response.ResponseFindChannelDto;
-import com.sprint.mission.discodeit.dto.response.ResponseChannelDto;
 import com.sprint.mission.discodeit.dto.request.RequestUpdateChannelDto;
+import com.sprint.mission.discodeit.dto.response.ResponseChannelDto;
+import com.sprint.mission.discodeit.dto.response.ResponseFindChannelDto;
 
 import java.util.List;
 import java.util.UUID;

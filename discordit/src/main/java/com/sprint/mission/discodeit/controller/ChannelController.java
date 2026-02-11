@@ -1,10 +1,10 @@
 package com.sprint.mission.discodeit.controller;
 
-import com.sprint.mission.discodeit.dto.response.ResponseChannelDto;
 import com.sprint.mission.discodeit.dto.request.RequestUpdateChannelDto;
+import com.sprint.mission.discodeit.dto.response.ResponseChannelDto;
 import com.sprint.mission.discodeit.entity.ChannelType;
-import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.exepction.global.Forbidden;
+import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +49,7 @@ public class ChannelController {
             @RequestParam("userId") UUID userId,
             @RequestParam("newChannelName") String newChannelName
     ) {
-        String userName = userService.find(userId).name();
+        String userName = userService.find(userId).username();
 
         if(!channelService.isPresent(channelId)){
             throw new NotFound("The channel does not exist.");
@@ -70,7 +70,7 @@ public class ChannelController {
             @RequestParam("channelId") UUID channelId,
             @RequestParam("userId") UUID userId
     ) {
-        String userName = userService.find(userId).name();
+        String userName = userService.find(userId).username();
 
         if(!channelService.isPresent(channelId)){
             throw new NotFound("The channel does not exist.");
@@ -84,12 +84,3 @@ public class ChannelController {
         return new ResponseEntity<>("Success: " + channelId + " has been deleted.", HttpStatus.OK);
     }
 }
-
-/*
-* 채널 관리
-* [X] 공개 채널을 생성할 수 있다.
-* [X] 비공개 채널을 생성할 수 있다.
-* [X] 공개 채널의 정보를 수정할 수 있다.
-* [X] 채널을 삭제할 수 있다.
-* [X] 특정 사용자가 볼 수 있는 모든 채널 목록을 조회할 수 있다.
-* */

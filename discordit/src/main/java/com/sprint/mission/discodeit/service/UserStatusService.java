@@ -8,7 +8,7 @@ import com.sprint.mission.discodeit.dto.request.RequestUpdateUserStatusDto;
 public interface UserStatusService {
     void create(RequestCreateUserStatusDto requestDto);
 
-    String find(RequestFindUserStatusDto requestDto);
+    boolean find(RequestFindUserStatusDto requestDto);
 
     void update(RequestUpdateUserStatusDto requestDto);
 

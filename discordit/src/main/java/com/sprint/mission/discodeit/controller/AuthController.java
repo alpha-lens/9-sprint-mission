@@ -29,8 +29,3 @@ public class AuthController {
         return ResponseEntity.ok("Logout successfully");
     }
 }
-
-/*
-* 권한 관리
-* [X] 사용자는 로그인할 수 있다.
-* */

@@ -2,7 +2,7 @@ package com.sprint.mission.discodeit.repository.jcf;
 
 import com.sprint.mission.discodeit.dto.request.RequestCreateUserDto;
 import com.sprint.mission.discodeit.dto.request.RequestUpdateUserDto;
-import com.sprint.mission.discodeit.dto.request.RequestUserResponseDto;
+import com.sprint.mission.discodeit.dto.response.ResponseUserDto;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exepction.DoNotDuplicate;
 import com.sprint.mission.discodeit.exepction.FailedDelete;
@@ -21,16 +21,16 @@ public class JCFUserRepository implements UserRepository {
     private final Map<String, UUID> userNameIdMap = new ConcurrentHashMap<>();
 
     @Override
-    public RequestUserResponseDto create(RequestCreateUserDto dto) {
+    public ResponseUserDto create(RequestCreateUserDto dto) {
         User user = dto.toEntity();
         userNameIdMap.put(user.getName(), user.getId());
         idUserMap.put(user.getId(), user);
-        
-        return new RequestUserResponseDto(user.getId(), user.getName(), user.toString(), user.getProfileId());
+
+        return response(user);
     }
 
     @Override
-    public RequestUserResponseDto update(RequestUpdateUserDto requestDto) {
+    public ResponseUserDto update(RequestUpdateUserDto requestDto) {
         UUID userId = requestDto.id();
         String reName = requestDto.reName();
         String rePassword = requestDto.rePassword();
@@ -38,7 +38,7 @@ public class JCFUserRepository implements UserRepository {
         String rePhoneNumber = requestDto.rePhoneNumber();
         UUID reProfileId = requestDto.reProfileId();
 
-        User user = null;
+        User user;
         try {
             user = idUserMap.get(userId);
         } catch (Exception e) {
@@ -46,38 +46,35 @@ public class JCFUserRepository implements UserRepository {
         }
 
         user.updateUser(reName, rePassword, reMail, rePhoneNumber, reProfileId);
-        return new RequestUserResponseDto(user.getId(), user.getName(), user.toString(), user.getProfileId());
+        return response(user);
     }
 
     @Override
-    public RequestUserResponseDto find(String name) {
+    public ResponseUserDto find(String name) {
         User user = idUserMap.get(userNameIdMap.get(name));
-        UUID id = user.getId();
-        String userName = user.getName();
-
-        return new RequestUserResponseDto(id, userName, user.toString(), user.getProfileId());
+        return response(user);
     }
 
     @Override
-    public RequestUserResponseDto find(UUID userId) {
+    public ResponseUserDto find(UUID userId) {
         User user = idUserMap.getOrDefault(userId, null);
         if(user == null) {
             throw new NotFound("Not Found This User Id");
         }
-        String userName = user.getName();
 
-        return new RequestUserResponseDto(userId, userName, user.toString(), user.getProfileId());
+        return response(user);
     }
 
     @Override
-    public List<RequestUserResponseDto> findAll() {
-        List<RequestUserResponseDto> result = new ArrayList<>();
-        idUserMap.values().stream().sorted(Comparator.comparing(User::getName)).forEach(user -> {
-            UUID id = user.getId();
-            String userName = user.getName();
-            result.add(new RequestUserResponseDto(id, userName, user.toString(), user.getProfileId()));
-        });
+    public List<ResponseUserDto> findAll() {
+        List<ResponseUserDto> result = new ArrayList<>();
+        idUserMap.values().stream().sorted(Comparator.comparing(User::getName))
+                .forEach(user -> result.add(response(user)));
         return result;
+    }
+
+    private ResponseUserDto response(User user) {
+        return new ResponseUserDto(user.getId(), user.getCreateAt(), user.getUpdateAt(), user.getName(), user.getEmail(), user.getProfileId());
     }
 
     @Override

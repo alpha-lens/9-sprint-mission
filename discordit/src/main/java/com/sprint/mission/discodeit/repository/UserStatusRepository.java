@@ -10,9 +10,9 @@ import java.util.List;
 public interface UserStatusRepository {
     boolean create(RequestCreateUserStatusDto requestDto);
 
-    String find(RequestFindUserStatusDto requestDto);
+    Boolean find(RequestFindUserStatusDto requestDto);
 
-    List<String> findAll(List<RequestFindUserStatusDto> requestDto);
+    List<Boolean> findAll(List<RequestFindUserStatusDto> requestDto);
 
     boolean update(RequestUpdateUserStatusDto requestDto);
 

@@ -1,13 +1,13 @@
 package com.sprint.mission.discodeit.repository.jcf;
 
 import com.sprint.mission.discodeit.dto.request.RequestCreateChannelDto;
-import com.sprint.mission.discodeit.dto.response.ResponseChannelDto;
 import com.sprint.mission.discodeit.dto.request.RequestUpdateChannelDto;
+import com.sprint.mission.discodeit.dto.response.ResponseChannelDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.exepction.DoNotUpdatePrivateChannel;
-import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.exepction.global.Forbidden;
+import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;

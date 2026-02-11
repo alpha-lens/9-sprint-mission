@@ -24,13 +24,13 @@ public class BasicUserStatusService implements UserStatusService {
 
         if(userRepository.userIdToName(requestDto.id()).isEmpty())
             throw new NotFound("해당 유저가 없습니다.");
-        if(!userStatusRepository.find(dto).isEmpty())
+        if(userStatusRepository.find(dto) != null)
             throw new DoNotDuplicate("이미 존재합니다.");
 
         userStatusRepository.create(requestDto);
     }
     @Override
-    public String find(RequestFindUserStatusDto requestDto) {
+    public boolean find(RequestFindUserStatusDto requestDto) {
         return userStatusRepository.find(requestDto);
     }
     public void findAll() {}

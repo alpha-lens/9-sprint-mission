@@ -2,8 +2,8 @@ package com.sprint.mission.discodeit.repository.jcf;
 
 import com.sprint.mission.discodeit.dto.request.RequestCreateBinaryContentDto;
 import com.sprint.mission.discodeit.dto.response.ResponseBinaryContentDto;
-import com.sprint.mission.discodeit.entity.BinaryContentType;
 import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.entity.BinaryContentType;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
@@ -21,7 +21,7 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
 
     @Override
     public UUID create(RequestCreateBinaryContentDto requestDto) {
-        BinaryContentType type = requestDto.type();
+        String type = requestDto.contentType();
         String file = requestDto.filename();
         byte[] bytes = requestDto.bytes();
         BinaryContent binaryContent = new BinaryContent(type, file, bytes);

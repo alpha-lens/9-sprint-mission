@@ -32,13 +32,12 @@ public class UserStatus implements Serializable {
         updateAt = time;
     }
 
-    public String isOnline() {
+    public boolean isOnline() {
         try {
             Duration duration = Duration.between(this.getUpdateAt(), Instant.now());
-            if(duration.toMinutes() > 5) return "오프라인";
-            return "온라인";
+            return duration.toMinutes() <= 5;
         } catch (Exception ignore) {
-            return "오프라인";
+            return false;
         }
     }
 }

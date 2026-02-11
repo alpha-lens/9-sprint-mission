@@ -3,26 +3,23 @@ package com.sprint.mission.discodeit.controller;
 import com.sprint.mission.discodeit.dto.response.ResponseBinaryContentDto;
 import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/binarycontent")
+@RequestMapping("/api/binary-content")
 @RequiredArgsConstructor
 public class BinaryContentController {
     private final BasicBinaryContentService basicBinaryContentService;
 
-    @RequestMapping(value = "/find", method = RequestMethod.GET)
+    @RequestMapping(value = "/find")
     public List<ResponseBinaryContentDto> handleFindBinaryContents(
-            @RequestParam("binaryContentIds") List<UUID> binaryContentIds
+            @RequestParam("binaryContentId") List<UUID> binaryContentId
     ) {
-        return basicBinaryContentService.findAllByIdIn(binaryContentIds);
+        return basicBinaryContentService.findAllByIdIn(binaryContentId);
     }
 }
-
-/*
-* 바이너리 파일 다운로드
-* [ ] 바이너리 파일을 1개 또는 여러 개 조회할 수 있다.
-* */

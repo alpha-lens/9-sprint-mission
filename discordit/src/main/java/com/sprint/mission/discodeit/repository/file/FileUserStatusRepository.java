@@ -79,15 +79,15 @@ public class FileUserStatusRepository implements UserStatusRepository {
     }
 
     @Override
-    public String find(RequestFindUserStatusDto requestDto) {
+    public Boolean find(RequestFindUserStatusDto requestDto) {
         if(!userIdMap.containsKey(requestDto.id()))
-            return "";
+            return null;
         return userIdMap.get(requestDto.id()).isOnline();
     }
 
     @Override
-    public List<String> findAll(List<RequestFindUserStatusDto> requestDto) {
-        List<String> result = new ArrayList<>();
+    public List<Boolean> findAll(List<RequestFindUserStatusDto> requestDto) {
+        List<Boolean> result = new ArrayList<>();
         requestDto.forEach(req -> result.add(find(req)));
         return result;
     }

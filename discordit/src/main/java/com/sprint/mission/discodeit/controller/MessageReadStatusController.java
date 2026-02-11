@@ -1,8 +1,8 @@
 package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.dto.request.RequestCreateReadStatusDto;
-import com.sprint.mission.discodeit.dto.response.ResponseReadStatus;
 import com.sprint.mission.discodeit.dto.response.ResponseChannelDto;
+import com.sprint.mission.discodeit.dto.response.ResponseReadStatus;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.ReadStatusService;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/readstatus")
+@RequestMapping("/api/read-status")
 @RequiredArgsConstructor
 public class MessageReadStatusController {
     private final ReadStatusService readStatusService;
@@ -45,11 +45,3 @@ public class MessageReadStatusController {
         return readStatusService.findAllByUserId(userId);
     }
 }
-
-
-/*
-* 메시지 수신 정보 관리
-* [ ] 특정 채널의 메시지 수신 정보를 생성할 수 있다.
-* [ ] 특정 채널의 메시지 수신 정보를 수정할 수 있다.
-* [ ] 특정 사용자의 메시지 수신 정보를 조회할 수 있다.
-* */

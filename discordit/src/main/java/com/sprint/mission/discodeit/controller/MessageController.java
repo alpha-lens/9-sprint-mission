@@ -3,7 +3,6 @@ package com.sprint.mission.discodeit.controller;
 import com.sprint.mission.discodeit.dto.request.RequestCreateBinaryContentDto;
 import com.sprint.mission.discodeit.dto.request.RequestCreateMessageDto;
 import com.sprint.mission.discodeit.dto.response.ResponseMessageDto;
-import com.sprint.mission.discodeit.entity.BinaryContentType;
 import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
@@ -54,7 +53,7 @@ public class MessageController {
             String extension = fileName.substring(fileName.lastIndexOf("."));
             if(List.of(".jpg", ".jpeg", ".png").contains(extension)) {
                 byte[] bytes = file.getBytes();
-                RequestCreateBinaryContentDto requestBinaryContentDto = new RequestCreateBinaryContentDto(BinaryContentType.MESSAGE, file.getOriginalFilename(), bytes);
+                RequestCreateBinaryContentDto requestBinaryContentDto = new RequestCreateBinaryContentDto(file.getContentType(), file.getOriginalFilename(), bytes);
                 binaryContentIds.add(binaryContentService.create(requestBinaryContentDto));
             }
         }
@@ -91,11 +90,3 @@ public class MessageController {
         return messageService.findAllInChannel(channelId);
     }
 }
-
-/*
-* 메시지 관리
-* [X] 메시지를 보낼 수 있다.
-* [X] 메시지를 수정할 수 있다.
-* [ ] 메시지를 삭제할 수 있다.
-* [ ] 특정 채널의 메시지 목록을 조회할 수 있다.
-*/

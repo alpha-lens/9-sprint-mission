@@ -1,6 +1,8 @@
 package com.sprint.mission.discodeit.controller;
 
+import com.sprint.mission.discodeit.dto.UserDto;
 import com.sprint.mission.discodeit.dto.request.*;
+import com.sprint.mission.discodeit.dto.response.ResponseUserDto;
 import com.sprint.mission.discodeit.entity.BinaryContentType;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.UserStatusService;
@@ -8,6 +10,7 @@ import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,7 +19,7 @@ import java.security.InvalidParameterException;
 import java.time.Instant;
 import java.util.*;
 
-@RestController
+@Controller
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
@@ -24,8 +27,9 @@ public class UserController {
     private final UserService userService;
     private final UserStatusService userStatusService;
 
+    @ResponseBody
     @RequestMapping(value="/create", method= RequestMethod.POST)
-    public RequestUserResponseDto handleCreateUser(
+    public ResponseUserDto handleCreateUser(
             @RequestParam("userName") String userName,
             @RequestParam("password") String password,
             @RequestParam("email") String email,
@@ -37,12 +41,12 @@ public class UserController {
         if(file == null || file.isEmpty()) {
             userCreateRequestDto = new RequestCreateUserDto(userName, password, email, null);
         } else {
-            binaryContentCreateRequestDto = new RequestCreateBinaryContentDto(BinaryContentType.USER, file.getName(), file.getBytes());
+            binaryContentCreateRequestDto = new RequestCreateBinaryContentDto(file.getContentType(), file.getName(), file.getBytes());
             UUID profileId = binaryContentService.create(binaryContentCreateRequestDto);
             userCreateRequestDto = new RequestCreateUserDto(userName, password, email, profileId);
         }
 
-        RequestUserResponseDto responseDto = userService.create(userCreateRequestDto);
+        ResponseUserDto responseDto = userService.create(userCreateRequestDto);
 
         UUID userId = responseDto.id();
 
@@ -51,42 +55,23 @@ public class UserController {
         return responseDto;
     }
 
+    @ResponseBody
     @RequestMapping(value = "/find/{id}", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, String>> handleFindUserByName(@PathVariable UUID id) {
-        Map<String, String> result = new HashMap<>();
-        RequestUserResponseDto requestUserResponseDto = userService.find(id);
-        String userStatus = userStatusService.find(new RequestFindUserStatusDto(requestUserResponseDto.id(), requestUserResponseDto.name()));
-        UUID profileId = requestUserResponseDto.profileId();
-
-        result.put("userId", requestUserResponseDto.id().toString());
-        if(profileId != null)
-            result.put("userProfile", profileId.toString());;
-        result.put("userName", requestUserResponseDto.name());
-        result.put("userInfo", requestUserResponseDto.userInfo());
-        result.put("userStatus", userStatus);
-
-        return new ResponseEntity<>(result, HttpStatus.OK);
+    public UserDto handleFindUserById(@PathVariable UUID id) {
+        ResponseUserDto responseUserDto = userService.find(id);
+        Boolean isOnline = userStatusService.find(new RequestFindUserStatusDto(responseUserDto.id(), responseUserDto.username()));
+        return UserDto.from(responseUserDto, isOnline);
     }
 
+    @ResponseBody
     @RequestMapping(value = "/findAll", method = RequestMethod.GET)
-    public List<Map<String, String>> handleFindAllUser() {
-        List<RequestUserResponseDto> requestUserResponseDtos = userService.findAll();
-        List<Map<String, String>> result = new ArrayList<>();
+    public List<UserDto> handleFindAllUser() {
+        List<ResponseUserDto> responseUserDtos = userService.findAll();
+        List<UserDto> result = new ArrayList<>();
 
-        for(RequestUserResponseDto requestUserResponseDto : requestUserResponseDtos) {
-            Map<String, String> temp = new HashMap<>();
-            RequestFindUserStatusDto requestFindUserStatusDto = new RequestFindUserStatusDto(requestUserResponseDto.id(), requestUserResponseDto.name());
-
-            UUID profileId = requestUserResponseDto.profileId();
-
-            temp.put("userId", requestUserResponseDto.id().toString());
-            if(profileId != null)
-                temp.put("userProfile", profileId.toString());
-            temp.put("userName", requestUserResponseDto.name());
-            temp.put("userInfo", requestUserResponseDto.userInfo());
-            temp.put("userStatus", userStatusService.find(requestFindUserStatusDto));
-
-            result.add(temp);
+        for(ResponseUserDto responseUserDto : responseUserDtos) {
+            Boolean isOnline = userStatusService.find(new RequestFindUserStatusDto(responseUserDto.id(), responseUserDto.username()));
+            result.add(UserDto.from(responseUserDto, isOnline));
         }
 
         return result;
@@ -109,9 +94,9 @@ public class UserController {
             throw new InvalidParameterException("Invalid user messageId or password");
 
         if(file == null || file.isEmpty()) {
-            updateUserRequestDto = new RequestUpdateUserDto(id, userName, password, email, phoneNumber, null);;
+            updateUserRequestDto = new RequestUpdateUserDto(id, userName, password, email, phoneNumber, null);
         } else {
-            binaryContentCreateRequestDto = new RequestCreateBinaryContentDto(BinaryContentType.USER, file.getName(), file.getBytes());
+            binaryContentCreateRequestDto = new RequestCreateBinaryContentDto(file.getContentType(), file.getName(), file.getBytes());
             UUID profileId = binaryContentService.create(binaryContentCreateRequestDto);
             updateUserRequestDto = new RequestUpdateUserDto(id, userName, password, email, phoneNumber, profileId);
         }
@@ -124,7 +109,7 @@ public class UserController {
     public ResponseEntity<String> handleDeleteUser(
             @RequestParam("id") UUID id
     ) {
-        String userName = userService.find(id).name();
+        String userName = userService.find(id).username();
         userService.delete(id);
         return new ResponseEntity<>("Success deleted! : " + userName, HttpStatus.OK);
     }
@@ -133,7 +118,7 @@ public class UserController {
     public ResponseEntity<String> handleUserStatus(
             @RequestParam("id") UUID id
     ) {
-        String userName = userService.find(id).name();
+        String userName = userService.find(id).username();
         Instant now = Instant.now();
 
         RequestUpdateUserStatusDto updateRequestDto = new RequestUpdateUserStatusDto(id, userName, now);
@@ -144,13 +129,3 @@ public class UserController {
                 , HttpStatus.OK);
     }
 }
-
-/*
-* 사용자 관리
-* [x] 사용자를 등록할 수 있다.
-* [x] 사용자 정보를 수정할 수 있다.
-* [X] 사용자를 삭제할 수 있다.
-* [X] 사용자를 조회할 수 있다.
-* [X] 모든 사용자를 조회할 수 있다.
-* [X] 사용자의 온라인 상태를 업데이트할 수 있다.
-* */

@@ -12,11 +12,11 @@ public class BinaryContent implements Serializable {
     private final Instant createAt;
     private final String fileName;
     private final String fileExtension;
-    private final BinaryContentType type;
+    private final String type;
     private final byte[] bytes;
 
-    public BinaryContent(BinaryContentType type, String fileName, byte[] bytes) {
-        String[] nameParts = fileName.split("\\.", 2);
+    public BinaryContent(String type, String fileName, byte[] bytes) {
+        String[] nameParts = fileName.split("\\.");
         this.fileName = nameParts[0];
         this.fileExtension = nameParts.length > 1 ? nameParts[1] : "";
         this.id = UUID.randomUUID();
