@@ -1,5 +1,7 @@
 package com.sprint.mission.discodeit.repository.jcf;
 
+import com.sprint.mission.discodeit.dto.ReadStatusCreateRequest;
+import com.sprint.mission.discodeit.dto.ReadStatusResponse;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
@@ -18,11 +20,24 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
     private final Map<UUID, List<ReadStatus>> channelIdReadStatusMap = new ConcurrentHashMap<>();
 
     @Override
-    public void create(UUID userId, UUID channelId) {
+    public List<ReadStatusResponse> create(ReadStatusCreateRequest request) {
+        List<ReadStatusResponse> result = new ArrayList<>();
+        for(UUID channelId : request.channelIds()) {
+            result.add(this.create(request.userId(), channelId));
+        }
+        return result;
+    }
+
+    private ReadStatusResponse create(UUID userId, UUID channelId) {
         ReadStatus readStatus = new ReadStatus(userId, channelId);
         idReadStatusMap.put(readStatus.getId(), readStatus);
         userIdReadStatusMap.computeIfAbsent(userId, id -> new ArrayList<>()).add(readStatus);
         channelIdReadStatusMap.computeIfAbsent(userId, id -> new ArrayList<>()).add(readStatus);
+        return response(readStatus);
+    }
+
+    private ReadStatusResponse response(ReadStatus readStatus) {
+        return new ReadStatusResponse(readStatus.getId(), readStatus.getUserId(), readStatus.getChannelId(), readStatus.getCreateAt(), readStatus.getUpdateAt());
     }
 
     @Override
@@ -31,24 +46,23 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
     }
 
     @Override
-    public Map<UUID, Instant> findAllByUserId(UUID userId) {
-        List<ReadStatus> tempList = userIdReadStatusMap.get(userId);
-        Map<UUID, Instant> result = new HashMap<>();
-        for(ReadStatus temp : tempList) {
-            result.put(temp.getChannelId(), temp.getUpdateAt());
-        }
+    public List<ReadStatusResponse> findAllByUserId(UUID userId) {
+        List<ReadStatusResponse> result = new ArrayList<>();
 
+        for(ReadStatus readStatus : userIdReadStatusMap.get(userId)) {
+            result.add(response(readStatus));
+        }
         return result;
     }
 
     @Override
-    public boolean update(UUID userId, UUID channelId) {
+    public ReadStatusResponse update(UUID userId, UUID channelId) {
         ReadStatus temp = userIdReadStatusMap.get(userId).stream().filter(readStatus -> readStatus.getChannelId().equals(channelId)).findFirst().orElse(null);
 
         if(temp == null) throw new NotFound("상태값을 찾지 못했습니다.");
 
         temp.updateReadAt();
-        return true;
+        return response(temp);
     }
 
     @Override

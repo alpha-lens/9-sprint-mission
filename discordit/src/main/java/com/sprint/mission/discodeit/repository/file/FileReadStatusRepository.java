@@ -1,5 +1,7 @@
 package com.sprint.mission.discodeit.repository.file;
 
+import com.sprint.mission.discodeit.dto.ReadStatusCreateRequest;
+import com.sprint.mission.discodeit.dto.ReadStatusResponse;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.exepction.FailedDelete;
 import com.sprint.mission.discodeit.exepction.FailedInit;
@@ -62,18 +64,31 @@ public class FileReadStatusRepository implements ReadStatusRepository {
     }
 
     @Override
-    public void create(UUID userId, UUID channelId) {
+    public List<ReadStatusResponse> create(ReadStatusCreateRequest request) {
+        List<ReadStatusResponse> result = new ArrayList<>();
+        for(UUID channelId : request.channelIds()) {
+            result.add(this.create(request.userId(), channelId));
+        }
+        return result;
+    }
+
+    private ReadStatusResponse create(UUID userId, UUID channelId) {
         ReadStatus readStatus = new ReadStatus(userId, channelId);
         idReadStatusMap.put(readStatus.getId(), readStatus);
         userIdReadStatusMap.computeIfAbsent(userId, id -> new ArrayList<>()).add(readStatus);
         channelIdReadStatusMap.computeIfAbsent(userId, id -> new ArrayList<>()).add(readStatus);
         Path path = resolvePath(readStatus.getId());
         try (FileOutputStream fos = new FileOutputStream(path.toFile());
-                ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(readStatus);
         } catch (IOException e) {
             throw new FailedInit("FileReadStatusRepository init failed");
         }
+        return response(readStatus);
+    }
+
+    private ReadStatusResponse response(ReadStatus readStatus) {
+        return new ReadStatusResponse(readStatus.getId(), readStatus.getUserId(), readStatus.getChannelId(), readStatus.getCreateAt(), readStatus.getUpdateAt());
     }
 
     @Override
@@ -82,18 +97,17 @@ public class FileReadStatusRepository implements ReadStatusRepository {
     }
 
     @Override
-    public Map<UUID, Instant> findAllByUserId(UUID userId) {
-        List<ReadStatus> tempList = userIdReadStatusMap.get(userId);
-        Map<UUID, Instant> result = new HashMap<>();
-        for(ReadStatus temp : tempList) {
-            result.put(temp.getChannelId(), temp.getUpdateAt());
-        }
+    public List<ReadStatusResponse> findAllByUserId(UUID userId) {
+        List<ReadStatusResponse> result = new ArrayList<>();
 
+        for(ReadStatus readStatus : userIdReadStatusMap.get(userId)) {
+            result.add(response(readStatus));
+        }
         return result;
     }
 
     @Override
-    public boolean update(UUID userId, UUID channelId) {
+    public ReadStatusResponse update(UUID userId, UUID channelId) {
         ReadStatus temp = userIdReadStatusMap.get(userId).stream().filter(readStatus -> readStatus.getChannelId().equals(channelId)).findFirst().orElse(null);
 
         if(temp == null) throw new NotFound("상태값을 찾지 못했습니다.");
@@ -103,7 +117,7 @@ public class FileReadStatusRepository implements ReadStatusRepository {
              ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(temp);
             temp.updateReadAt();
-            return true;
+            return response(temp);
         } catch (IOException e) {
             throw new FailedUpdate("ReadStatus update failed");
         }
