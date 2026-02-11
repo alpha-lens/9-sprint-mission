@@ -1,9 +1,9 @@
 package com.sprint.mission.discodeit.controller;
 
-import com.sprint.mission.discodeit.dto.CreateBinaryContentDto;
-import com.sprint.mission.discodeit.dto.CreateMessageDto;
-import com.sprint.mission.discodeit.dto.MessageResponseDto;
-import com.sprint.mission.discodeit.entity.AttachmentType;
+import com.sprint.mission.discodeit.dto.request.RequestCreateBinaryContentDto;
+import com.sprint.mission.discodeit.dto.request.RequestCreateMessageDto;
+import com.sprint.mission.discodeit.dto.response.ResponseMessageDto;
+import com.sprint.mission.discodeit.entity.BinaryContentType;
 import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/{channelId}/message")
+@RequestMapping("/api/channel/{channelId}/message")
 @RequiredArgsConstructor
 public class MessageController {
     private final BasicBinaryContentService binaryContentService;
@@ -30,7 +30,7 @@ public class MessageController {
     private final UserService userService;
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
-    public MessageResponseDto handleCreateMessage(
+    public ResponseMessageDto handleCreateMessage(
             @PathVariable UUID channelId,
             @RequestParam("userId") UUID userId,
             @RequestParam("content") String content,
@@ -45,7 +45,7 @@ public class MessageController {
             throw new NotFound("This user is not present");
 
         if(files == null || files.isEmpty()){
-            CreateMessageDto requestMessageDto = new CreateMessageDto(content, channelId, userId, null);
+            RequestCreateMessageDto requestMessageDto = new RequestCreateMessageDto(content, channelId, userId, null);
             return messageService.create(requestMessageDto);
         }
 
@@ -54,17 +54,17 @@ public class MessageController {
             String extension = fileName.substring(fileName.lastIndexOf("."));
             if(List.of(".jpg", ".jpeg", ".png").contains(extension)) {
                 byte[] bytes = file.getBytes();
-                CreateBinaryContentDto requestBinaryContentDto = new CreateBinaryContentDto(AttachmentType.MESSAGE, file.getOriginalFilename(), bytes);
+                RequestCreateBinaryContentDto requestBinaryContentDto = new RequestCreateBinaryContentDto(BinaryContentType.MESSAGE, file.getOriginalFilename(), bytes);
                 binaryContentIds.add(binaryContentService.create(requestBinaryContentDto));
             }
         }
 
-        CreateMessageDto requestMessageDto = new CreateMessageDto(content, channelId, userId, binaryContentIds);
+        RequestCreateMessageDto requestMessageDto = new RequestCreateMessageDto(content, channelId, userId, binaryContentIds);
         return messageService.create(requestMessageDto);
     }
 
     @RequestMapping(value = "/update/{id}", method = RequestMethod.PUT)
-    public MessageResponseDto handleUpdateMessage(
+    public ResponseMessageDto handleUpdateMessage(
             @PathVariable("id") UUID messageId,
             @RequestParam("userId") UUID userId,
             @RequestParam("new_content") String newContent
@@ -83,7 +83,7 @@ public class MessageController {
     }
 
     @RequestMapping(value = "/find")
-    public List<MessageResponseDto> handleFindMessage(
+    public List<ResponseMessageDto> handleFindMessage(
             @PathVariable UUID channelId,
             @RequestParam("userId") UUID userId
     ) {

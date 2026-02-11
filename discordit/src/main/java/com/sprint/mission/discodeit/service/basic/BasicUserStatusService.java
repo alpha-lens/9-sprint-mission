@@ -1,9 +1,9 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.CreateUserStatusDto;
-import com.sprint.mission.discodeit.dto.DeleteUserStatusDto;
-import com.sprint.mission.discodeit.dto.FindUserStatusDto;
-import com.sprint.mission.discodeit.dto.UserStatusUpdateDto;
+import com.sprint.mission.discodeit.dto.request.RequestCreateUserStatusDto;
+import com.sprint.mission.discodeit.dto.request.RequestDeleteUserStatusDto;
+import com.sprint.mission.discodeit.dto.request.RequestFindUserStatusDto;
+import com.sprint.mission.discodeit.dto.request.RequestUpdateUserStatusDto;
 import com.sprint.mission.discodeit.exepction.DoNotDuplicate;
 import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -19,8 +19,8 @@ public class BasicUserStatusService implements UserStatusService {
     private final UserRepository userRepository;
 
     @Override
-    public void create(CreateUserStatusDto requestDto){
-        FindUserStatusDto dto = new FindUserStatusDto(requestDto.id(), requestDto.name());
+    public void create(RequestCreateUserStatusDto requestDto){
+        RequestFindUserStatusDto dto = new RequestFindUserStatusDto(requestDto.id(), requestDto.name());
 
         if(userRepository.userIdToName(requestDto.id()).isEmpty())
             throw new NotFound("해당 유저가 없습니다.");
@@ -30,18 +30,18 @@ public class BasicUserStatusService implements UserStatusService {
         userStatusRepository.create(requestDto);
     }
     @Override
-    public String find(FindUserStatusDto requestDto) {
+    public String find(RequestFindUserStatusDto requestDto) {
         return userStatusRepository.find(requestDto);
     }
     public void findAll() {}
 
     @Override
-    public void update(UserStatusUpdateDto requestDto) {
+    public void update(RequestUpdateUserStatusDto requestDto) {
         userStatusRepository.update(requestDto);
     }
 
     @Override
-    public void delete(DeleteUserStatusDto requestDto) {
+    public void delete(RequestDeleteUserStatusDto requestDto) {
         userStatusRepository.delete(requestDto);
     }
 }

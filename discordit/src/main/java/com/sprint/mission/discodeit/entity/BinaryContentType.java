@@ -1,5 +1,5 @@
 package com.sprint.mission.discodeit.entity;
 
-public enum AttachmentType {
+public enum BinaryContentType {
     USER, MESSAGE, CHANNEL
 }

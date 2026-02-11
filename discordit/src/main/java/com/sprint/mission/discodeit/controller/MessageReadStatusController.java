@@ -1,12 +1,11 @@
 package com.sprint.mission.discodeit.controller;
 
-import com.sprint.mission.discodeit.dto.ReadStatusCreateRequest;
-import com.sprint.mission.discodeit.dto.ReadStatusResponse;
-import com.sprint.mission.discodeit.dto.ResponseChannelDto;
+import com.sprint.mission.discodeit.dto.request.RequestCreateReadStatusDto;
+import com.sprint.mission.discodeit.dto.response.ResponseReadStatus;
+import com.sprint.mission.discodeit.dto.response.ResponseChannelDto;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.ReadStatusService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ public class MessageReadStatusController {
     private final ChannelService channelService;
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
-    public List<ReadStatusResponse> handleCreateReadStatus(
+    public List<ResponseReadStatus> handleCreateReadStatus(
             @RequestParam("userId") UUID userId
     ) {
         List<UUID> channelIds = new ArrayList<>();
@@ -30,11 +29,11 @@ public class MessageReadStatusController {
             channelIds.add(dto.channelId());
         }
 
-        return readStatusService.create(new ReadStatusCreateRequest(userId, channelIds));
+        return readStatusService.create(new RequestCreateReadStatusDto(userId, channelIds));
     }
 
     @RequestMapping(value = "/update", method = RequestMethod.PUT)
-    public ReadStatusResponse handleUpdateReadStatus(
+    public ResponseReadStatus handleUpdateReadStatus(
             @RequestParam("userId") UUID userId,
             @RequestParam("channelId") UUID channelId
     ) {
@@ -42,7 +41,7 @@ public class MessageReadStatusController {
     }
 
     @RequestMapping(value = "/find/{userId}", method = RequestMethod.GET)
-    public List<ReadStatusResponse> handleFindAllReadStatusForUser(@PathVariable UUID userId) {
+    public List<ResponseReadStatus> handleFindAllReadStatusForUser(@PathVariable UUID userId) {
         return readStatusService.findAllByUserId(userId);
     }
 }

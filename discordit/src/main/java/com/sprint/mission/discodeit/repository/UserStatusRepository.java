@@ -1,20 +1,20 @@
 package com.sprint.mission.discodeit.repository;
 
-import com.sprint.mission.discodeit.dto.CreateUserStatusDto;
-import com.sprint.mission.discodeit.dto.DeleteUserStatusDto;
-import com.sprint.mission.discodeit.dto.FindUserStatusDto;
-import com.sprint.mission.discodeit.dto.UserStatusUpdateDto;
+import com.sprint.mission.discodeit.dto.request.RequestCreateUserStatusDto;
+import com.sprint.mission.discodeit.dto.request.RequestDeleteUserStatusDto;
+import com.sprint.mission.discodeit.dto.request.RequestFindUserStatusDto;
+import com.sprint.mission.discodeit.dto.request.RequestUpdateUserStatusDto;
 
 import java.util.List;
 
 public interface UserStatusRepository {
-    boolean create(CreateUserStatusDto requestDto);
+    boolean create(RequestCreateUserStatusDto requestDto);
 
-    String find(FindUserStatusDto requestDto);
+    String find(RequestFindUserStatusDto requestDto);
 
-    List<String> findAll(List<FindUserStatusDto> requestDto);
+    List<String> findAll(List<RequestFindUserStatusDto> requestDto);
 
-    boolean update(UserStatusUpdateDto requestDto);
+    boolean update(RequestUpdateUserStatusDto requestDto);
 
-    boolean delete(DeleteUserStatusDto requestDto);
+    boolean delete(RequestDeleteUserStatusDto requestDto);
 }

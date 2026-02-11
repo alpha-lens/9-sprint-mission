@@ -1,7 +1,8 @@
 package com.sprint.mission.discodeit.repository.file;
 
-import com.sprint.mission.discodeit.dto.CreateBinaryContentDto;
-import com.sprint.mission.discodeit.entity.AttachmentType;
+import com.sprint.mission.discodeit.dto.request.RequestCreateBinaryContentDto;
+import com.sprint.mission.discodeit.dto.response.ResponseBinaryContentDto;
+import com.sprint.mission.discodeit.entity.BinaryContentType;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.exepction.FailedCreate;
 import com.sprint.mission.discodeit.exepction.FailedDelete;
@@ -62,8 +63,8 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
     }
 
     @Override
-    public UUID create(CreateBinaryContentDto requestDto) {
-        AttachmentType type = requestDto.type();
+    public UUID create(RequestCreateBinaryContentDto requestDto) {
+        BinaryContentType type = requestDto.type();
         String file = requestDto.filename();
         BinaryContent binaryContent = new BinaryContent(type, file, null);
         
@@ -81,20 +82,26 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
     }
 
     @Override
-    public String find(UUID id) {
-        try {
-            return fileIdMap.get(id).toString();
-        } catch (Exception e) {
-            System.err.println("왠지 모르지만, 여기서 오류난다. " + e.getMessage());
-            return null;
-        }
+    public ResponseBinaryContentDto find(UUID id) {
+        return response(fileIdMap.get(id));
     }
 
     @Override
-    public List<String> findAllByIdIn(List<UUID> ids) {
-        List<String> result = new ArrayList<>();
-        ids.forEach(id -> result.add(fileIdMap.get(id).toString()));
+    public List<ResponseBinaryContentDto> findAllByIdIn(List<UUID> ids) {
+        List<ResponseBinaryContentDto> result = new ArrayList<>();
+        ids.forEach(id -> result.add(response(fileIdMap.get(id))));
         return result;
+    }
+
+    private ResponseBinaryContentDto response(BinaryContent binaryContent) {
+        return new ResponseBinaryContentDto(
+                binaryContent.getId(),
+                binaryContent.getCreateAt(),
+                binaryContent.getFileName(),
+                binaryContent.getFileExtension(),
+                binaryContent.getType(),
+                binaryContent.getBytes()
+        );
     }
 
     @Override

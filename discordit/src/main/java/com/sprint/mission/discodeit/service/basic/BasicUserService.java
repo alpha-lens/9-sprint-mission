@@ -1,8 +1,8 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.CreateUserDto;
-import com.sprint.mission.discodeit.dto.UpdateUserDto;
-import com.sprint.mission.discodeit.dto.UserResponseDto;
+import com.sprint.mission.discodeit.dto.request.RequestCreateUserDto;
+import com.sprint.mission.discodeit.dto.request.RequestUpdateUserDto;
+import com.sprint.mission.discodeit.dto.request.RequestUserResponseDto;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
@@ -35,7 +35,7 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public UserResponseDto create(CreateUserDto requestDto) {
+    public RequestUserResponseDto create(RequestCreateUserDto requestDto) {
         userRepository.duplicateChecker("사용자명", requestDto.username());
         userRepository.duplicateChecker("이메일", requestDto.email());
 
@@ -44,7 +44,7 @@ public class BasicUserService implements UserService {
 
     /// Update
     @Override
-    public UserResponseDto update(UpdateUserDto requestDto) {
+    public RequestUserResponseDto update(RequestUpdateUserDto requestDto) {
         userRepository.duplicateChecker("사용자명", requestDto.reName());
         userRepository.duplicateChecker("이메일", requestDto.reMail());
         userRepository.duplicateChecker("전화번호", requestDto.rePhoneNumber());
@@ -60,17 +60,17 @@ public class BasicUserService implements UserService {
 
     /// Read
     @Override
-    public UserResponseDto find(String name) {
+    public RequestUserResponseDto find(String name) {
         return userRepository.find(name);
     }
 
     @Override
-    public UserResponseDto find(UUID id) {
+    public RequestUserResponseDto find(UUID id) {
         return userRepository.find(id);
     }
 
     @Override
-    public List<UserResponseDto> findAll() {
+    public List<RequestUserResponseDto> findAll() {
         return userRepository.findAll();
     }
 

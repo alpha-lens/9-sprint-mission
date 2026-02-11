@@ -1,8 +1,8 @@
 package com.sprint.mission.discodeit.service.auth;
 
 import com.sprint.mission.discodeit.UserState;
-import com.sprint.mission.discodeit.dto.LoginDto;
-import com.sprint.mission.discodeit.dto.UserStatusUpdateDto;
+import com.sprint.mission.discodeit.dto.request.RequestLoginDto;
+import com.sprint.mission.discodeit.dto.request.RequestUpdateUserStatusDto;
 import com.sprint.mission.discodeit.exepction.FailedLogin;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
@@ -18,14 +18,14 @@ public class AuthService {
     private final UserStatusRepository userStatusRepository;
     private final UserState userState;
 
-    public void login(LoginDto requestDto) {
+    public void login(RequestLoginDto requestDto) {
         /// 검증로직
         try {
             UUID id = userRepository.userNameToId(requestDto.name());
 
             if(!userRepository.checkInvalid(id, requestDto.password())) {
                 userState.userState(requestDto.name(), id);
-                userStatusRepository.update(new UserStatusUpdateDto(id, requestDto.name(), null));
+                userStatusRepository.update(new RequestUpdateUserStatusDto(id, requestDto.name(), null));
             } else throw new Exception();
         } catch (Exception ignore) {
             throw new FailedLogin("Invalid username or password");
@@ -33,7 +33,7 @@ public class AuthService {
     }
 
     public void logout() {
-        userStatusRepository.update(new UserStatusUpdateDto(userState.getUserId(), userState.getUserName(), null));
+        userStatusRepository.update(new RequestUpdateUserStatusDto(userState.getUserId(), userState.getUserName(), null));
         userState.userState("");
     }
 }

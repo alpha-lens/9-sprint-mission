@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.dto;
+package com.sprint.mission.discodeit.dto.response;
 
 import com.sprint.mission.discodeit.entity.ChannelType;
 
@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.UUID;
 
-public record ChannelInfoDto(
+public record ResponseChannelInfoDto(
         ChannelType type,
         UUID channelId,
         String channelName,

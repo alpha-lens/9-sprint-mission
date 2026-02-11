@@ -1,21 +1,21 @@
 package com.sprint.mission.discodeit.repository;
 
-import com.sprint.mission.discodeit.dto.MessageResponseDto;
+import com.sprint.mission.discodeit.dto.response.ResponseMessageDto;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 public interface MessageRepository {
-    MessageResponseDto create(String content, UUID channelId, UUID userId, List<UUID> attachmentIdList);
+    ResponseMessageDto create(String content, UUID channelId, UUID userId, List<UUID> attachmentIdList);
 
-    List<MessageResponseDto> findAllInChannel(UUID channelId);
+    List<ResponseMessageDto> findAllInChannel(UUID channelId);
 
     Instant getLastMessageInChannel(UUID channelId);
 
-    List<MessageResponseDto> findAllForSender(UUID userId);
+    List<ResponseMessageDto> findAllForSender(UUID userId);
 
-    MessageResponseDto updateMessage(UUID id, String content);
+    ResponseMessageDto updateMessage(UUID id, String content);
 
     UUID delete(UUID userId, UUID id);
 

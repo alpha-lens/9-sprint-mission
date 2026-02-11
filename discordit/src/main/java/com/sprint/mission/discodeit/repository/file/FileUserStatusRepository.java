@@ -1,9 +1,9 @@
 package com.sprint.mission.discodeit.repository.file;
 
-import com.sprint.mission.discodeit.dto.CreateUserStatusDto;
-import com.sprint.mission.discodeit.dto.DeleteUserStatusDto;
-import com.sprint.mission.discodeit.dto.FindUserStatusDto;
-import com.sprint.mission.discodeit.dto.UserStatusUpdateDto;
+import com.sprint.mission.discodeit.dto.request.RequestCreateUserStatusDto;
+import com.sprint.mission.discodeit.dto.request.RequestDeleteUserStatusDto;
+import com.sprint.mission.discodeit.dto.request.RequestFindUserStatusDto;
+import com.sprint.mission.discodeit.dto.request.RequestUpdateUserStatusDto;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.exepction.FailedCreate;
 import com.sprint.mission.discodeit.exepction.FailedDelete;
@@ -69,7 +69,7 @@ public class FileUserStatusRepository implements UserStatusRepository {
     }
 
     @Override
-    public boolean create(CreateUserStatusDto requestDto){
+    public boolean create(RequestCreateUserStatusDto requestDto){
         UserStatus userStatus = new UserStatus(requestDto.id(), requestDto.name());
         idMap.put(userStatus.getId(), userStatus);
         userIdMap.put(requestDto.id(), userStatus);
@@ -79,21 +79,21 @@ public class FileUserStatusRepository implements UserStatusRepository {
     }
 
     @Override
-    public String find(FindUserStatusDto requestDto) {
+    public String find(RequestFindUserStatusDto requestDto) {
         if(!userIdMap.containsKey(requestDto.id()))
             return "";
         return userIdMap.get(requestDto.id()).isOnline();
     }
 
     @Override
-    public List<String> findAll(List<FindUserStatusDto> requestDto) {
+    public List<String> findAll(List<RequestFindUserStatusDto> requestDto) {
         List<String> result = new ArrayList<>();
         requestDto.forEach(req -> result.add(find(req)));
         return result;
     }
 
     @Override
-    public boolean update(UserStatusUpdateDto requestDto) {
+    public boolean update(RequestUpdateUserStatusDto requestDto) {
         UserStatus userStatus = userIdMap.get(requestDto.id());
 
         if(requestDto.time() == null) {
@@ -106,7 +106,7 @@ public class FileUserStatusRepository implements UserStatusRepository {
     }
 
     @Override
-    public boolean delete(DeleteUserStatusDto requestDto) {
+    public boolean delete(RequestDeleteUserStatusDto requestDto) {
         UUID id = userIdMap.get(requestDto.id()).getId();
 
         Path path = resolvePath(id);

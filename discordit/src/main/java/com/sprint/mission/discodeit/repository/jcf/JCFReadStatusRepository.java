@@ -1,7 +1,7 @@
 package com.sprint.mission.discodeit.repository.jcf;
 
-import com.sprint.mission.discodeit.dto.ReadStatusCreateRequest;
-import com.sprint.mission.discodeit.dto.ReadStatusResponse;
+import com.sprint.mission.discodeit.dto.request.RequestCreateReadStatusDto;
+import com.sprint.mission.discodeit.dto.response.ResponseReadStatus;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
@@ -20,15 +20,15 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
     private final Map<UUID, List<ReadStatus>> channelIdReadStatusMap = new ConcurrentHashMap<>();
 
     @Override
-    public List<ReadStatusResponse> create(ReadStatusCreateRequest request) {
-        List<ReadStatusResponse> result = new ArrayList<>();
+    public List<ResponseReadStatus> create(RequestCreateReadStatusDto request) {
+        List<ResponseReadStatus> result = new ArrayList<>();
         for(UUID channelId : request.channelIds()) {
             result.add(this.create(request.userId(), channelId));
         }
         return result;
     }
 
-    private ReadStatusResponse create(UUID userId, UUID channelId) {
+    private ResponseReadStatus create(UUID userId, UUID channelId) {
         ReadStatus readStatus = new ReadStatus(userId, channelId);
         idReadStatusMap.put(readStatus.getId(), readStatus);
         userIdReadStatusMap.computeIfAbsent(userId, id -> new ArrayList<>()).add(readStatus);
@@ -36,8 +36,8 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
         return response(readStatus);
     }
 
-    private ReadStatusResponse response(ReadStatus readStatus) {
-        return new ReadStatusResponse(readStatus.getId(), readStatus.getUserId(), readStatus.getChannelId(), readStatus.getCreateAt(), readStatus.getUpdateAt());
+    private ResponseReadStatus response(ReadStatus readStatus) {
+        return new ResponseReadStatus(readStatus.getId(), readStatus.getUserId(), readStatus.getChannelId(), readStatus.getCreateAt(), readStatus.getUpdateAt());
     }
 
     @Override
@@ -46,8 +46,8 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
     }
 
     @Override
-    public List<ReadStatusResponse> findAllByUserId(UUID userId) {
-        List<ReadStatusResponse> result = new ArrayList<>();
+    public List<ResponseReadStatus> findAllByUserId(UUID userId) {
+        List<ResponseReadStatus> result = new ArrayList<>();
 
         for(ReadStatus readStatus : userIdReadStatusMap.get(userId)) {
             result.add(response(readStatus));
@@ -56,7 +56,7 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
     }
 
     @Override
-    public ReadStatusResponse update(UUID userId, UUID channelId) {
+    public ResponseReadStatus update(UUID userId, UUID channelId) {
         ReadStatus temp = userIdReadStatusMap.get(userId).stream().filter(readStatus -> readStatus.getChannelId().equals(channelId)).findFirst().orElse(null);
 
         if(temp == null) throw new NotFound("상태값을 찾지 못했습니다.");

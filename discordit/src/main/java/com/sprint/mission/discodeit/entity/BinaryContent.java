@@ -12,10 +12,10 @@ public class BinaryContent implements Serializable {
     private final Instant createAt;
     private final String fileName;
     private final String fileExtension;
-    private final AttachmentType type;
+    private final BinaryContentType type;
     private final byte[] bytes;
 
-    public BinaryContent(AttachmentType type, String fileName, byte[] bytes) {
+    public BinaryContent(BinaryContentType type, String fileName, byte[] bytes) {
         String[] nameParts = fileName.split("\\.", 2);
         this.fileName = nameParts[0];
         this.fileExtension = nameParts.length > 1 ? nameParts[1] : "";
@@ -23,11 +23,5 @@ public class BinaryContent implements Serializable {
         this.createAt = Instant.now();
         this.bytes = bytes;
         this.type = type;
-    }
-
-    @Override
-    public String toString() {
-        return "\n        BinaryContent ID : " + id
-                + "\n        fileName : " + fileName + "." + fileExtension + "\n";
     }
 }

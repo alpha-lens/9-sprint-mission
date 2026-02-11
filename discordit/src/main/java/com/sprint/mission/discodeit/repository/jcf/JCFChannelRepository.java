@@ -1,8 +1,8 @@
 package com.sprint.mission.discodeit.repository.jcf;
 
-import com.sprint.mission.discodeit.dto.CreateChannelDto;
-import com.sprint.mission.discodeit.dto.ResponseChannelDto;
-import com.sprint.mission.discodeit.dto.UpdateChannelDto;
+import com.sprint.mission.discodeit.dto.request.RequestCreateChannelDto;
+import com.sprint.mission.discodeit.dto.response.ResponseChannelDto;
+import com.sprint.mission.discodeit.dto.request.RequestUpdateChannelDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.exepction.DoNotUpdatePrivateChannel;
@@ -29,7 +29,7 @@ public class JCFChannelRepository implements ChannelRepository {
 
     /// interface
     @Override
-    public ResponseChannelDto save(CreateChannelDto requestDto) {
+    public ResponseChannelDto save(RequestCreateChannelDto requestDto) {
         Channel channel = requestDto.toEntity();
         if (channel.getChannelType() == ChannelType.PUBLIC) {
             publicChannelNameMap.put(channel.getName(), channel);
@@ -50,7 +50,7 @@ public class JCFChannelRepository implements ChannelRepository {
     }
 
     @Override
-    public ResponseChannelDto save(UpdateChannelDto requestDto) {
+    public ResponseChannelDto save(RequestUpdateChannelDto requestDto) {
         UUID id = requestDto.id();
         String newName = requestDto.newName();
         if(!isPresentChannel(id))  throw new NotFound("Not found this channel");

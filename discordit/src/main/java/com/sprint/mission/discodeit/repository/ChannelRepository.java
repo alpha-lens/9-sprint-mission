@@ -1,8 +1,8 @@
 package com.sprint.mission.discodeit.repository;
 
-import com.sprint.mission.discodeit.dto.CreateChannelDto;
-import com.sprint.mission.discodeit.dto.ResponseChannelDto;
-import com.sprint.mission.discodeit.dto.UpdateChannelDto;
+import com.sprint.mission.discodeit.dto.request.RequestCreateChannelDto;
+import com.sprint.mission.discodeit.dto.response.ResponseChannelDto;
+import com.sprint.mission.discodeit.dto.request.RequestUpdateChannelDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 
@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ChannelRepository {
-    ResponseChannelDto save(CreateChannelDto requestDto);
-    ResponseChannelDto save(UpdateChannelDto requestDto);
+    ResponseChannelDto save(RequestCreateChannelDto requestDto);
+    ResponseChannelDto save(RequestUpdateChannelDto requestDto);
     ResponseChannelDto findChannel(UUID channelId, UUID userId);
 
     ChannelType getChannelType(UUID id);

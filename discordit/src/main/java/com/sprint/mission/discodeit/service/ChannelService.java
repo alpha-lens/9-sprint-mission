@@ -1,8 +1,8 @@
 package com.sprint.mission.discodeit.service;
 
-import com.sprint.mission.discodeit.dto.FindChannelDto;
-import com.sprint.mission.discodeit.dto.ResponseChannelDto;
-import com.sprint.mission.discodeit.dto.UpdateChannelDto;
+import com.sprint.mission.discodeit.dto.response.ResponseFindChannelDto;
+import com.sprint.mission.discodeit.dto.response.ResponseChannelDto;
+import com.sprint.mission.discodeit.dto.request.RequestUpdateChannelDto;
 
 import java.util.List;
 import java.util.UUID;
@@ -10,12 +10,12 @@ import java.util.UUID;
 public interface ChannelService {
     boolean isPresent(UUID id);
     ResponseChannelDto create(String type, String name, UUID userId);
-    FindChannelDto find(UUID channelId, UUID userId);
+    ResponseFindChannelDto find(UUID channelId, UUID userId);
 
     List<ResponseChannelDto> findAllPrivateChannel(UUID userId);
 
     List<ResponseChannelDto> findAll(UUID userId);
-    ResponseChannelDto update(UpdateChannelDto requestDto);
+    ResponseChannelDto update(RequestUpdateChannelDto requestDto);
     boolean delete(UUID id);
 
     void deleteAll(String name);

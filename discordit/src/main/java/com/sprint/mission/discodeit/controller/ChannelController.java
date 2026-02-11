@@ -1,7 +1,7 @@
 package com.sprint.mission.discodeit.controller;
 
-import com.sprint.mission.discodeit.dto.ResponseChannelDto;
-import com.sprint.mission.discodeit.dto.UpdateChannelDto;
+import com.sprint.mission.discodeit.dto.response.ResponseChannelDto;
+import com.sprint.mission.discodeit.dto.request.RequestUpdateChannelDto;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.exepction.global.Forbidden;
@@ -62,7 +62,7 @@ public class ChannelController {
         if(!channelService.findChannelCreator(channelId, userName))
             throw new Forbidden("Channel update is only creator!");
 
-        return channelService.update(new UpdateChannelDto(channelId, newChannelName));
+        return channelService.update(new RequestUpdateChannelDto(channelId, newChannelName));
     }
 
     @RequestMapping(value = "/delete", method = RequestMethod.DELETE)

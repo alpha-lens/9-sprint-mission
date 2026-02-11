@@ -1,22 +1,22 @@
 package com.sprint.mission.discodeit.repository;
 
-import com.sprint.mission.discodeit.dto.CreateUserDto;
-import com.sprint.mission.discodeit.dto.UpdateUserDto;
-import com.sprint.mission.discodeit.dto.UserResponseDto;
+import com.sprint.mission.discodeit.dto.request.RequestCreateUserDto;
+import com.sprint.mission.discodeit.dto.request.RequestUpdateUserDto;
+import com.sprint.mission.discodeit.dto.request.RequestUserResponseDto;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface UserRepository {
-    UserResponseDto create(CreateUserDto dto);
+    RequestUserResponseDto create(RequestCreateUserDto dto);
 
-    UserResponseDto update(UpdateUserDto requestDto);
+    RequestUserResponseDto update(RequestUpdateUserDto requestDto);
 
-    UserResponseDto find(String name);
+    RequestUserResponseDto find(String name);
 
-    UserResponseDto find(UUID userId);
+    RequestUserResponseDto find(UUID userId);
 
-    List<UserResponseDto> findAll();
+    List<RequestUserResponseDto> findAll();
 
     boolean delete(UUID id);
 

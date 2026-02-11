@@ -1,7 +1,7 @@
 package com.sprint.mission.discodeit.repository.jcf;
 
 
-import com.sprint.mission.discodeit.dto.MessageResponseDto;
+import com.sprint.mission.discodeit.dto.response.ResponseMessageDto;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.exepction.FailedDelete;
 import com.sprint.mission.discodeit.exepction.global.NotFound;
@@ -24,14 +24,14 @@ public class JCFMessageRepository implements MessageRepository {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분 ss초").withZone(ZoneId.of("Asia/Seoul"));
 
     @Override
-    public MessageResponseDto create(String content, UUID channelId, UUID userId, List<UUID> attachmentIdList) {
+    public ResponseMessageDto create(String content, UUID channelId, UUID userId, List<UUID> attachmentIdList) {
         Message message = new Message(channelId, userId, content, attachmentIdList);
 
         messageIdMap.put(message.getId(), message);
         channelIdMessageMap.computeIfAbsent(channelId, m -> new ArrayList<>()).add(message);
         userIdMessageMap.computeIfAbsent(userId, m -> new ArrayList<>()).add(message);
 
-        return new MessageResponseDto(
+        return new ResponseMessageDto(
                 message.getId(),
                 message.getChannelId(),
                 message.getUserId(),
@@ -42,13 +42,13 @@ public class JCFMessageRepository implements MessageRepository {
     }
 
     @Override
-    public List<MessageResponseDto> findAllInChannel(UUID channelId) {
-        List<MessageResponseDto> result = new ArrayList<>();
+    public List<ResponseMessageDto> findAllInChannel(UUID channelId) {
+        List<ResponseMessageDto> result = new ArrayList<>();
         try{
             List<Message> messages = channelIdMessageMap.get(channelId);
             messages.stream().sorted(Comparator.comparing(Message::getCreateAt))
                     .forEach(message -> {
-                        result.add(new MessageResponseDto(
+                        result.add(new ResponseMessageDto(
                                 message.getId(),
                                 message.getChannelId(),
                                 message.getUserId(),
@@ -74,14 +74,14 @@ public class JCFMessageRepository implements MessageRepository {
     }
 
     @Override
-    public List<MessageResponseDto> findAllForSender(UUID userId) {
-        List<MessageResponseDto> result = new ArrayList<>();
+    public List<ResponseMessageDto> findAllForSender(UUID userId) {
+        List<ResponseMessageDto> result = new ArrayList<>();
         List<Message> messages = userIdMessageMap.get(userId);
         try{
             if(messages != null) {
                 messages.stream().sorted(Comparator.comparing(Message::getCreateAt))
                         .forEach(message -> {
-                            result.add(new MessageResponseDto(
+                            result.add(new ResponseMessageDto(
                                     message.getId(),
                                     message.getChannelId(),
                                     message.getUserId(),
@@ -99,13 +99,13 @@ public class JCFMessageRepository implements MessageRepository {
     }
 
     @Override
-    public MessageResponseDto updateMessage(UUID id, String content) {
+    public ResponseMessageDto updateMessage(UUID id, String content) {
         Message message = messageIdMap.get(id);
         if (message == null) throw new NotFound("Message not found");
 
         message.updateMessage(content);
 
-        return new MessageResponseDto(
+        return new ResponseMessageDto(
                 message.getId(),
                 message.getChannelId(),
                 message.getUserId(),

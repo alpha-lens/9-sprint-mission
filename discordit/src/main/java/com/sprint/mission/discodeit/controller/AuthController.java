@@ -1,6 +1,6 @@
 package com.sprint.mission.discodeit.controller;
 
-import com.sprint.mission.discodeit.dto.LoginDto;
+import com.sprint.mission.discodeit.dto.request.RequestLoginDto;
 import com.sprint.mission.discodeit.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ public class AuthController {
             @RequestParam(value = "userName") String userName,
             @RequestParam(value = "password") String password
     ) {
-        authService.login(new LoginDto(userName, password));
+        authService.login(new RequestLoginDto(userName, password));
         return ResponseEntity.ok(userName + " is login successfully");
     }
     @RequestMapping(value = "/logout", method = RequestMethod.POST)

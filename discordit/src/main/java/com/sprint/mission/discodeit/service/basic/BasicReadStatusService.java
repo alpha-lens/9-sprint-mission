@@ -1,7 +1,7 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.ReadStatusCreateRequest;
-import com.sprint.mission.discodeit.dto.ReadStatusResponse;
+import com.sprint.mission.discodeit.dto.request.RequestCreateReadStatusDto;
+import com.sprint.mission.discodeit.dto.response.ResponseReadStatus;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.service.ReadStatusService;
@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -20,7 +19,7 @@ public class BasicReadStatusService implements ReadStatusService {
     private final ChannelRepository channelRepository;
 
     @Override
-    public List<ReadStatusResponse> create(ReadStatusCreateRequest request){
+    public List<ResponseReadStatus> create(RequestCreateReadStatusDto request){
         return readStatusRepository.create(request);
     }
 
@@ -29,11 +28,11 @@ public class BasicReadStatusService implements ReadStatusService {
         return readStatusRepository.find(id);
     }
     @Override
-    public List<ReadStatusResponse> findAllByUserId(UUID userId) {
+    public List<ResponseReadStatus> findAllByUserId(UUID userId) {
         return readStatusRepository.findAllByUserId(userId);
     }
     @Override
-    public ReadStatusResponse update(UUID userId, UUID channelId) {
+    public ResponseReadStatus update(UUID userId, UUID channelId) {
         return readStatusRepository.update(userId, channelId);
     }
     @Override
