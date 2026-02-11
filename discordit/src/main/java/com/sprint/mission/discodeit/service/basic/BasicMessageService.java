@@ -2,7 +2,6 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.CreateMessageDto;
 import com.sprint.mission.discodeit.dto.MessageResponseDto;
-import com.sprint.mission.discodeit.dto.apiresponse.ResponseMessage;
 import com.sprint.mission.discodeit.exepction.FailedFound;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
@@ -29,7 +28,7 @@ public class BasicMessageService implements MessageService {
     }
 
     @Override
-    public UUID create(CreateMessageDto requestDto) {
+    public MessageResponseDto create(CreateMessageDto requestDto) {
         String text = requestDto.text();
         UUID channelId = requestDto.channelId();
         UUID userId = requestDto.userId();
@@ -44,12 +43,12 @@ public class BasicMessageService implements MessageService {
     }
 
     @Override
-    public List<String> findAllInChannel(UUID channelId) {
-        return messageRepository.findAllInChannel(channelId).stream().map(this::formattingMessage).toList();
+    public List<MessageResponseDto> findAllInChannel(UUID channelId) {
+        return messageRepository.findAllInChannel(channelId);
     }
 
     private String formattingMessage(MessageResponseDto dto) {
-        String id = "ID: " + dto.id().toString();
+        String id = "ID: " + dto.messageId().toString();
         String user = "사용자명: " + userRepository.userIdToName(dto.userId());
         String channel = "채널명: " + channelRepository.channelIdToName(dto.channelId());
 
@@ -57,13 +56,13 @@ public class BasicMessageService implements MessageService {
                 + user + "\n"
                 + channel + "\n"
                 + "내용: " + dto.content() + "\n"
-                + "첨부파일: " + String.join("", binaryContentRepository.findAllByIdIn(dto.attachmentIds())) + "\n"
+                + "첨부파일: " + String.join("", binaryContentRepository.findAllByIdIn(dto.binaryContentIds())) + "\n"
                 + "생성일: " + dto.createAt() + "\n"
                 + "수정일: " + dto.updateAt() + "\n====================";
     }
 
     @Override
-    public ResponseMessage update(UUID userId, UUID messageId, String content) {
+    public MessageResponseDto update(UUID userId, UUID messageId, String content) {
         if (!messageRepository.isPresentMessage(userId, messageId)) {
             throw new FailedFound("해당 ID를 찾지 못했습니다.");
         }

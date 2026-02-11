@@ -75,7 +75,7 @@ public class FileChannelRepository implements ChannelRepository {
 
     /// interface
     @Override
-    public UUID save(CreateChannelDto requestDto) {
+    public ResponseChannelDto save(CreateChannelDto requestDto) {
         Channel channel = requestDto.toEntity();
 
         Path path = resolvePath(channel.getId());
@@ -92,17 +92,24 @@ public class FileChannelRepository implements ChannelRepository {
                 privateChannelNameMap.put(channel.getName(), channel);
             }
 
-            return channel.getId();
+            return new ResponseChannelDto(
+                    channel.getName(),
+                    channel.getId(),
+                    channel.getChannelType(),
+                    channel.getCreateAt(),
+                    channel.getUpdateAt(),
+                    channel.getCreateUser(),
+                    channel.getAccessibleUser());
         } catch (IOException e) {
             throw new FailedCreate("Channel save failed");
         }
     }
 
     @Override
-    public boolean save(UpdateChannelDto requestDto) {
+    public ResponseChannelDto save(UpdateChannelDto requestDto) {
         UUID id = requestDto.id();
         String newName = requestDto.newName();
-        if(!isPresentChannel(id)) return false;
+        if(!isPresentChannel(id)) throw new NotFound("Not found this channel");
         if(privateChannelIdMap.containsKey(id))
             throw new DoNotUpdatePrivateChannel("Do not update private channel");
         Path path;
@@ -120,7 +127,14 @@ public class FileChannelRepository implements ChannelRepository {
             publicChannelNameMap.remove(oldName);
             channel.channelUpdater(newName);
 
-            return true;
+            return new ResponseChannelDto(
+                    channel.getName(),
+                    channel.getId(),
+                    channel.getChannelType(),
+                    channel.getCreateAt(),
+                    channel.getUpdateAt(),
+                    channel.getCreateUser(),
+                    channel.getAccessibleUser());
         } catch (IOException e) {
             throw new FailedUpdate("Channel update failed");
         }

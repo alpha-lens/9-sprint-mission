@@ -2,7 +2,7 @@ package com.sprint.mission.discodeit.repository.file;
 
 import com.sprint.mission.discodeit.dto.CreateUserDto;
 import com.sprint.mission.discodeit.dto.UpdateUserDto;
-import com.sprint.mission.discodeit.dto.UserFinder;
+import com.sprint.mission.discodeit.dto.UserResponseDto;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exepction.*;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -61,7 +61,7 @@ public class FileUserRepository implements UserRepository {
     }
 
     @Override
-    public UUID create(CreateUserDto dto) {
+    public UserResponseDto create(CreateUserDto dto) {
         User user = dto.toEntity();
         userNameIdMap.put(user.getName(), user.getId());
         idUserMap.put(user.getId(), user);
@@ -72,14 +72,14 @@ public class FileUserRepository implements UserRepository {
                 ObjectOutputStream oos = new ObjectOutputStream(fos)
         ) {
             oos.writeObject(user);
-            return user.getId();
+            return new UserResponseDto(user.getId(), user.getName(), user.toString(), user.getProfileId());
         } catch (IOException e) {
             throw new FailedCreate("FileBinaryContentRepository create failed");
         }
     }
 
     @Override
-    public boolean update(UpdateUserDto requestDto) {
+    public UserResponseDto update(UpdateUserDto requestDto) {
         UUID userId = requestDto.id();
         String reName = requestDto.reName();
         String rePassword = requestDto.rePassword();
@@ -88,44 +88,45 @@ public class FileUserRepository implements UserRepository {
         UUID reProfileId = requestDto.reProfileId();
 
         Path path = resolvePath(userId);
+        User user = idUserMap.get(userId);
 
         try(FileOutputStream fos = new FileOutputStream(path.toFile());
             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-            oos.writeObject(idUserMap.get(userId));
-            idUserMap.get(userId).updateUser(reName, rePassword, reMail, rePhoneNumber, reProfileId);
-            return true;
+            oos.writeObject(user);
+            user.updateUser(reName, rePassword, reMail, rePhoneNumber, reProfileId);
+            return new UserResponseDto(user.getId(), user.getName(), user.toString(), user.getProfileId());
         } catch (IOException e) {
             throw new FailedUpdate("User update failed");
         }
     }
 
     @Override
-    public UserFinder find(String name) {
+    public UserResponseDto find(String name) {
         User user = idUserMap.get(userNameIdMap.get(name));
         UUID id = user.getId();
         String userName = user.getName();
 
-        return new UserFinder(id, userName, user.toString(), user.getProfileId());
+        return new UserResponseDto(id, userName, user.toString(), user.getProfileId());
     }
 
     @Override
-    public UserFinder find(UUID userId) {
+    public UserResponseDto find(UUID userId) {
         User user = idUserMap.getOrDefault(userId, null);
         if(user == null) {
             throw new NotFound("Not Found This User Id");
         }
         String userName = user.getName();
 
-        return new UserFinder(userId, userName, user.toString(), user.getProfileId());
+        return new UserResponseDto(userId, userName, user.toString(), user.getProfileId());
     }
 
     @Override
-    public List<UserFinder> findAll() {
-        List<UserFinder> result = new ArrayList<>();
+    public List<UserResponseDto> findAll() {
+        List<UserResponseDto> result = new ArrayList<>();
         idUserMap.values().stream().sorted(Comparator.comparing(User::getName)).forEach(user -> {
             UUID id = user.getId();
             String userName = user.getName();
-            result.add(new UserFinder(id, userName, user.toString(), user.getProfileId()));
+            result.add(new UserResponseDto(id, userName, user.toString(), user.getProfileId()));
         });
         return result;
     }

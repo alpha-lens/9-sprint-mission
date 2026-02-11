@@ -4,7 +4,6 @@ import com.sprint.mission.discodeit.dto.CreateChannelDto;
 import com.sprint.mission.discodeit.dto.FindChannelDto;
 import com.sprint.mission.discodeit.dto.ResponseChannelDto;
 import com.sprint.mission.discodeit.dto.UpdateChannelDto;
-import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
@@ -30,13 +29,13 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public UUID create(String type, String name, String createUserName) {
-        UUID createUserId = userRepository.userNameToId(createUserName);
+    public ResponseChannelDto create(String type, String name, UUID userId) {
+        String createUserName = userRepository.userIdToName(userId);
 
         if(type.equalsIgnoreCase("public") || type.equals("1")) {
-            return channelRepository.save(new CreateChannelDto(name, createUserName, createUserId, ChannelType.PUBLIC));
+            return channelRepository.save(new CreateChannelDto(name, createUserName, userId, ChannelType.PUBLIC));
         } else if (type.equalsIgnoreCase("private") || type.equals("2")) {
-            return channelRepository.save(new CreateChannelDto(name, createUserName, createUserId, ChannelType.PRIVATE));
+            return channelRepository.save(new CreateChannelDto(name, createUserName, userId, ChannelType.PRIVATE));
         }
 
         return null;
@@ -65,7 +64,7 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public boolean update(UpdateChannelDto requestDto) {
+    public ResponseChannelDto update(UpdateChannelDto requestDto) {
         return channelRepository.save(requestDto);
     }
 

@@ -1,6 +1,5 @@
 package com.sprint.mission.discodeit.controller;
 
-import com.sprint.mission.discodeit.UserState;
 import com.sprint.mission.discodeit.dto.*;
 import com.sprint.mission.discodeit.entity.AttachmentType;
 import com.sprint.mission.discodeit.service.UserService;
@@ -9,33 +8,29 @@ import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-@Controller
+@RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
     private final BasicBinaryContentService binaryContentService;
     private final UserService userService;
-    private final UserState userState;
     private final UserStatusService userStatusService;
 
     @RequestMapping(value="/create", method= RequestMethod.POST)
-    public ResponseEntity<Map<String, String>> handleCreateUser(
+    public UserResponseDto handleCreateUser(
             @RequestParam("userName") String userName,
             @RequestParam("password") String password,
             @RequestParam("email") String email,
             @RequestParam(value = "file", required = false) MultipartFile file
     ) throws IOException {
-        Map<String, String> result = new HashMap<>();
         CreateBinaryContentDto binaryContentCreateRequestDto;
         CreateUserDto userCreateRequestDto;
 
@@ -47,56 +42,54 @@ public class UserController {
             userCreateRequestDto = new CreateUserDto(userName, password, email, profileId);
         }
 
-        userService.create(userCreateRequestDto);
+        UserResponseDto responseDto = userService.create(userCreateRequestDto);
 
-        UUID userId = userService.find(userName).id();
+        UUID userId = responseDto.id();
 
         userStatusService.create(new CreateUserStatusDto(userName, userId));
 
-        result.put("id", userId.toString());
-
-        return new ResponseEntity<>(result, HttpStatus.CREATED);
+        return responseDto;
     }
 
     @RequestMapping(value = "/find/{id}", method = RequestMethod.GET)
     public ResponseEntity<Map<String, String>> handleFindUserByName(@PathVariable UUID id) {
         Map<String, String> result = new HashMap<>();
-        UserFinder userFinder = userService.find(id);
-        String userStatus = userStatusService.find(new FindUserStatusDto(userFinder.id(), userFinder.name()));
-        UUID profileId = userFinder.profileId();
+        UserResponseDto userResponseDto = userService.find(id);
+        String userStatus = userStatusService.find(new FindUserStatusDto(userResponseDto.id(), userResponseDto.name()));
+        UUID profileId = userResponseDto.profileId();
 
-        result.put("userId", userFinder.id().toString());
+        result.put("userId", userResponseDto.id().toString());
         if(profileId != null)
             result.put("userProfile", profileId.toString());;
-        result.put("userName", userFinder.name());
-        result.put("userInfo", userFinder.userInfo());
+        result.put("userName", userResponseDto.name());
+        result.put("userInfo", userResponseDto.userInfo());
         result.put("userStatus", userStatus);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/findAll", method = RequestMethod.GET)
-    public ResponseEntity<List<Map<String, String>>> handleFindAllUser() {
-        List<UserFinder> userFinders = userService.findAll();
+    public List<Map<String, String>> handleFindAllUser() {
+        List<UserResponseDto> userResponseDtos = userService.findAll();
         List<Map<String, String>> result = new ArrayList<>();
 
-        for(UserFinder userFinder : userFinders) {
+        for(UserResponseDto userResponseDto : userResponseDtos) {
             Map<String, String> temp = new HashMap<>();
-            FindUserStatusDto findUserStatusDto = new FindUserStatusDto(userFinder.id(), userFinder.name());
+            FindUserStatusDto findUserStatusDto = new FindUserStatusDto(userResponseDto.id(), userResponseDto.name());
 
-            UUID profileId = userFinder.profileId();
+            UUID profileId = userResponseDto.profileId();
 
-            temp.put("userId", userFinder.id().toString());
+            temp.put("userId", userResponseDto.id().toString());
             if(profileId != null)
                 temp.put("userProfile", profileId.toString());
-            temp.put("userName", userFinder.name());
-            temp.put("userInfo", userFinder.userInfo());
+            temp.put("userName", userResponseDto.name());
+            temp.put("userInfo", userResponseDto.userInfo());
             temp.put("userStatus", userStatusService.find(findUserStatusDto));
 
             result.add(temp);
         }
 
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return result;
     }
 
     @RequestMapping(value="/update", method= RequestMethod.PUT)
@@ -113,7 +106,7 @@ public class UserController {
         CreateBinaryContentDto binaryContentCreateRequestDto;
 
         if(userService.isInvalid(id, oldPassword))
-            throw new InvalidParameterException("Invalid user id or password");
+            throw new InvalidParameterException("Invalid user messageId or password");
 
         if(file == null || file.isEmpty()) {
             updateUserRequestDto = new UpdateUserDto(id, userName, password, email, phoneNumber, null);;

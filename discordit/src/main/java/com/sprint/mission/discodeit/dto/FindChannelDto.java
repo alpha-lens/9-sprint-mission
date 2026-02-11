@@ -1,7 +1,6 @@
 package com.sprint.mission.discodeit.dto;
 
 import com.sprint.mission.discodeit.entity.ChannelType;
-import lombok.NonNull;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -14,7 +13,8 @@ public record FindChannelDto(
 ) {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분 ss초").withZone(ZoneId.of("Asia/Seoul"));
 
-    public @NonNull String getInfo() {
+    public String getInfo() {
+        if(lastMessage == null) return channelInfo.toString();
         return channelInfo +  "\n마지막 메시지 : " + FORMATTER.format(lastMessage);
     }
 }

@@ -20,8 +20,8 @@ public class UserStatus implements Serializable {
         Instant now = Instant.now();
         this.userId = userId;
         this.userName = userName;
-        updateAt = now;
-        createAt = now;
+        this.updateAt = now;
+        this.createAt = now;
     }
 
     public void lastAccessTimeUpdater() {

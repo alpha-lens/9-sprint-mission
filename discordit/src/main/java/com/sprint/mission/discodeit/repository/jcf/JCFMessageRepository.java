@@ -2,7 +2,6 @@ package com.sprint.mission.discodeit.repository.jcf;
 
 
 import com.sprint.mission.discodeit.dto.MessageResponseDto;
-import com.sprint.mission.discodeit.dto.apiresponse.ResponseMessage;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.exepction.FailedDelete;
 import com.sprint.mission.discodeit.exepction.FailedFound;
@@ -25,14 +24,21 @@ public class JCFMessageRepository implements MessageRepository {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분 ss초").withZone(ZoneId.of("Asia/Seoul"));
 
     @Override
-    public UUID create(String content, UUID channelId, UUID userId, List<UUID> attachmentIdList) {
+    public MessageResponseDto create(String content, UUID channelId, UUID userId, List<UUID> attachmentIdList) {
         Message message = new Message(channelId, userId, content, attachmentIdList);
 
         messageIdMap.put(message.getId(), message);
         channelIdMessageMap.computeIfAbsent(channelId, m -> new ArrayList<>()).add(message);
         userIdMessageMap.computeIfAbsent(userId, m -> new ArrayList<>()).add(message);
 
-        return message.getId();
+        return new MessageResponseDto(
+                message.getId(),
+                message.getChannelId(),
+                message.getUserId(),
+                message.getBinaryContentIds(),
+                FORMATTER.format(message.getCreateAt()),
+                FORMATTER.format(message.getUpdateAt()),
+                message.getContent());
     }
 
     @Override
@@ -46,7 +52,7 @@ public class JCFMessageRepository implements MessageRepository {
                                 message.getId(),
                                 message.getChannelId(),
                                 message.getUserId(),
-                                message.getAttachmentIds(),
+                                message.getBinaryContentIds(),
                                 FORMATTER.format(message.getCreateAt()),
                                 FORMATTER.format(message.getUpdateAt()), message.getContent()
                         ));
@@ -79,7 +85,7 @@ public class JCFMessageRepository implements MessageRepository {
                                     message.getId(),
                                     message.getChannelId(),
                                     message.getUserId(),
-                                    message.getAttachmentIds(),
+                                    message.getBinaryContentIds(),
                                     FORMATTER.format(message.getCreateAt()),
                                     FORMATTER.format(message.getUpdateAt()),
                                     message.getContent()
@@ -93,17 +99,20 @@ public class JCFMessageRepository implements MessageRepository {
     }
 
     @Override
-    public ResponseMessage updateMessage(UUID id, String content) {
+    public MessageResponseDto updateMessage(UUID id, String content) {
         Message message = messageIdMap.get(id);
         if (message == null) throw new FailedFound("Message not found");
 
         message.updateMessage(content);
 
-        return new ResponseMessage(
+        return new MessageResponseDto(
                 message.getId(),
-                message.getAttachmentIds(),
-                message.getContent()
-        );
+                message.getChannelId(),
+                message.getUserId(),
+                message.getBinaryContentIds(),
+                FORMATTER.format(message.getCreateAt()),
+                FORMATTER.format(message.getUpdateAt()),
+                message.getContent());
     }
 
     @Override
@@ -133,13 +142,13 @@ public class JCFMessageRepository implements MessageRepository {
         List<List<UUID>> result = new ArrayList<>();
         if(channelIdMessageMap.containsKey(id)) {
             new ArrayList<>(channelIdMessageMap.get(id)).forEach(message -> {
-                result.add(message.getAttachmentIds());
+                result.add(message.getBinaryContentIds());
                 delete(message.getUserId(), message.getId());
             });
         }
         if(userIdMessageMap.containsKey(id)) {
             new ArrayList<>(userIdMessageMap.get(id)).forEach(message -> {
-                result.add(message.getAttachmentIds());
+                result.add(message.getBinaryContentIds());
                 delete(message.getUserId(), message.getId());
             });
         }

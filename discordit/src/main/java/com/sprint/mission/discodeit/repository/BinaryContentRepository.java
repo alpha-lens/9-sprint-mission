@@ -2,7 +2,6 @@ package com.sprint.mission.discodeit.repository;
 
 import com.sprint.mission.discodeit.dto.CreateBinaryContentDto;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 

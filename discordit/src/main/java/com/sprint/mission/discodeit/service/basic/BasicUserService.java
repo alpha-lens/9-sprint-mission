@@ -2,7 +2,7 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.CreateUserDto;
 import com.sprint.mission.discodeit.dto.UpdateUserDto;
-import com.sprint.mission.discodeit.dto.UserFinder;
+import com.sprint.mission.discodeit.dto.UserResponseDto;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
@@ -35,18 +35,16 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public boolean create(CreateUserDto requestDto) {
+    public UserResponseDto create(CreateUserDto requestDto) {
         userRepository.duplicateChecker("사용자명", requestDto.username());
         userRepository.duplicateChecker("이메일", requestDto.email());
 
-        UUID userId = userRepository.create(requestDto);
-
-        return userId != nullUUID;
+        return userRepository.create(requestDto);
     }
 
     /// Update
     @Override
-    public boolean update(UpdateUserDto requestDto) {
+    public UserResponseDto update(UpdateUserDto requestDto) {
         userRepository.duplicateChecker("사용자명", requestDto.reName());
         userRepository.duplicateChecker("이메일", requestDto.reMail());
         userRepository.duplicateChecker("전화번호", requestDto.rePhoneNumber());
@@ -54,29 +52,25 @@ public class BasicUserService implements UserService {
 
         UUID reProfileId = requestDto.reProfileId();
         UUID userId = requestDto.id();
-
-        if(userRepository.update(requestDto)) {
-            if(reProfileId != null){
-                binaryContentRepository.delete(userId);
-            }
-            return true;
+        if(reProfileId != null){
+            binaryContentRepository.delete(userId);
         }
-        return false;
+        return userRepository.update(requestDto);
     }
 
     /// Read
     @Override
-    public UserFinder find(String name) {
+    public UserResponseDto find(String name) {
         return userRepository.find(name);
     }
 
     @Override
-    public UserFinder find(UUID id) {
+    public UserResponseDto find(UUID id) {
         return userRepository.find(id);
     }
 
     @Override
-    public List<UserFinder> findAll() {
+    public List<UserResponseDto> findAll() {
         return userRepository.findAll();
     }
 

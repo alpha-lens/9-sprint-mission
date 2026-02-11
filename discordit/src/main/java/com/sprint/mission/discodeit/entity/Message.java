@@ -14,13 +14,13 @@ public class Message implements Serializable {
     private final Instant createAt;
     private final UUID channelId;
     private final UUID userId;
-    private final List<UUID> attachmentIds;
+    private final List<UUID> binaryContentIds;
     private Instant updateAt;
     private String content;
     @Serial
     private static final long serialVersionUID = 1L;
 
-    public Message(UUID channelId, UUID userId, String content, List<UUID> attachmentIds) {
+    public Message(UUID channelId, UUID userId, String content, List<UUID> binaryContentIds) {
         Instant n = Instant.now();
         this.id = UUID.randomUUID();
         this.channelId = channelId;
@@ -28,7 +28,7 @@ public class Message implements Serializable {
         this.content = content;
         this.createAt = n;
         this.updateAt = n;
-        this.attachmentIds = attachmentIds;
+        this.binaryContentIds = binaryContentIds;
     }
 
     public UUID getSenderUserId() {

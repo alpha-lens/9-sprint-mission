@@ -2,7 +2,6 @@ package com.sprint.mission.discodeit.repository.file;
 
 
 import com.sprint.mission.discodeit.dto.MessageResponseDto;
-import com.sprint.mission.discodeit.dto.apiresponse.ResponseMessage;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.exepction.*;
 import com.sprint.mission.discodeit.repository.MessageRepository;
@@ -75,7 +74,7 @@ public class FileMessageRepository implements MessageRepository {
     }
 
     @Override
-    public UUID create(String content, UUID channelId, UUID userId, List<UUID> attachmentIdList) {
+    public MessageResponseDto create(String content, UUID channelId, UUID userId, List<UUID> attachmentIdList) {
         Message message = new Message(channelId, userId, content, attachmentIdList);
 
         messageIdMap.put(message.getId(), message);
@@ -88,7 +87,15 @@ public class FileMessageRepository implements MessageRepository {
                 ObjectOutputStream oos = new ObjectOutputStream(fos)
         ) {
             oos.writeObject(message);
-            return message.getId();
+
+            return new MessageResponseDto(
+                    message.getId(),
+                    message.getChannelId(),
+                    message.getUserId(),
+                    message.getBinaryContentIds(),
+                    FORMATTER.format(message.getCreateAt()),
+                    FORMATTER.format(message.getUpdateAt()),
+                    message.getContent());
         } catch (IOException e) {
             throw new FailedCreate("Message create failed");
         }
@@ -105,7 +112,7 @@ public class FileMessageRepository implements MessageRepository {
                                 message.getId(),
                                 message.getChannelId(),
                                 message.getUserId(),
-                                message.getAttachmentIds(),
+                                message.getBinaryContentIds(),
                                 FORMATTER.format(message.getCreateAt()),
                                 FORMATTER.format(message.getUpdateAt()), message.getContent()
                         ));
@@ -138,7 +145,7 @@ public class FileMessageRepository implements MessageRepository {
                                     message.getId(),
                                     message.getChannelId(),
                                     message.getUserId(),
-                                    message.getAttachmentIds(),
+                                    message.getBinaryContentIds(),
                                     FORMATTER.format(message.getCreateAt()),
                                     FORMATTER.format(message.getUpdateAt()),
                                     message.getContent()
@@ -152,7 +159,7 @@ public class FileMessageRepository implements MessageRepository {
     }
 
     @Override
-    public ResponseMessage updateMessage(UUID id, String content) {
+    public MessageResponseDto updateMessage(UUID id, String content) {
         Message message = messageIdMap.get(id);
         if (message == null) throw new FailedFound("Message not found");
 
@@ -162,11 +169,14 @@ public class FileMessageRepository implements MessageRepository {
         try(FileOutputStream fos = new FileOutputStream(path.toFile());
             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(message);
-            return new ResponseMessage(
+            return new MessageResponseDto(
                     message.getId(),
-                    message.getAttachmentIds(),
-                    message.getContent()
-            );
+                    message.getChannelId(),
+                    message.getUserId(),
+                    message.getBinaryContentIds(),
+                    FORMATTER.format(message.getCreateAt()),
+                    FORMATTER.format(message.getUpdateAt()),
+                    message.getContent());
         } catch (IOException e) {
             throw new FailedUpdate("Message update failed");
         }
@@ -202,13 +212,13 @@ public class FileMessageRepository implements MessageRepository {
         List<List<UUID>> result = new ArrayList<>();
         if(channelIdMessageMap.containsKey(id)) {
             new ArrayList<>(channelIdMessageMap.get(id)).forEach(message -> {
-                result.add(message.getAttachmentIds());
+                result.add(message.getBinaryContentIds());
                 delete(message.getUserId(), message.getId());
             });
         }
         if(userIdMessageMap.containsKey(id)) {
             new ArrayList<>(userIdMessageMap.get(id)).forEach(message -> {
-                result.add(message.getAttachmentIds());
+                result.add(message.getBinaryContentIds());
                 delete(message.getUserId(), message.getId());
             });
         }

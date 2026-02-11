@@ -2,7 +2,7 @@ package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.dto.CreateBinaryContentDto;
 import com.sprint.mission.discodeit.dto.CreateMessageDto;
-import com.sprint.mission.discodeit.dto.apiresponse.ResponseMessage;
+import com.sprint.mission.discodeit.dto.MessageResponseDto;
 import com.sprint.mission.discodeit.entity.AttachmentType;
 import com.sprint.mission.discodeit.exepction.NotFound;
 import com.sprint.mission.discodeit.service.ChannelService;
@@ -28,7 +28,7 @@ public class MessageController {
     private final UserService userService;
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
-    public ResponseMessage handleCreateMessage(
+    public MessageResponseDto handleCreateMessage(
             @RequestParam("channelId") UUID channelId,
             @RequestParam("userId") UUID userId,
             @RequestParam("content") String content,
@@ -44,8 +44,7 @@ public class MessageController {
 
         if(files == null || files.isEmpty()){
             CreateMessageDto requestMessageDto = new CreateMessageDto(content, channelId, userId, null);
-            UUID messageId = messageService.create(requestMessageDto);
-            return new ResponseMessage(messageId, binaryContentIds, content);
+            return messageService.create(requestMessageDto);
         }
 
         for (MultipartFile file : files) {
@@ -59,13 +58,11 @@ public class MessageController {
         }
 
         CreateMessageDto requestMessageDto = new CreateMessageDto(content, channelId, userId, binaryContentIds);
-        UUID messageId = messageService.create(requestMessageDto);
-
-        return new ResponseMessage(messageId, binaryContentIds, content);
+        return messageService.create(requestMessageDto);
     }
 
     @RequestMapping(value = "/update/{id}", method = RequestMethod.PUT)
-    public ResponseMessage handleUpdateMessage(
+    public MessageResponseDto handleUpdateMessage(
             @PathVariable("id") UUID messageId,
             @RequestParam("userId") UUID userId,
             @RequestParam("new_content") String newContent

@@ -9,13 +9,13 @@ import java.util.UUID;
 
 public interface ChannelService {
     boolean isPresent(UUID id);
-    UUID create(String type, String name, String createUserName);
+    ResponseChannelDto create(String type, String name, UUID userId);
     FindChannelDto find(UUID channelId, UUID userId);
 
     List<ResponseChannelDto> findAllPrivateChannel(UUID userId);
 
     List<ResponseChannelDto> findAll(UUID userId);
-    boolean update(UpdateChannelDto requestDto);
+    ResponseChannelDto update(UpdateChannelDto requestDto);
     boolean delete(UUID id);
 
     void deleteAll(String name);

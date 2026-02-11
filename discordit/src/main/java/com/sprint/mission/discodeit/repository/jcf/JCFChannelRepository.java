@@ -30,7 +30,7 @@ public class JCFChannelRepository implements ChannelRepository {
 
     /// interface
     @Override
-    public UUID save(CreateChannelDto requestDto) {
+    public ResponseChannelDto save(CreateChannelDto requestDto) {
         Channel channel = requestDto.toEntity();
         if (channel.getChannelType() == ChannelType.PUBLIC) {
             publicChannelNameMap.put(channel.getName(), channel);
@@ -40,14 +40,21 @@ public class JCFChannelRepository implements ChannelRepository {
             privateChannelNameMap.put(channel.getName(), channel);
         }
 
-        return channel.getId();
+        return new ResponseChannelDto(
+                channel.getName(),
+                channel.getId(),
+                channel.getChannelType(),
+                channel.getCreateAt(),
+                channel.getUpdateAt(),
+                channel.getCreateUser(),
+                channel.getAccessibleUser());
     }
 
     @Override
-    public boolean save(UpdateChannelDto requestDto) {
+    public ResponseChannelDto save(UpdateChannelDto requestDto) {
         UUID id = requestDto.id();
         String newName = requestDto.newName();
-        if(!isPresentChannel(id)) return false;
+        if(!isPresentChannel(id))  throw new NotFound("Not found this channel");
         if(privateChannelIdMap.containsKey(id))
             throw new DoNotUpdatePrivateChannel("Do not update private channel");
         Channel channel = publicChannelIdMap.get(id);
@@ -55,7 +62,15 @@ public class JCFChannelRepository implements ChannelRepository {
         publicChannelNameMap.put(newName, channel);
         publicChannelNameMap.remove(oldName);
         channel.channelUpdater(newName);
-        return true;
+
+        return new ResponseChannelDto(
+                channel.getName(),
+                channel.getId(),
+                channel.getChannelType(),
+                channel.getCreateAt(),
+                channel.getUpdateAt(),
+                channel.getCreateUser(),
+                channel.getAccessibleUser());
     }
 
     @Override

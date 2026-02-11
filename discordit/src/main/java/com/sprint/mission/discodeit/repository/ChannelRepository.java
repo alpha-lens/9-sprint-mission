@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ChannelRepository {
-    UUID save(CreateChannelDto requestDto);
-    boolean save(UpdateChannelDto requestDto);
+    ResponseChannelDto save(CreateChannelDto requestDto);
+    ResponseChannelDto save(UpdateChannelDto requestDto);
     ResponseChannelDto findChannel(UUID channelId, UUID userId);
 
     ChannelType getChannelType(UUID id);
