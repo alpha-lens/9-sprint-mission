@@ -6,6 +6,7 @@ import com.sprint.mission.discodeit.dto.UpdateChannelDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.exepction.*;
+import com.sprint.mission.discodeit.exepction.global.Forbidden;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Profile;
@@ -147,7 +148,7 @@ public class FileChannelRepository implements ChannelRepository {
         if(privateChannelIdMap.containsKey(channelId))
             if (privateChannelIdMap.get(channelId).getAccessibleUser().containsValue(userId))
                 return requestChannelInfo(privateChannelIdMap.get(channelId));
-            else throw new Unauthorized("Cannot accessible this channel!");
+            else throw new Forbidden("Cannot accessible this channel!");
         throw new FailedFound("Channel not found");
     }
 

@@ -10,10 +10,14 @@ import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -68,6 +72,16 @@ public class MessageController {
             @RequestParam("new_content") String newContent
     ) {
         return messageService.update(userId, messageId, newContent);
+    }
+
+    @RequestMapping(value = "delete/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<String> handleDeleteMessage(
+            @PathVariable("id") UUID messageId,
+            @RequestParam("userId") UUID userId
+    ) {
+        if (messageService.delete(userId, messageId)) {
+            return new ResponseEntity<>("Success", HttpStatus.OK);
+        } else return new ResponseEntity<>(HttpStatus.CONFLICT);
     }
 }
 

@@ -3,11 +3,11 @@ package com.sprint.mission.discodeit.controller;
 import com.sprint.mission.discodeit.dto.ResponseChannelDto;
 import com.sprint.mission.discodeit.dto.UpdateChannelDto;
 import com.sprint.mission.discodeit.entity.ChannelType;
-import com.sprint.mission.discodeit.exepction.Unauthorized;
+import com.sprint.mission.discodeit.exepction.NotFound;
+import com.sprint.mission.discodeit.exepction.global.Forbidden;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,19 +48,19 @@ public class ChannelController {
             @RequestParam("channelId") UUID channelId,
             @RequestParam("userId") UUID userId,
             @RequestParam("newChannelName") String newChannelName
-    ) throws BadRequestException {
+    ) {
         String userName = userService.find(userId).name();
 
         if(!channelService.isPresent(channelId)){
-            throw new BadRequestException("The channel does not exist.");
+            throw new NotFound("The channel does not exist.");
         }
 
         if(channelService.find(channelId, userId).channelType() == ChannelType.PRIVATE){
-            throw new BadRequestException("Failed: Private channel cannot update!");
+            throw new Forbidden("Failed: Private channel cannot update!");
         }
 
         if(!channelService.findChannelCreator(channelId, userName))
-            throw new Unauthorized("Channel update is only creator!");
+            throw new Forbidden("Channel update is only creator!");
 
         return channelService.update(new UpdateChannelDto(channelId, newChannelName));
     }
@@ -69,15 +69,15 @@ public class ChannelController {
     public ResponseEntity<String> handleDeleteChannel(
             @RequestParam("channelId") UUID channelId,
             @RequestParam("userId") UUID userId
-    ) throws BadRequestException {
+    ) {
         String userName = userService.find(userId).name();
 
         if(!channelService.isPresent(channelId)){
-            throw new BadRequestException("The channel does not exist.");
+            throw new NotFound("The channel does not exist.");
         }
 
         if(!channelService.findChannelCreator(channelId, userName)) {
-            throw new Unauthorized("Failed: Private channel cannot update!");
+            throw new Forbidden("Failed: Private channel cannot update!");
         }
 
         channelService.delete(channelId);

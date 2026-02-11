@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.exepction;
+package com.sprint.mission.discodeit.exepction.global;
 
 public class Unauthorized extends RuntimeException {
     public Unauthorized(String message) {
