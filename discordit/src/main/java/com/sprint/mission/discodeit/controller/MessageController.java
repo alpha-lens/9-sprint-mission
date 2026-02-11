@@ -81,7 +81,7 @@ public class MessageController {
         } else return new ResponseEntity<>(HttpStatus.CONFLICT);
     }
 
-    @RequestMapping(value = "/find")
+    @RequestMapping(value = "/find", method = RequestMethod.GET)
     public List<ResponseMessageDto> handleFindMessage(
             @PathVariable UUID channelId,
             @RequestParam("userId") UUID userId

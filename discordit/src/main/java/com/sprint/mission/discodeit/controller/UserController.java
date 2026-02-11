@@ -114,7 +114,7 @@ public class UserController {
         return new ResponseEntity<>("Success deleted! : " + userName, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/userstatus/update")
+    @RequestMapping(value = "/userstatus/update", method = RequestMethod.PUT)
     public ResponseEntity<String> handleUserStatus(
             @RequestParam("id") UUID id
     ) {
