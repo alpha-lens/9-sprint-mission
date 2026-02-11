@@ -4,7 +4,7 @@ package com.sprint.mission.discodeit.repository.jcf;
 import com.sprint.mission.discodeit.dto.MessageResponseDto;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.exepction.FailedDelete;
-import com.sprint.mission.discodeit.exepction.FailedFound;
+import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
@@ -69,7 +69,7 @@ public class JCFMessageRepository implements MessageRepository {
             return channelIdMessageMap.get(channelId)
                     .stream().max(Comparator.comparing(Message::getCreateAt)).orElse(null).getCreateAt();
         } catch (NullPointerException e) {
-            throw new FailedFound("Last message not found");
+            throw new NotFound("Last message not found");
         }
     }
 
@@ -93,7 +93,7 @@ public class JCFMessageRepository implements MessageRepository {
                         });
             }
         } catch (Exception e) {
-            throw new FailedFound("Message not found");
+            throw new NotFound("Message not found");
         }
         return result;
     }
@@ -101,7 +101,7 @@ public class JCFMessageRepository implements MessageRepository {
     @Override
     public MessageResponseDto updateMessage(UUID id, String content) {
         Message message = messageIdMap.get(id);
-        if (message == null) throw new FailedFound("Message not found");
+        if (message == null) throw new NotFound("Message not found");
 
         message.updateMessage(content);
 
@@ -118,10 +118,10 @@ public class JCFMessageRepository implements MessageRepository {
     @Override
     public UUID delete(UUID userId, UUID id) {
         List<Message> userMessages = userIdMessageMap.get(userId);
-        if (userMessages == null) throw new FailedFound("Message not found(Delete)");
+        if (userMessages == null) throw new NotFound("Message not found(Delete)");
 
         Message message = userMessages.stream().filter(e -> e.getId().equals(id)).findFirst().orElse(null);
-        if (message == null) throw new FailedFound("Message not found(Delete)");
+        if (message == null) throw new NotFound("Message not found(Delete)");
 
         UUID channelId = message.getSendChannelId();
         try {

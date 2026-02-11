@@ -2,7 +2,7 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.CreateMessageDto;
 import com.sprint.mission.discodeit.dto.MessageResponseDto;
-import com.sprint.mission.discodeit.exepction.FailedFound;
+import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
@@ -64,7 +64,7 @@ public class BasicMessageService implements MessageService {
     @Override
     public MessageResponseDto update(UUID userId, UUID messageId, String content) {
         if (!messageRepository.isPresentMessage(userId, messageId)) {
-            throw new FailedFound("해당 ID를 찾지 못했습니다.");
+            throw new NotFound("해당 ID를 찾지 못했습니다.");
         }
 
         return messageRepository.updateMessage(messageId, content);

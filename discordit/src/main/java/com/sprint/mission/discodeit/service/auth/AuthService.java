@@ -4,7 +4,6 @@ import com.sprint.mission.discodeit.UserState;
 import com.sprint.mission.discodeit.dto.LoginDto;
 import com.sprint.mission.discodeit.dto.UserStatusUpdateDto;
 import com.sprint.mission.discodeit.exepction.FailedLogin;
-import com.sprint.mission.discodeit.exepction.NotFound;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import lombok.RequiredArgsConstructor;

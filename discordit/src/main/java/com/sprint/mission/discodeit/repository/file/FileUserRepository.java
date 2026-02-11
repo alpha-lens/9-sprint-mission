@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.dto.UpdateUserDto;
 import com.sprint.mission.discodeit.dto.UserResponseDto;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exepction.*;
+import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
@@ -154,7 +155,7 @@ public class FileUserRepository implements UserRepository {
         try {
             return userNameIdMap.get(name);
         } catch (Exception e) {
-            throw new FailedFound("Do not found this user : " + name);
+            throw new NotFound("Do not found this user : " + name);
         }
     }
 
@@ -163,7 +164,7 @@ public class FileUserRepository implements UserRepository {
         try {
             return idUserMap.get(id).getName();
         } catch (Exception e) {
-            throw new FailedFound("Do not found this user : " + id);
+            throw new NotFound("Do not found this user : " + id);
         }
     }
 

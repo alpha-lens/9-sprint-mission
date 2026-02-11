@@ -6,8 +6,7 @@ import com.sprint.mission.discodeit.dto.UserResponseDto;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exepction.DoNotDuplicate;
 import com.sprint.mission.discodeit.exepction.FailedDelete;
-import com.sprint.mission.discodeit.exepction.FailedFound;
-import com.sprint.mission.discodeit.exepction.NotFound;
+import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
@@ -103,7 +102,7 @@ public class JCFUserRepository implements UserRepository {
         try {
             return userNameIdMap.get(name);
         } catch (Exception e) {
-            throw new FailedFound("Do not found this user : " + name);
+            throw new NotFound("Do not found this user : " + name);
         }
     }
 
@@ -112,7 +111,7 @@ public class JCFUserRepository implements UserRepository {
         try {
             return idUserMap.get(id).getName();
         } catch (Exception e) {
-            throw new FailedFound("Do not found this user : " + id);
+            throw new NotFound("Do not found this user : " + id);
         }
     }
 

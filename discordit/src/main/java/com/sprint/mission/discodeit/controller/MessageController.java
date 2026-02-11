@@ -4,20 +4,18 @@ import com.sprint.mission.discodeit.dto.CreateBinaryContentDto;
 import com.sprint.mission.discodeit.dto.CreateMessageDto;
 import com.sprint.mission.discodeit.dto.MessageResponseDto;
 import com.sprint.mission.discodeit.entity.AttachmentType;
-import com.sprint.mission.discodeit.exepction.NotFound;
+import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.basic.BasicBinaryContentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -82,6 +80,15 @@ public class MessageController {
         if (messageService.delete(userId, messageId)) {
             return new ResponseEntity<>("Success", HttpStatus.OK);
         } else return new ResponseEntity<>(HttpStatus.CONFLICT);
+    }
+
+    @RequestMapping(value = "find/{channelId}")
+    public List<MessageResponseDto> handleFindMessage(
+            @PathVariable UUID channelId,
+            @RequestParam("userId") UUID userId
+    ) {
+        channelService.find(channelId, userId);
+        return messageService.findAllInChannel(channelId);
     }
 }
 

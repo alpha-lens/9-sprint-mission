@@ -5,7 +5,7 @@ import com.sprint.mission.discodeit.dto.DeleteUserStatusDto;
 import com.sprint.mission.discodeit.dto.FindUserStatusDto;
 import com.sprint.mission.discodeit.dto.UserStatusUpdateDto;
 import com.sprint.mission.discodeit.exepction.DoNotDuplicate;
-import com.sprint.mission.discodeit.exepction.NotFound;
+import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserStatusService;
