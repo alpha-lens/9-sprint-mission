@@ -96,7 +96,7 @@ public class UserController {
         if(file == null || file.isEmpty()) {
             updateUserRequestDto = new RequestUpdateUserDto(id, userName, password, email, phoneNumber, null);
         } else {
-            binaryContentCreateRequestDto = new RequestCreateBinaryContentDto(file.getContentType(), file.getName(), file.getBytes());
+            binaryContentCreateRequestDto = new RequestCreateBinaryContentDto(file.getContentType(), file.getOriginalFilename(), file.getBytes());
             UUID profileId = binaryContentService.create(binaryContentCreateRequestDto);
             updateUserRequestDto = new RequestUpdateUserDto(id, userName, password, email, phoneNumber, profileId);
         }
