@@ -1,63 +1,63 @@
 package com.sprint.mission.discodeit.entity;
 
-import lombok.Getter;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.Getter;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 @Getter
 @EntityScan
 public class Channel implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
-    private final UUID id;
-    private final Instant createAt;
-    private final String createUser;
-    private final Map<String, UUID> accessibleUser = new ConcurrentHashMap<>();
-    private final Map<String, ReadStatus> userReadStatusMap = new ConcurrentHashMap<>();
-    private final ChannelType channelType;
-    private String name;
-    private Instant updateAt;
 
-    public Channel(String name, String createUser, UUID createUserId) {
-        this(name, createUser, createUserId, ChannelType.PUBLIC);
-    }
+  @Serial
+  private static final long serialVersionUID = 1L;
+  private final UUID id;
+  private final Instant createAt;
+  private final String createUser;
+  private final Map<String, UUID> accessibleUser = new ConcurrentHashMap<>();
+  private final Map<String, ReadStatus> userReadStatusMap = new ConcurrentHashMap<>();
+  private final ChannelType channelType;
+  private String name;
+  private Instant updateAt;
 
-    public Channel(String name, String createUser, UUID createUserId, ChannelType channelType) {
-        Instant now = Instant.now();
-        this.id = UUID.randomUUID();
-        this.name = name;
-        this.createUser = createUser;
-        this.channelType = channelType;
-        this.createAt = now;
-        this.updateAt = now;
-        accessibleUser.put(createUser, createUserId);
-    }
+  public Channel(String name, String createUser, UUID createUserId) {
+    this(name, createUser, createUserId, ChannelType.PUBLIC);
+  }
 
-    /// setter
-    private void setUpdateAt() {
-        this.updateAt = Instant.now();
-    }
+  public Channel(String name, String createUser, UUID createUserId, ChannelType channelType) {
+    Instant now = Instant.now();
+    this.id = UUID.randomUUID();
+    this.name = name;
+    this.createUser = createUser;
+    this.channelType = channelType;
+    this.createAt = now;
+    this.updateAt = now;
+    accessibleUser.put(createUser, createUserId);
+  }
 
-    private void setName(String name) {
-        this.name = name;
-        setUpdateAt();
-    }
+  /// setter
+  private void setUpdateAt() {
+    this.updateAt = Instant.now();
+  }
 
-    public void channelUpdater(String name) {
-        setName(name);
-    }
+  private void setName(String name) {
+    this.name = name;
+    setUpdateAt();
+  }
 
-    public void addAccessibleUser(String userName, UUID userId) {
-        accessibleUser.put(userName, userId);
-    }
+  public void channelUpdater(String name) {
+    setName(name);
+  }
 
-    public void removeAccessibleUser(String userName) {
-        accessibleUser.remove(userName);
-    }
+  public void addAccessibleUser(String username, UUID userId) {
+    accessibleUser.put(username, userId);
+  }
+
+  public void removeAccessibleUser(String username) {
+    accessibleUser.remove(username);
+  }
 }

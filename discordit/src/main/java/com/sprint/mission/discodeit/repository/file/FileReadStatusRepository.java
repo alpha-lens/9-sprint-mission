@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
@@ -38,6 +39,7 @@ public class FileReadStatusRepository implements ReadStatusRepository {
   private final Map<UUID, ReadStatus> idReadStatusMap = new ConcurrentHashMap<>();
   private final Map<UUID, List<ReadStatus>> userIdReadStatusMap = new ConcurrentHashMap<>();
   private final Map<UUID, List<ReadStatus>> channelIdReadStatusMap = new ConcurrentHashMap<>();
+  private final FileLockProvider fileLockProvider = new FileLockProvider();
   private Path DIRECTORY;
   private final String EXTENSION = ".ser";
 
@@ -92,11 +94,15 @@ public class FileReadStatusRepository implements ReadStatusRepository {
     userIdReadStatusMap.computeIfAbsent(userId, id -> new ArrayList<>()).add(readStatus);
     channelIdReadStatusMap.computeIfAbsent(userId, id -> new ArrayList<>()).add(readStatus);
     Path path = resolvePath(readStatus.getId());
+    ReentrantLock lock = fileLockProvider.getLock(path);
+    lock.lock();
     try (FileOutputStream fos = new FileOutputStream(path.toFile());
         ObjectOutputStream oos = new ObjectOutputStream(fos)) {
       oos.writeObject(readStatus);
     } catch (IOException e) {
       throw new FailedInit("FileReadStatusRepository init failed");
+    } finally {
+      lock.unlock();
     }
     return response(readStatus);
   }
@@ -127,11 +133,13 @@ public class FileReadStatusRepository implements ReadStatusRepository {
     ReadStatus temp = userIdReadStatusMap.get(userId).stream()
         .filter(readStatus -> readStatus.getChannelId().equals(channelId)).findFirst().orElse(null);
 
-      if (temp == null) {
-          throw new NotFound("상태값을 찾지 못했습니다.");
-      }
+    if (temp == null) {
+      throw new NotFound("상태값을 찾지 못했습니다.");
+    }
 
     Path path = resolvePath(temp.getId());
+    ReentrantLock lock = fileLockProvider.getLock(path);
+    lock.lock();
     try (FileOutputStream fos = new FileOutputStream(path.toFile());
         ObjectOutputStream oos = new ObjectOutputStream(fos)) {
       oos.writeObject(temp);
@@ -139,12 +147,16 @@ public class FileReadStatusRepository implements ReadStatusRepository {
       return response(temp);
     } catch (IOException e) {
       throw new FailedUpdate("ReadStatus update failed");
+    } finally {
+      lock.unlock();
     }
   }
 
   @Override
   public boolean delete(UUID id) {
     Path path = resolvePath(id);
+    ReentrantLock lock = fileLockProvider.getLock(path);
+    lock.lock();
     try {
       Files.delete(path);
       ReadStatus temp = idReadStatusMap.remove(id);
@@ -153,6 +165,8 @@ public class FileReadStatusRepository implements ReadStatusRepository {
       return true;
     } catch (IOException e) {
       throw new FailedDelete("ReadStatus delete failed");
+    } finally {
+      lock.unlock();
     }
   }
 

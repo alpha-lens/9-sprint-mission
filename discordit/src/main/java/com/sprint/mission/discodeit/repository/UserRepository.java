@@ -3,30 +3,30 @@ package com.sprint.mission.discodeit.repository;
 import com.sprint.mission.discodeit.dto.request.RequestCreateUserDto;
 import com.sprint.mission.discodeit.dto.request.RequestUpdateUserDto;
 import com.sprint.mission.discodeit.dto.response.ResponseUserDto;
-
 import java.util.List;
 import java.util.UUID;
 
 public interface UserRepository {
-    ResponseUserDto create(RequestCreateUserDto dto);
 
-    ResponseUserDto update(RequestUpdateUserDto requestDto);
+  ResponseUserDto create(RequestCreateUserDto dto);
 
-    ResponseUserDto find(String name);
+  ResponseUserDto update(RequestUpdateUserDto requestDto);
 
-    ResponseUserDto find(UUID userId);
+  ResponseUserDto find(String name);
 
-    List<ResponseUserDto> findAll();
+  ResponseUserDto find(UUID userId);
 
-    boolean delete(UUID id);
+  List<ResponseUserDto> findAll();
 
-    boolean isPresent(UUID id);
+  boolean delete(UUID id);
 
-    UUID userNameToId(String name);
+  boolean isPresent(UUID id);
 
-    String userIdToName(UUID id);
+  UUID usernameToId(String name);
 
-    boolean checkInvalid(UUID id, String pw);
+  String userIdToName(UUID id);
 
-    void duplicateChecker(String checkThis, String findThis);
+  boolean checkInvalid(UUID id, String pw);
+
+  void duplicateChecker(String checkThis, String findThis);
 }

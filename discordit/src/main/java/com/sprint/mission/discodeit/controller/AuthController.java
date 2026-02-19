@@ -10,22 +10,24 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-@RequestMapping("/api/auth")
+@RequestMapping("/api/auth/")
 @RequiredArgsConstructor
 public class AuthController {
-    private final AuthService authService;
 
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public ResponseEntity<String> loginUser(
-            @RequestParam(value = "userName") String userName,
-            @RequestParam(value = "password") String password
-    ) {
-        authService.login(new RequestLoginDto(userName, password));
-        return ResponseEntity.ok(userName + " is login successfully");
-    }
-    @RequestMapping(value = "/logout", method = RequestMethod.POST)
-    public ResponseEntity<String> loginUser() {
-        authService.logout();
-        return ResponseEntity.ok("Logout successfully");
-    }
+  private final AuthService authService;
+
+  @RequestMapping(value = "/login", method = RequestMethod.POST)
+  public ResponseEntity<String> loginUser(
+      @RequestParam(value = "username") String username,
+      @RequestParam(value = "password") String password
+  ) {
+    authService.login(new RequestLoginDto(username, password));
+    return ResponseEntity.ok(username + " is login successfully");
+  }
+
+  @RequestMapping(value = "/logout", method = RequestMethod.POST)
+  public ResponseEntity<String> loginUser() {
+    authService.logout();
+    return ResponseEntity.ok("Logout successfully");
+  }
 }

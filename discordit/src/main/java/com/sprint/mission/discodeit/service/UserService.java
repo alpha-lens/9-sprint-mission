@@ -3,23 +3,26 @@ package com.sprint.mission.discodeit.service;
 import com.sprint.mission.discodeit.dto.request.RequestCreateUserDto;
 import com.sprint.mission.discodeit.dto.request.RequestUpdateUserDto;
 import com.sprint.mission.discodeit.dto.response.ResponseUserDto;
-
 import java.util.List;
 import java.util.UUID;
 
 public interface UserService {
-    UUID userNameToId(String name);
 
-    boolean isPresent(UUID id);
+  UUID usernameToId(String name);
 
-    boolean isInvalid(UUID userId, String password);
+  boolean isPresent(UUID id);
 
-    ResponseUserDto create(RequestCreateUserDto requestDto);
-    ResponseUserDto update(RequestUpdateUserDto requestDto);
-    ResponseUserDto find(String name);
+  boolean isInvalid(UUID userId, String password);
 
-    ResponseUserDto find(UUID id);
+  ResponseUserDto create(RequestCreateUserDto requestDto);
 
-    List<ResponseUserDto> findAll();
-    boolean delete(UUID id);
+  ResponseUserDto update(RequestUpdateUserDto requestDto);
+
+  ResponseUserDto find(String name);
+
+  ResponseUserDto find(UUID id);
+
+  List<ResponseUserDto> findAll();
+
+  boolean delete(UUID id);
 }

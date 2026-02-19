@@ -40,7 +40,7 @@ public class UserController {
   @ResponseBody
   @RequestMapping(method = RequestMethod.POST)
   public ResponseUserDto handleCreateUser(
-      @RequestParam("userName") String userName,
+      @RequestParam("username") String username,
       @RequestParam("password") String password,
       @RequestParam("email") String email,
       @RequestParam(value = "file", required = false) MultipartFile file
@@ -49,19 +49,19 @@ public class UserController {
     RequestCreateUserDto userCreateRequestDto;
 
     if (file == null || file.isEmpty()) {
-      userCreateRequestDto = new RequestCreateUserDto(userName, password, email, null);
+      userCreateRequestDto = new RequestCreateUserDto(username, password, email, null);
     } else {
       binaryContentCreateRequestDto = new RequestCreateBinaryContentDto(file.getContentType(),
           file.getName(), file.getBytes());
       UUID profileId = binaryContentService.create(binaryContentCreateRequestDto);
-      userCreateRequestDto = new RequestCreateUserDto(userName, password, email, profileId);
+      userCreateRequestDto = new RequestCreateUserDto(username, password, email, profileId);
     }
 
     ResponseUserDto responseDto = userService.create(userCreateRequestDto);
 
     UUID userId = responseDto.id();
 
-    userStatusService.create(new RequestCreateUserStatusDto(userName, userId));
+    userStatusService.create(new RequestCreateUserStatusDto(username, userId));
 
     return responseDto;
   }
@@ -94,7 +94,7 @@ public class UserController {
   public ResponseEntity<String> handleUpdateUser(
       @PathVariable UUID id,
       @RequestParam(value = "oldPassword") String oldPassword,
-      @RequestParam(value = "userName", required = false) String userName,
+      @RequestParam(value = "username", required = false) String username,
       @RequestParam(value = "password", required = false) String password,
       @RequestParam(value = "email", required = false) String email,
       @RequestParam(value = "phoneNumber", required = false) String phoneNumber,
@@ -108,41 +108,41 @@ public class UserController {
     }
 
     if (file == null || file.isEmpty()) {
-      updateUserRequestDto = new RequestUpdateUserDto(id, userName, password, email, phoneNumber,
+      updateUserRequestDto = new RequestUpdateUserDto(id, username, password, email, phoneNumber,
           null);
     } else {
       binaryContentCreateRequestDto = new RequestCreateBinaryContentDto(file.getContentType(),
           file.getOriginalFilename(), file.getBytes());
       UUID profileId = binaryContentService.create(binaryContentCreateRequestDto);
-      updateUserRequestDto = new RequestUpdateUserDto(id, userName, password, email, phoneNumber,
+      updateUserRequestDto = new RequestUpdateUserDto(id, username, password, email, phoneNumber,
           profileId);
     }
 
     userService.update(updateUserRequestDto);
-    return new ResponseEntity<>(userName + " has been updated!", HttpStatus.OK);
+    return new ResponseEntity<>(username + " has been updated!", HttpStatus.OK);
   }
 
   @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
   public ResponseEntity<String> handleDeleteUser(
       @PathVariable UUID id
   ) {
-    String userName = userService.find(id).username();
+    String username = userService.find(id).username();
     userService.delete(id);
-    return new ResponseEntity<>("Success deleted! : " + userName, HttpStatus.OK);
+    return new ResponseEntity<>("Success deleted! : " + username, HttpStatus.OK);
   }
 
   @RequestMapping(value = "{id}/userStatus", method = RequestMethod.PATCH)
   public ResponseEntity<String> handleUserStatus(
       @PathVariable UUID id
   ) {
-    String userName = userService.find(id).username();
+    String username = userService.find(id).username();
     Instant now = Instant.now();
 
-    RequestUpdateUserStatusDto updateRequestDto = new RequestUpdateUserStatusDto(id, userName, now);
+    RequestUpdateUserStatusDto updateRequestDto = new RequestUpdateUserStatusDto(id, username, now);
 
     userStatusService.update(updateRequestDto);
-    return new ResponseEntity<>(userName + " status updated!\n"
-        + "User Status : " + userStatusService.find(new RequestFindUserStatusDto(id, userName))
+    return new ResponseEntity<>(username + " status updated!\n"
+        + "User Status : " + userStatusService.find(new RequestFindUserStatusDto(id, username))
         , HttpStatus.OK);
   }
 }

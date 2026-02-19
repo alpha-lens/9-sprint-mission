@@ -34,10 +34,10 @@ public class MessageController {
 
   @RequestMapping(method = RequestMethod.POST)
   public ResponseMessageDto handleCreateMessage(
-      @RequestParam("")
+      @RequestParam("channelId") UUID channelId,
       @RequestParam("userId") UUID userId,
-      @RequestParam("content") String content,
-      @RequestParam(value = "files", required = false) List<MultipartFile> files
+      @RequestParam("messageCreateRequest") String content,
+      @RequestParam(value = "attachments", required = false) List<MultipartFile> files
   ) throws IOException {
     List<UUID> binaryContentIds = new ArrayList<>();
 
@@ -71,18 +71,18 @@ public class MessageController {
     return messageService.create(requestMessageDto);
   }
 
-  @RequestMapping(value = "/update/{id}", method = RequestMethod.PUT)
+  @RequestMapping(value = "{messageId}", method = RequestMethod.PATCH)
   public ResponseMessageDto handleUpdateMessage(
-      @PathVariable("id") UUID messageId,
+      @PathVariable UUID messageId,
       @RequestParam("userId") UUID userId,
       @RequestParam("new_content") String newContent
   ) {
     return messageService.update(userId, messageId, newContent);
   }
 
-  @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE)
+  @RequestMapping(value = "{messageId}", method = RequestMethod.DELETE)
   public ResponseEntity<String> handleDeleteMessage(
-      @PathVariable("id") UUID messageId,
+      @PathVariable UUID messageId,
       @RequestParam("userId") UUID userId
   ) {
     if (messageService.delete(userId, messageId)) {
@@ -92,9 +92,9 @@ public class MessageController {
     }
   }
 
-  @RequestMapping(value = "/find", method = RequestMethod.GET)
+  @RequestMapping(method = RequestMethod.GET)
   public List<ResponseMessageDto> handleFindMessage(
-      @PathVariable UUID channelId,
+      @RequestParam("channelId") UUID channelId,
       @RequestParam("userId") UUID userId
   ) {
     channelService.find(channelId, userId);

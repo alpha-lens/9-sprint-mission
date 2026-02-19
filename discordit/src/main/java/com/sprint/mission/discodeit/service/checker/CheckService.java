@@ -7,8 +7,10 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class CheckService {
-    private final UserState userState;
-    public boolean isNotLogin(){
-        return userState.getUserName() == null ||  userState.getUserName().isEmpty();
-    }
+
+  private final UserState userState;
+
+  public boolean isNotLogin() {
+    return userState.getUsername() == null || userState.getUsername().isEmpty();
+  }
 }

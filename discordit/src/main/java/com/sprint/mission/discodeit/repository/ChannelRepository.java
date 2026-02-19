@@ -5,42 +5,44 @@ import com.sprint.mission.discodeit.dto.request.RequestUpdateChannelDto;
 import com.sprint.mission.discodeit.dto.response.ResponseChannelDto;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
-
 import java.util.List;
 import java.util.UUID;
 
 public interface ChannelRepository {
-    ResponseChannelDto save(RequestCreateChannelDto requestDto);
-    ResponseChannelDto save(RequestUpdateChannelDto requestDto);
-    ResponseChannelDto findChannel(UUID channelId, UUID userId);
 
-    ChannelType getChannelType(UUID id);
+  ResponseChannelDto save(RequestCreateChannelDto requestDto);
 
-    UUID getChannelId(String name);
+  ResponseChannelDto save(RequestUpdateChannelDto requestDto);
 
-    List<ResponseChannelDto> findAllChannel(UUID userId);
+  ResponseChannelDto findChannel(UUID channelId, UUID userId);
 
-    List<ResponseChannelDto> findAllPrivateChannel(UUID userId);
+  ChannelType getChannelType(UUID id);
 
-    List<ResponseChannelDto> accessiblePrivateChannel(UUID userId);
+  UUID getChannelId(String name);
 
-    ResponseChannelDto requestChannelInfo(Channel channel);
+  List<ResponseChannelDto> findAllChannel(UUID userId);
 
-    void includePrivateChannel(String channelName, String userName, UUID userId);
+  List<ResponseChannelDto> findAllPrivateChannel(UUID userId);
 
-    void excludePrivateChannel(String channelName, String userName);
+  List<ResponseChannelDto> accessiblePrivateChannel(UUID userId);
 
-    boolean deleteChannel(UUID id);
+  ResponseChannelDto requestChannelInfo(Channel channel);
 
-    void deleteAllChannel(String name);
+  void includePrivateChannel(String channelName, String username, UUID userId);
 
-    boolean isPresentChannel(UUID id);
+  void excludePrivateChannel(String channelName, String username);
 
-    boolean isCreatePrivateChannel(String name);
+  boolean deleteChannel(UUID id);
 
-    boolean findChannelCreator(UUID id, String userName);
+  void deleteAllChannel(String name);
 
-    UUID channelNameToId(String name);
+  boolean isPresentChannel(UUID id);
 
-    String channelIdToName(UUID id);
+  boolean isCreatePrivateChannel(String name);
+
+  boolean findChannelCreator(UUID id, String username);
+
+  UUID channelNameToId(String name);
+
+  String channelIdToName(UUID id);
 }
