@@ -5,9 +5,9 @@ import com.sprint.mission.discodeit.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/api/auth")
@@ -18,11 +18,10 @@ public class AuthController {
 
   @RequestMapping(value = "/login", method = RequestMethod.POST)
   public ResponseEntity<String> loginUser(
-      @RequestParam(value = "username") String username,
-      @RequestParam(value = "password") String password
+      @RequestBody RequestLoginDto loginDto
   ) {
-    authService.login(new RequestLoginDto(username, password));
-    return ResponseEntity.ok(username + " is login successfully");
+    authService.login(loginDto);
+    return ResponseEntity.ok(loginDto.username() + " is login successfully");
   }
 
   @RequestMapping(value = "/logout", method = RequestMethod.POST)

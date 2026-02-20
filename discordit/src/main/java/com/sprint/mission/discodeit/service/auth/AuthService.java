@@ -21,12 +21,12 @@ public class AuthService {
   public void login(RequestLoginDto requestDto) {
     /// 검증로직
     try {
-      UUID id = userRepository.usernameToId(requestDto.name());
+      UUID id = userRepository.usernameToId(requestDto.username());
 
       if (!userRepository.checkInvalid(id, requestDto.password())) {
-        userState.userState(requestDto.name(), id);
+        userState.userState(requestDto.username(), id);
         userStatusRepository.update(
-            new RequestUpdateUserStatusDto(id, requestDto.name(), null));
+            new RequestUpdateUserStatusDto(id, requestDto.username(), null));
       } else {
         throw new Exception();
       }
