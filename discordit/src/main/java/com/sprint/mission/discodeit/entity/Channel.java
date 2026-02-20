@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.entity;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,26 +18,22 @@ public class Channel implements Serializable {
   private static final long serialVersionUID = 1L;
   private final UUID id;
   private final Instant createAt;
-  private final String createUser;
-  private final Map<String, UUID> accessibleUser = new ConcurrentHashMap<>();
+  private final Map<String, UUID> participantIds = new ConcurrentHashMap<>();
   private final Map<String, ReadStatus> userReadStatusMap = new ConcurrentHashMap<>();
   private final ChannelType channelType;
   private String name;
+  private String description;
   private Instant updateAt;
 
-  public Channel(String name, String createUser, UUID createUserId) {
-    this(name, createUser, createUserId, ChannelType.PUBLIC);
-  }
-
-  public Channel(String name, String createUser, UUID createUserId, ChannelType channelType) {
+  public Channel(String name, String description, ChannelType channelType,
+      List<UUID> participantIds) {
     Instant now = Instant.now();
     this.id = UUID.randomUUID();
     this.name = name;
-    this.createUser = createUser;
     this.channelType = channelType;
+    this.description = description;
     this.createAt = now;
     this.updateAt = now;
-    accessibleUser.put(createUser, createUserId);
   }
 
   /// setter
@@ -44,20 +41,29 @@ public class Channel implements Serializable {
     this.updateAt = Instant.now();
   }
 
-  private void setName(String name) {
-    this.name = name;
-    setUpdateAt();
+  public void channelUpdater(String name, String description) {
+    boolean edit = false;
+
+    if (name != null && !name.isEmpty() && !this.name.equals(name)) {
+      this.name = name;
+      edit = true;
+    }
+
+    if (description != null && !description.isEmpty() && !this.description.equals(description)) {
+      this.description = description;
+      edit = true;
+    }
+
+    if (edit) {
+      setUpdateAt();
+    }
   }
 
-  public void channelUpdater(String name) {
-    setName(name);
+  public void addParticipantIds(String username, UUID userId) {
+    participantIds.put(username, userId);
   }
 
-  public void addAccessibleUser(String username, UUID userId) {
-    accessibleUser.put(username, userId);
-  }
-
-  public void removeAccessibleUser(String username) {
-    accessibleUser.remove(username);
+  public void removeParticipantIds(String username) {
+    participantIds.remove(username);
   }
 }

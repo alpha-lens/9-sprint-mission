@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.UUID;
 
 public record RequestCreateChannelDto(
-    String name, String createUsername, UUID createUserId, ChannelType type,
+    String name, String description, ChannelType type,
     List<UUID> participantIds
 ) {
 
   public Channel toEntity() {
-    return new Channel(name, createUsername, createUserId, type);
+    return new Channel(name, description, type, participantIds);
   }
 }

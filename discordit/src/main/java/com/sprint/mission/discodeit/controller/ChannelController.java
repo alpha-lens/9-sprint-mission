@@ -1,11 +1,9 @@
 package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.dto.request.RequestChannelDto;
-import com.sprint.mission.discodeit.dto.request.RequestCreateChannelDto;
 import com.sprint.mission.discodeit.dto.request.RequestUpdateChannelDto;
 import com.sprint.mission.discodeit.dto.response.ResponseChannelDto;
 import com.sprint.mission.discodeit.entity.ChannelType;
-import com.sprint.mission.discodeit.exepction.global.Forbidden;
 import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.UserService;
@@ -20,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/channels")
@@ -32,29 +29,18 @@ public class ChannelController {
 
   @RequestMapping(value = "public", method = RequestMethod.POST)
   public ResponseChannelDto handleCreatePublicChannel(
-      @RequestParam("channelName") String channelName,
-      @RequestParam("userId") UUID userId,
-      @RequestParam(value = "file", required = false) MultipartFile file
+      @RequestBody RequestChannelDto channelDto
   ) {
-    String username = userService.find(userId).username();
-    RequestCreateChannelDto requestDto = new RequestCreateChannelDto(channelName, username, userId,
-        ChannelType.PUBLIC, null);
-
-    return channelService.create(requestDto);
+    channelDto.setType(ChannelType.PUBLIC);
+    return channelService.create(channelDto);
   }
 
   @RequestMapping(value = "private", method = RequestMethod.POST)
   public ResponseChannelDto handleCreatePrivateChannel(
       @RequestBody RequestChannelDto channelDto
   ) {
-    String channelName = channelDto.getName();
-    UUID userId = channelDto.getCreateUserId();
-    List<UUID> participantIds = channelDto.getParticipantIds();
-
-    String username = userService.find(userId).username();
-    RequestCreateChannelDto requestDto = new RequestCreateChannelDto(channelName, username, userId,
-        ChannelType.PRIVATE, participantIds);
-    return channelService.create(requestDto);
+    channelDto.setType(ChannelType.PRIVATE);
+    return channelService.create(channelDto);
   }
 
   @RequestMapping(method = RequestMethod.GET)
@@ -67,25 +53,9 @@ public class ChannelController {
   @RequestMapping(value = "{channelId}", method = RequestMethod.PATCH)
   public ResponseChannelDto handleUpdateChannel(
       @PathVariable UUID channelId,
-      @RequestParam("userId") UUID userId,
-      @RequestParam("newChannelName") String newChannelName,
-      @RequestParam(value = "newDescription", required = false) String newDescription
+      @RequestBody RequestUpdateChannelDto updateChannelDto
   ) {
-    String username = userService.find(userId).username();
-
-    if (!channelService.isPresent(channelId)) {
-      throw new NotFound("The channel does not exist.");
-    }
-
-    if (channelService.find(channelId, userId).channelType() == ChannelType.PRIVATE) {
-      throw new Forbidden("Failed: Private channel cannot update!");
-    }
-
-    if (!channelService.findChannelCreator(channelId, username)) {
-      throw new Forbidden("Channel update is only creator!");
-    }
-
-    return channelService.update(new RequestUpdateChannelDto(channelId, newChannelName));
+    return channelService.update(channelId, updateChannelDto);
   }
 
   @RequestMapping(value = "{channelId}", method = RequestMethod.DELETE)
@@ -93,14 +63,8 @@ public class ChannelController {
       @PathVariable UUID channelId,
       @RequestParam("userId") UUID userId
   ) {
-    String username = userService.find(userId).username();
-
     if (!channelService.isPresent(channelId)) {
       throw new NotFound("The channel does not exist.");
-    }
-
-    if (!channelService.findChannelCreator(channelId, username)) {
-      throw new Forbidden("Failed: Private channel cannot update!");
     }
 
     channelService.delete(channelId);

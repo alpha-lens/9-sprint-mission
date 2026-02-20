@@ -1,10 +1,12 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.request.RequestCreateChannelDto;
+import com.sprint.mission.discodeit.dto.request.RequestChannelDto;
 import com.sprint.mission.discodeit.dto.request.RequestUpdateChannelDto;
 import com.sprint.mission.discodeit.dto.response.ResponseChannelDto;
 import com.sprint.mission.discodeit.dto.response.ResponseFindChannelDto;
 import com.sprint.mission.discodeit.entity.ChannelType;
+import com.sprint.mission.discodeit.exepction.global.Forbidden;
+import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -29,13 +31,13 @@ public class BasicChannelService implements ChannelService {
   }
 
   @Override
-  public ResponseChannelDto create(RequestCreateChannelDto requestDto) {
+  public ResponseChannelDto create(RequestChannelDto requestDto) {
     return channelRepository.save(requestDto);
   }
 
   @Override
-  public ResponseFindChannelDto find(UUID channelId, UUID userId) {
-    ResponseChannelDto channelInfo = channelRepository.findChannel(channelId, userId);
+  public ResponseFindChannelDto find(UUID channelId) {
+    ResponseChannelDto channelInfo = channelRepository.findChannel(channelId);
     ChannelType channelType = channelRepository.getChannelType(channelId);
     Instant lastMessageTime = null;
     try {
@@ -57,18 +59,21 @@ public class BasicChannelService implements ChannelService {
   }
 
   @Override
-  public ResponseChannelDto update(RequestUpdateChannelDto requestDto) {
-    return channelRepository.save(requestDto);
+  public ResponseChannelDto update(UUID channelId, RequestUpdateChannelDto requestDto) {
+    if (!isPresent(channelId)) {
+      throw new NotFound("The channel does not exist.");
+    }
+
+    if (channelRepository.getChannelType(channelId).equals(ChannelType.PRIVATE)) {
+      throw new Forbidden("Failed: Private channel cannot update!");
+    }
+
+    return channelRepository.save(channelId, requestDto);
   }
 
   @Override
   public boolean delete(UUID id) {
     return channelRepository.deleteChannel(id);
-  }
-
-  @Override
-  public void deleteAll(String name) {
-    channelRepository.deleteAllChannel(name);
   }
 
   @Override
@@ -80,15 +85,5 @@ public class BasicChannelService implements ChannelService {
   @Override
   public void excludePrivateChannel(String channelName, String username) {
     channelRepository.excludePrivateChannel(channelName, username);
-  }
-
-  @Override
-  public boolean isCreatePrivateChannel(String username) {
-    return channelRepository.isCreatePrivateChannel(username);
-  }
-
-  @Override
-  public boolean findChannelCreator(UUID id, String username) {
-    return channelRepository.findChannelCreator(id, username);
   }
 }
