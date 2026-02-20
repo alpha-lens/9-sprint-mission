@@ -11,14 +11,13 @@ import com.sprint.mission.discordit.repository.BinaryContentRepository;
 import com.sprint.mission.discordit.repository.UserRepository;
 import com.sprint.mission.discordit.repository.UserStatusRepository;
 import com.sprint.mission.discordit.service.UserService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
@@ -30,7 +29,7 @@ public class BasicUserService implements UserService {
   private final UserStatusRepository userStatusRepository;
 
   @Override
-  public User create(UserCreateRequest userCreateRequest,
+  public UserDto create(UserCreateRequest userCreateRequest,
       Optional<BinaryContentCreateRequest> optionalProfileCreateRequest) {
     String username = userCreateRequest.username();
     String email = userCreateRequest.email();
@@ -61,7 +60,7 @@ public class BasicUserService implements UserService {
     UserStatus userStatus = new UserStatus(createdUser.getId(), now);
     userStatusRepository.save(userStatus);
 
-    return createdUser;
+    return toDto(user);
   }
 
   @Override
@@ -80,7 +79,7 @@ public class BasicUserService implements UserService {
   }
 
   @Override
-  public User update(UUID userId, UserUpdateRequest userUpdateRequest,
+  public UserDto update(UUID userId, UserUpdateRequest userUpdateRequest,
       Optional<BinaryContentCreateRequest> optionalProfileCreateRequest) {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new NoSuchElementException("User with id " + userId + " not found"));
@@ -111,7 +110,7 @@ public class BasicUserService implements UserService {
     String newPassword = userUpdateRequest.newPassword();
     user.update(newUsername, newEmail, newPassword, nullableProfileId);
 
-    return userRepository.save(user);
+    return toDto(userRepository.save(user));
   }
 
   @Override
