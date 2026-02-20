@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.controller;
 
+import com.sprint.mission.discodeit.dto.request.RequestChannelDto;
 import com.sprint.mission.discodeit.dto.request.RequestCreateChannelDto;
 import com.sprint.mission.discodeit.dto.request.RequestUpdateChannelDto;
 import com.sprint.mission.discodeit.dto.response.ResponseChannelDto;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,18 +38,19 @@ public class ChannelController {
   ) {
     String username = userService.find(userId).username();
     RequestCreateChannelDto requestDto = new RequestCreateChannelDto(channelName, username, userId,
-        ChannelType.PRIVATE, null);
+        ChannelType.PUBLIC, null);
 
     return channelService.create(requestDto);
   }
 
   @RequestMapping(value = "private", method = RequestMethod.POST)
   public ResponseChannelDto handleCreatePrivateChannel(
-      @RequestParam("channelName") String channelName,
-      @RequestParam("userId") UUID userId,
-      @RequestParam(value = "participantIds", required = false) UUID participantIds,
-      @RequestParam(value = "file", required = false) MultipartFile file
+      @RequestBody RequestChannelDto channelDto
   ) {
+    String channelName = channelDto.getName();
+    UUID userId = channelDto.getCreateUserId();
+    List<UUID> participantIds = channelDto.getParticipantIds();
+
     String username = userService.find(userId).username();
     RequestCreateChannelDto requestDto = new RequestCreateChannelDto(channelName, username, userId,
         ChannelType.PRIVATE, participantIds);
