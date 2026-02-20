@@ -8,6 +8,11 @@ import com.sprint.mission.discordit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discordit.entity.UserStatus;
 import com.sprint.mission.discordit.service.UserService;
 import com.sprint.mission.discordit.service.UserStatusService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Tag(name = "사용자 API")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/users")
@@ -32,6 +38,11 @@ public class UserController {
   private final UserService userService;
   private final UserStatusService userStatusService;
 
+  @Operation(summary = "사용자 생성")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "사용자 생성 완료"),
+      @ApiResponse(responseCode = "400", description = "사용자명 혹은 이메일 중복", content = @Content)
+  })
   @RequestMapping(
       consumes = {MediaType.MULTIPART_FORM_DATA_VALUE},
       method = RequestMethod.POST
@@ -48,6 +59,11 @@ public class UserController {
         .body(createdUser);
   }
 
+  @Operation(summary = "사용자 수정")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "사용자 수정 완료"),
+      @ApiResponse(responseCode = "400", description = "사용자명 혹은 이메일 중복", content = @Content)
+  })
   @RequestMapping(
       path = "{userId}",
       consumes = {MediaType.MULTIPART_FORM_DATA_VALUE},
@@ -66,6 +82,11 @@ public class UserController {
         .body(updatedUser);
   }
 
+  @Operation(summary = "사용자 삭제")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "204", description = "사용자 삭제 완료"),
+      @ApiResponse(responseCode = "404", description = "존재하지 않는 사용자", content = @Content)
+  })
   @RequestMapping(path = "{userId}", method = RequestMethod.DELETE)
   public ResponseEntity<Void> delete(@PathVariable UUID userId) {
     userService.delete(userId);
@@ -74,6 +95,10 @@ public class UserController {
         .build();
   }
 
+  @Operation(summary = "사용자 전체 조회")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "사용자 전체 조회 완료")
+  })
   @RequestMapping(method = RequestMethod.GET)
   public ResponseEntity<List<UserDto>> findAll() {
     List<UserDto> users = userService.findAll();
@@ -82,6 +107,11 @@ public class UserController {
         .body(users);
   }
 
+  @Operation(summary = "사용자 상태 수정")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "사용자 수정 완료"),
+      @ApiResponse(responseCode = "400", description = "사용자 상태 조회 불가", content = @Content)
+  })
   @RequestMapping(path = "{userId}/userStatus")
   public ResponseEntity<UserStatus> updateUserStatusByUserId(@PathVariable UUID userId,
       @RequestBody UserStatusUpdateRequest request) {
