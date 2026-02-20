@@ -39,9 +39,9 @@ public class JCFUserStatusRepository implements UserStatusRepository {
 
   @Override
   public Boolean find(RequestFindUserStatusDto requestDto) {
-      if (!userIdMap.containsKey(requestDto.id())) {
-          return null;
-      }
+    if (!userIdMap.containsKey(requestDto.id())) {
+      return null;
+    }
     return userIdMap.get(requestDto.id()).isOnline();
   }
 
@@ -53,7 +53,7 @@ public class JCFUserStatusRepository implements UserStatusRepository {
   }
 
   @Override
-  public boolean update(RequestUpdateUserStatusDto requestDto) {
+  public UserStatus update(RequestUpdateUserStatusDto requestDto) {
     UserStatus userStatus = userIdMap.get(requestDto.id());
 
     if (requestDto.time() == null) {
@@ -62,7 +62,7 @@ public class JCFUserStatusRepository implements UserStatusRepository {
 
     userStatus.lastAccessTimeUpdater(requestDto.time());
 
-    return true;
+    return userStatus;
   }
 
   @Override

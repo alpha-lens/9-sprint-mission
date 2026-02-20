@@ -8,9 +8,9 @@ import java.util.UUID;
 
 public interface UserRepository {
 
-  ResponseUserDto create(RequestCreateUserDto dto);
+  ResponseUserDto create(RequestCreateUserDto dto, UUID profileId);
 
-  ResponseUserDto update(RequestUpdateUserDto requestDto);
+  ResponseUserDto update(UUID userId, RequestUpdateUserDto requestDto, UUID profileId);
 
   ResponseUserDto find(String name);
 

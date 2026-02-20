@@ -14,9 +14,9 @@ public interface UserService {
 
   boolean isInvalid(UUID userId, String password);
 
-  ResponseUserDto create(RequestCreateUserDto requestDto);
+  ResponseUserDto create(RequestCreateUserDto requestDto, UUID profileId);
 
-  ResponseUserDto update(RequestUpdateUserDto requestDto);
+  ResponseUserDto update(UUID userId, RequestUpdateUserDto requestDto, UUID profileId);
 
   ResponseUserDto find(String name);
 

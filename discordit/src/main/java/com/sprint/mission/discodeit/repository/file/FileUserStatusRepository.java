@@ -106,7 +106,7 @@ public class FileUserStatusRepository implements UserStatusRepository {
   }
 
   @Override
-  public boolean update(RequestUpdateUserStatusDto requestDto) {
+  public UserStatus update(RequestUpdateUserStatusDto requestDto) {
     UserStatus userStatus = userIdMap.get(requestDto.id());
 
     if (requestDto.time() == null) {
@@ -115,7 +115,9 @@ public class FileUserStatusRepository implements UserStatusRepository {
 
     userStatus.lastAccessTimeUpdater(requestDto.time());
 
-    return save(userStatus);
+    save(userStatus);
+
+    return userStatus;
   }
 
   @Override

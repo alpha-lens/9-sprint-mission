@@ -82,8 +82,8 @@ public class FileUserRepository implements UserRepository {
   }
 
   @Override
-  public ResponseUserDto create(RequestCreateUserDto dto) {
-    User user = dto.toEntity();
+  public ResponseUserDto create(RequestCreateUserDto dto, UUID profileId) {
+    User user = dto.toEntity(profileId);
     usernameIdMap.put(user.getName(), user.getId());
     idUserMap.put(user.getId(), user);
     Path path = resolvePath(user.getId());
@@ -104,13 +104,10 @@ public class FileUserRepository implements UserRepository {
   }
 
   @Override
-  public ResponseUserDto update(RequestUpdateUserDto requestDto) {
-    UUID userId = requestDto.id();
-    String reName = requestDto.reName();
-    String rePassword = requestDto.rePassword();
-    String reMail = requestDto.reMail();
-    String rePhoneNumber = requestDto.rePhoneNumber();
-    UUID reProfileId = requestDto.reProfileId();
+  public ResponseUserDto update(UUID userId, RequestUpdateUserDto requestDto, UUID profileId) {
+    String reName = requestDto.newUsername();
+    String rePassword = requestDto.newPassword();
+    String reMail = requestDto.newEmail();
 
     Path path = resolvePath(userId);
     ReentrantLock lock = fileLockProvider.getLock(path);
@@ -120,7 +117,7 @@ public class FileUserRepository implements UserRepository {
     try (FileOutputStream fos = new FileOutputStream(path.toFile());
         ObjectOutputStream oos = new ObjectOutputStream(fos)) {
       oos.writeObject(user);
-      user.updateUser(reName, rePassword, reMail, rePhoneNumber, reProfileId);
+      user.updateUser(reName, rePassword, reMail, profileId);
       return response(user);
     } catch (IOException e) {
       throw new FailedUpdate("User update failed");

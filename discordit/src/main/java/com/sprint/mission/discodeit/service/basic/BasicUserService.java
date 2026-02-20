@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.dto.request.RequestCreateUserDto;
 import com.sprint.mission.discodeit.dto.request.RequestUpdateUserDto;
 import com.sprint.mission.discodeit.dto.response.ResponseUserDto;
+import com.sprint.mission.discodeit.exepction.global.NotFound;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
@@ -34,26 +35,27 @@ public class BasicUserService implements UserService {
   }
 
   @Override
-  public ResponseUserDto create(RequestCreateUserDto requestDto) {
+  public ResponseUserDto create(RequestCreateUserDto requestDto, UUID profileId) {
     userRepository.duplicateChecker("사용자명", requestDto.username());
     userRepository.duplicateChecker("이메일", requestDto.email());
 
-    return userRepository.create(requestDto);
+    return userRepository.create(requestDto, profileId);
   }
 
   /// Update
   @Override
-  public ResponseUserDto update(RequestUpdateUserDto requestDto) {
-    userRepository.duplicateChecker("사용자명", requestDto.reName());
-    userRepository.duplicateChecker("이메일", requestDto.reMail());
-    userRepository.duplicateChecker("전화번호", requestDto.rePhoneNumber());
+  public ResponseUserDto update(UUID userId, RequestUpdateUserDto requestDto, UUID profileId) {
+    if (!userRepository.isPresent(userId)) {
+      throw new NotFound("해당 사용자가 존재하지 않습니다.");
+    }
 
-    UUID reProfileId = requestDto.reProfileId();
-    UUID userId = requestDto.id();
-    if (reProfileId != null) {
+    userRepository.duplicateChecker("사용자명", requestDto.newUsername());
+    userRepository.duplicateChecker("이메일", requestDto.newEmail());
+
+    if (profileId != null) {
       binaryContentRepository.delete(userId);
     }
-    return userRepository.update(requestDto);
+    return userRepository.update(userId, requestDto, profileId);
   }
 
   /// Read

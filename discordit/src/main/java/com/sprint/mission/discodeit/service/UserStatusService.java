@@ -4,13 +4,15 @@ import com.sprint.mission.discodeit.dto.request.RequestCreateUserStatusDto;
 import com.sprint.mission.discodeit.dto.request.RequestDeleteUserStatusDto;
 import com.sprint.mission.discodeit.dto.request.RequestFindUserStatusDto;
 import com.sprint.mission.discodeit.dto.request.RequestUpdateUserStatusDto;
+import com.sprint.mission.discodeit.entity.UserStatus;
 
 public interface UserStatusService {
-    void create(RequestCreateUserStatusDto requestDto);
 
-    boolean find(RequestFindUserStatusDto requestDto);
+  void create(RequestCreateUserStatusDto requestDto);
 
-    void update(RequestUpdateUserStatusDto requestDto);
+  boolean find(RequestFindUserStatusDto requestDto);
 
-    void delete(RequestDeleteUserStatusDto requestDto);
+  UserStatus update(RequestUpdateUserStatusDto requestDto);
+
+  void delete(RequestDeleteUserStatusDto requestDto);
 }

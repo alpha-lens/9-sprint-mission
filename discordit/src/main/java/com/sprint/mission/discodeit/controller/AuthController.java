@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-@RequestMapping("/api/auth/")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 

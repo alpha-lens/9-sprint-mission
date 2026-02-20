@@ -30,8 +30,8 @@ public class JCFUserRepository implements UserRepository {
   private final Map<String, UUID> usernameIdMap = new ConcurrentHashMap<>();
 
   @Override
-  public ResponseUserDto create(RequestCreateUserDto dto) {
-    User user = dto.toEntity();
+  public ResponseUserDto create(RequestCreateUserDto dto, UUID profileId) {
+    User user = dto.toEntity(profileId);
     usernameIdMap.put(user.getName(), user.getId());
     idUserMap.put(user.getId(), user);
 
@@ -39,22 +39,13 @@ public class JCFUserRepository implements UserRepository {
   }
 
   @Override
-  public ResponseUserDto update(RequestUpdateUserDto requestDto) {
-    UUID userId = requestDto.id();
-    String reName = requestDto.reName();
-    String rePassword = requestDto.rePassword();
-    String reMail = requestDto.reMail();
-    String rePhoneNumber = requestDto.rePhoneNumber();
-    UUID reProfileId = requestDto.reProfileId();
+  public ResponseUserDto update(UUID userId, RequestUpdateUserDto requestDto, UUID profileId) {
+    String reName = requestDto.newUsername();
+    String rePassword = requestDto.newPassword();
+    String reMail = requestDto.newEmail();
+    User user = idUserMap.get(userId);
 
-    User user;
-    try {
-      user = idUserMap.get(userId);
-    } catch (Exception e) {
-      throw new RuntimeException("NPE 발생!" + e);
-    }
-
-    user.updateUser(reName, rePassword, reMail, rePhoneNumber, reProfileId);
+    user.updateUser(reName, rePassword, reMail, profileId);
     return response(user);
   }
 
