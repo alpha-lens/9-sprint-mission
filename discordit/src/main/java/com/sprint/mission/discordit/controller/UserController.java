@@ -6,6 +6,7 @@ import com.sprint.mission.discordit.dto.request.UserCreateRequest;
 import com.sprint.mission.discordit.dto.request.UserStatusUpdateRequest;
 import com.sprint.mission.discordit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discordit.entity.UserStatus;
+import com.sprint.mission.discordit.global.ApiResult;
 import com.sprint.mission.discordit.service.UserService;
 import com.sprint.mission.discordit.service.UserStatusService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,7 +48,7 @@ public class UserController {
       consumes = {MediaType.MULTIPART_FORM_DATA_VALUE},
       method = RequestMethod.POST
   )
-  public ResponseEntity<UserDto> create(
+  public ResponseEntity<ApiResult<UserDto>> create(
       @RequestPart("userCreateRequest") UserCreateRequest userCreateRequest,
       @RequestPart(value = "profile", required = false) MultipartFile profile
   ) {
@@ -56,7 +57,7 @@ public class UserController {
     UserDto createdUser = userService.create(userCreateRequest, profileRequest);
     return ResponseEntity
         .status(HttpStatus.CREATED)
-        .body(createdUser);
+        .body(ApiResult.success(createdUser));
   }
 
   @Operation(summary = "사용자 수정")
@@ -69,7 +70,7 @@ public class UserController {
       consumes = {MediaType.MULTIPART_FORM_DATA_VALUE},
       method = RequestMethod.PATCH
   )
-  public ResponseEntity<UserDto> update(
+  public ResponseEntity<ApiResult<UserDto>> update(
       @PathVariable UUID userId,
       @RequestPart("userUpdateRequest") UserUpdateRequest userUpdateRequest,
       @RequestPart(value = "profile", required = false) MultipartFile profile
@@ -79,7 +80,7 @@ public class UserController {
     UserDto updatedUser = userService.update(userId, userUpdateRequest, profileRequest);
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(updatedUser);
+        .body(ApiResult.success(updatedUser));
   }
 
   @Operation(summary = "사용자 삭제")
@@ -100,11 +101,11 @@ public class UserController {
       @ApiResponse(responseCode = "200", description = "사용자 전체 조회 완료")
   })
   @RequestMapping(method = RequestMethod.GET)
-  public ResponseEntity<List<UserDto>> findAll() {
+  public ResponseEntity<ApiResult<List<UserDto>>> findAll() {
     List<UserDto> users = userService.findAll();
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(users);
+        .body(ApiResult.success(users));
   }
 
   @Operation(summary = "사용자 상태 수정")
@@ -113,12 +114,12 @@ public class UserController {
       @ApiResponse(responseCode = "400", description = "사용자 상태 조회 불가", content = @Content)
   })
   @RequestMapping(path = "{userId}/userStatus")
-  public ResponseEntity<UserStatus> updateUserStatusByUserId(@PathVariable UUID userId,
+  public ResponseEntity<ApiResult<UserStatus>> updateUserStatusByUserId(@PathVariable UUID userId,
       @RequestBody UserStatusUpdateRequest request) {
     UserStatus updatedUserStatus = userStatusService.updateByUserId(userId, request);
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(updatedUserStatus);
+        .body(ApiResult.success(updatedUserStatus));
   }
 
   private Optional<BinaryContentCreateRequest> resolveProfileRequest(MultipartFile profileFile) {

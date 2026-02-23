@@ -2,6 +2,9 @@ spring:
   application:
     name: "discodeit"
 
+server:
+  port: ${PORT:8080}
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html  # 접속 경로 설정

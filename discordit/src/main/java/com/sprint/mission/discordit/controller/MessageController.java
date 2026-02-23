@@ -4,6 +4,7 @@ import com.sprint.mission.discordit.dto.request.BinaryContentCreateRequest;
 import com.sprint.mission.discordit.dto.request.MessageCreateRequest;
 import com.sprint.mission.discordit.dto.request.MessageUpdateRequest;
 import com.sprint.mission.discordit.entity.Message;
+import com.sprint.mission.discordit.global.ApiResult;
 import com.sprint.mission.discordit.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -47,7 +48,7 @@ public class MessageController {
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
       method = RequestMethod.POST
   )
-  public ResponseEntity<Message> create(
+  public ResponseEntity<ApiResult<Message>> create(
       @RequestPart("messageCreateRequest") MessageCreateRequest messageCreateRequest,
       @RequestPart(value = "attachments", required = false) List<MultipartFile> attachments
   ) {
@@ -69,7 +70,7 @@ public class MessageController {
     Message createdMessage = messageService.create(messageCreateRequest, attachmentRequests);
     return ResponseEntity
         .status(HttpStatus.CREATED)
-        .body(createdMessage);
+        .body(ApiResult.success(createdMessage));
   }
 
   @Operation(summary = "메시지 수정")
@@ -78,12 +79,12 @@ public class MessageController {
       @ApiResponse(responseCode = "404", description = "해당 메시지가 존재하지 않을 경우", content = @Content)
   })
   @RequestMapping(path = "{messageId}")
-  public ResponseEntity<Message> update(@PathVariable UUID messageId,
+  public ResponseEntity<ApiResult<Message>> update(@PathVariable UUID messageId,
       @RequestBody MessageUpdateRequest request) {
     Message updatedMessage = messageService.update(messageId, request);
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(updatedMessage);
+        .body(ApiResult.success(updatedMessage));
   }
 
   @Operation(summary = "메시지 삭제")
@@ -104,11 +105,11 @@ public class MessageController {
       @ApiResponse(responseCode = "200", description = "메시지 조회 성공")
   })
   @RequestMapping(method = RequestMethod.GET)
-  public ResponseEntity<List<Message>> findAllByChannelId(
+  public ResponseEntity<ApiResult<List<Message>>> findAllByChannelId(
       @RequestParam("channelId") UUID channelId) {
     List<Message> messages = messageService.findAllByChannelId(channelId);
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(messages);
+        .body(ApiResult.success(messages));
   }
 }
