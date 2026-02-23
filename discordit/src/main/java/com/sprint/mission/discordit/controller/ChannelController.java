@@ -87,10 +87,10 @@ public class ChannelController {
       @ApiResponse(responseCode = "200", description = "채널 조회 성공")
   })
   @RequestMapping(method = RequestMethod.GET)
-  public ResponseEntity<ApiResult<List<ChannelDto>>> findAll(@RequestParam("userId") UUID userId) {
+  public ResponseEntity<List<ChannelDto>> findAll(@RequestParam("userId") UUID userId) {
     List<ChannelDto> channels = channelService.findAllByUserId(userId);
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(ApiResult.success(channels));
+        .body(channels);
   }
 }

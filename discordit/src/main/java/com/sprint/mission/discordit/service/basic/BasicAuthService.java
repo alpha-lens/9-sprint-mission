@@ -1,10 +1,11 @@
 package com.sprint.mission.discordit.service.basic;
 
-import com.sprint.mission.discordit.dto.data.LoginInfoDto;
+import com.sprint.mission.discordit.dto.data.UserDto;
 import com.sprint.mission.discordit.dto.request.LoginRequest;
 import com.sprint.mission.discordit.entity.User;
 import com.sprint.mission.discordit.repository.UserRepository;
 import com.sprint.mission.discordit.service.AuthService;
+import com.sprint.mission.discordit.service.UserService;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,10 @@ import org.springframework.stereotype.Service;
 public class BasicAuthService implements AuthService {
 
   private final UserRepository userRepository;
+  private final UserService userService;
 
   @Override
-  public LoginInfoDto login(LoginRequest loginRequest) {
+  public UserDto login(LoginRequest loginRequest) {
     String username = loginRequest.username();
     String password = loginRequest.password();
 
@@ -28,6 +30,6 @@ public class BasicAuthService implements AuthService {
       throw new IllegalArgumentException("Wrong password");
     }
 
-    return new LoginInfoDto(user.getUsername(), "로그인");
+    return userService.find(user.getId());
   }
 }

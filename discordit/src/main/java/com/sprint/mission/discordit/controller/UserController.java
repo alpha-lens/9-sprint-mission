@@ -48,7 +48,7 @@ public class UserController {
       consumes = {MediaType.MULTIPART_FORM_DATA_VALUE},
       method = RequestMethod.POST
   )
-  public ResponseEntity<ApiResult<UserDto>> create(
+  public ResponseEntity<UserDto> create(
       @RequestPart("userCreateRequest") UserCreateRequest userCreateRequest,
       @RequestPart(value = "profile", required = false) MultipartFile profile
   ) {
@@ -57,7 +57,7 @@ public class UserController {
     UserDto createdUser = userService.create(userCreateRequest, profileRequest);
     return ResponseEntity
         .status(HttpStatus.CREATED)
-        .body(ApiResult.success(createdUser));
+        .body(createdUser);
   }
 
   @Operation(summary = "사용자 수정")
@@ -101,11 +101,11 @@ public class UserController {
       @ApiResponse(responseCode = "200", description = "사용자 전체 조회 완료")
   })
   @RequestMapping(method = RequestMethod.GET)
-  public ResponseEntity<ApiResult<List<UserDto>>> findAll() {
+  public ResponseEntity<List<UserDto>> findAll() {
     List<UserDto> users = userService.findAll();
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(ApiResult.success(users));
+        .body(users);
   }
 
   @Operation(summary = "사용자 상태 수정")
@@ -114,12 +114,12 @@ public class UserController {
       @ApiResponse(responseCode = "400", description = "사용자 상태 조회 불가", content = @Content)
   })
   @RequestMapping(path = "{userId}/userStatus")
-  public ResponseEntity<ApiResult<UserStatus>> updateUserStatusByUserId(@PathVariable UUID userId,
+  public ResponseEntity<UserStatus> updateUserStatusByUserId(@PathVariable UUID userId,
       @RequestBody UserStatusUpdateRequest request) {
     UserStatus updatedUserStatus = userStatusService.updateByUserId(userId, request);
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(ApiResult.success(updatedUserStatus));
+        .body(updatedUserStatus);
   }
 
   private Optional<BinaryContentCreateRequest> resolveProfileRequest(MultipartFile profileFile) {

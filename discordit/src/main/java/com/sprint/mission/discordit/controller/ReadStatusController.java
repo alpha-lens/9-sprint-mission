@@ -3,7 +3,6 @@ package com.sprint.mission.discordit.controller;
 import com.sprint.mission.discordit.dto.request.ReadStatusCreateRequest;
 import com.sprint.mission.discordit.dto.request.ReadStatusUpdateRequest;
 import com.sprint.mission.discordit.entity.ReadStatus;
-import com.sprint.mission.discordit.global.ApiResult;
 import com.sprint.mission.discordit.service.ReadStatusService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -38,12 +37,12 @@ public class ReadStatusController {
       @ApiResponse(responseCode = "404", description = "사용자 혹은 채널을 찾지 못함", content = @Content)
   })
   @RequestMapping(method = RequestMethod.POST)
-  public ResponseEntity<ApiResult<ReadStatus>> create(
+  public ResponseEntity<ReadStatus> create(
       @RequestBody ReadStatusCreateRequest request) {
     ReadStatus createdReadStatus = readStatusService.create(request);
     return ResponseEntity
         .status(HttpStatus.CREATED)
-        .body(ApiResult.success(createdReadStatus));
+        .body(createdReadStatus);
   }
 
   @Operation(summary = "readStatus 수정")
@@ -52,12 +51,12 @@ public class ReadStatusController {
       @ApiResponse(responseCode = "404", description = "readStatus ID를 찾지 못함", content = @Content)
   })
   @RequestMapping(path = "{readStatusId}", method = RequestMethod.PATCH)
-  public ResponseEntity<ApiResult<ReadStatus>> update(@PathVariable UUID readStatusId,
+  public ResponseEntity<ReadStatus> update(@PathVariable UUID readStatusId,
       @RequestBody ReadStatusUpdateRequest request) {
     ReadStatus updatedReadStatus = readStatusService.update(readStatusId, request);
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(ApiResult.success(updatedReadStatus));
+        .body(updatedReadStatus);
   }
 
   @Operation(summary = "readStatus 수정")
@@ -65,11 +64,11 @@ public class ReadStatusController {
       @ApiResponse(responseCode = "200", description = "readStatus 조회 성공")
   })
   @RequestMapping(method = RequestMethod.GET)
-  public ResponseEntity<ApiResult<List<ReadStatus>>> findAllByUserId(
+  public ResponseEntity<List<ReadStatus>> findAllByUserId(
       @RequestParam("userId") UUID userId) {
     List<ReadStatus> readStatuses = readStatusService.findAllByUserId(userId);
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(ApiResult.success(readStatuses));
+        .body(readStatuses);
   }
 }
