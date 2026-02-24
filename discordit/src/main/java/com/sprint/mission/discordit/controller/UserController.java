@@ -11,6 +11,7 @@ import com.sprint.mission.discordit.service.UserService;
 import com.sprint.mission.discordit.service.UserStatusService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Encoding;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,7 +40,11 @@ public class UserController {
   private final UserService userService;
   private final UserStatusService userStatusService;
 
-  @Operation(summary = "사용자 생성")
+  @Operation(summary = "사용자 생성", requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+      content = @Content(mediaType = "multipart/form-data",
+          encoding = @Encoding(name = "userCreateRequest", contentType = "application/json")
+      )
+  ))
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "사용자 생성 완료"),
       @ApiResponse(responseCode = "400", description = "사용자명 혹은 이메일 중복", content = @Content)
