@@ -8,13 +8,12 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
         format_sql: true
         highlight_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
 logging:
   level:
     org:

@@ -1,5 +1,6 @@
 -- 1. UUID 생성을 위한 확장 모듈 활성화 (필요한 경우)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+DROP TYPE IF EXISTS channel_type_enum;
 
 -- 2. ENUM 타입 정의 (channels 테이블의 type 컬럼용)
 CREATE TYPE channel_type_enum AS ENUM ('PUBLIC', 'PRIVATE');

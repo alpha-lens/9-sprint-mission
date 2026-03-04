@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.dto.data;
 
+import com.sprint.mission.discodeit.entity.BinaryContent;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -9,7 +10,7 @@ public record UserDto(
     Instant updatedAt,
     String username,
     String email,
-    UUID profileId,
+    BinaryContent profileId,
     Boolean online
 ) {
 

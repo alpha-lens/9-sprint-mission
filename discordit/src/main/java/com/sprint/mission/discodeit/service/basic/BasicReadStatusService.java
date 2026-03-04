@@ -2,18 +2,19 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.request.ReadStatusCreateRequest;
 import com.sprint.mission.discodeit.dto.request.ReadStatusUpdateRequest;
+import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
+import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.ReadStatusService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
@@ -25,23 +26,24 @@ public class BasicReadStatusService implements ReadStatusService {
 
   @Override
   public ReadStatus create(ReadStatusCreateRequest request) {
-    UUID userId = request.userId();
-    UUID channelId = request.channelId();
+    User user = request.user();
+    Channel channel = request.channel();
 
-    if (!userRepository.existsById(userId)) {
-      throw new NoSuchElementException("User with id " + userId + " does not exist");
+    if (!userRepository.existsById(user.getId())) {
+      throw new NoSuchElementException("Username " + user.getUsername() + " does not exist");
     }
-    if (!channelRepository.existsById(channelId)) {
-      throw new NoSuchElementException("Channel with id " + channelId + " does not exist");
+    if (!channelRepository.existsById(channel.getId())) {
+      throw new NoSuchElementException(
+          "Channel with name " + channel.getName() + " does not exist");
     }
 
-    return readStatusRepository.findAllByUserId(userId).stream()
-        .filter(readStatus -> readStatus.getChannelId().equals(channelId))
+    return readStatusRepository.findAllByUser_Id(user.getId()).stream()
+        .filter(readStatus -> readStatus.getChannelId().equals(channel))
         .findFirst()
         .orElseGet(
             () -> {
               Instant lastReadAt = request.lastReadAt();
-              ReadStatus readStatus = new ReadStatus(userId, channelId, lastReadAt);
+              ReadStatus readStatus = new ReadStatus(user, channel, lastReadAt);
               return readStatusRepository.save(readStatus);
             }
         );
@@ -56,7 +58,7 @@ public class BasicReadStatusService implements ReadStatusService {
 
   @Override
   public List<ReadStatus> findAllByUserId(UUID userId) {
-    return readStatusRepository.findAllByUserId(userId).stream()
+    return readStatusRepository.findAllByUser_Id(userId).stream()
         .toList();
   }
 
