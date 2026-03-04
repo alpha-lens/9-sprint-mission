@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.entity.base;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
@@ -21,6 +22,7 @@ public abstract class BaseEntity {
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(columnDefinition = "uuid")
   protected UUID id;
+  @JsonIgnore
   @CreatedDate
   @Column(updatable = false)
   protected Instant createdAt;

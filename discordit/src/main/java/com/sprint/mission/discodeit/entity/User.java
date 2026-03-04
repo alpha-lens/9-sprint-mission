@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import jakarta.persistence.CascadeType;
@@ -17,6 +18,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "users")
 @Getter
+@JsonIgnoreProperties({"createdAt", "updatedAt", "password"})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseUpdatableEntity {
 

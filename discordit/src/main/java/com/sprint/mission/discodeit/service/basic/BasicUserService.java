@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.data.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.data.UserDto;
 import com.sprint.mission.discodeit.dto.request.BinaryContentCreateRequest;
 import com.sprint.mission.discodeit.dto.request.UserCreateRequest;
@@ -134,13 +135,18 @@ public class BasicUserService implements UserService {
         .map(UserStatus::isOnline)
         .orElse(null);
 
+    BinaryContentDto profile = null;
+
+    if (user.getProfile() != null) {
+      profile = new BinaryContentDto(user.getProfile().getId(), user.getProfile().getFileName(),
+          user.getProfile().getSize(), user.getProfile().getContentType());
+    }
+
     return new UserDto(
         user.getId(),
-        user.getCreatedAt(),
-        user.getUpdatedAt(),
         user.getUsername(),
         user.getEmail(),
-        user.getProfile(),
+        profile,
         online
     );
   }
