@@ -1,28 +1,34 @@
 package com.sprint.mission.discodeit.entity;
 
-import lombok.Getter;
-
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Entity
+@Table(name = "user_statuses")
 @Getter
-public class UserStatus implements Serializable {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class UserStatus extends BaseUpdatableEntity {
 
-  private static final long serialVersionUID = 1L;
-  private UUID id;
-  private Instant createdAt;
-  private Instant updatedAt;
-  //
-  private UUID userId;
+  @Column(nullable = false)
   private Instant lastActiveAt;
+  @JsonBackReference
+  @OneToOne
+  @JoinColumn(name = "user_id", columnDefinition = "uuid")
+  private User user;
 
-  public UserStatus(UUID userId, Instant lastActiveAt) {
-    this.id = UUID.randomUUID();
-    this.createdAt = Instant.now();
-    //
-    this.userId = userId;
+  public UserStatus(User user, Instant lastActiveAt) {
+    this.user = user;
     this.lastActiveAt = lastActiveAt;
   }
 
@@ -36,6 +42,10 @@ public class UserStatus implements Serializable {
     if (anyValueUpdated) {
       this.updatedAt = Instant.now();
     }
+  }
+
+  public UUID getUserId() {
+    return user.getId();
   }
 
   public Boolean isOnline() {

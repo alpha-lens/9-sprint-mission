@@ -1,8 +1,8 @@
 package com.sprint.mission.discodeit.controller;
 
-import com.sprint.mission.discodeit.dto.request.BinaryContentCreateRequest;
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.request.MessageUpdateRequest;
+import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,12 +51,13 @@ public class MessageController {
       @RequestPart("messageCreateRequest") MessageCreateRequest messageCreateRequest,
       @RequestPart(value = "attachments", required = false) List<MultipartFile> attachments
   ) {
-    List<BinaryContentCreateRequest> attachmentRequests = Optional.ofNullable(attachments)
+    List<BinaryContent> attachmentRequests = Optional.ofNullable(attachments)
         .map(files -> files.stream()
             .map(file -> {
               try {
-                return new BinaryContentCreateRequest(
+                return new BinaryContent(
                     file.getOriginalFilename(),
+                    file.getSize(),
                     file.getContentType(),
                     file.getBytes()
                 );
@@ -66,6 +67,7 @@ public class MessageController {
             })
             .toList())
         .orElse(new ArrayList<>());
+
     Message createdMessage = messageService.create(messageCreateRequest, attachmentRequests);
     return ResponseEntity
         .status(HttpStatus.CREATED)
