@@ -13,6 +13,7 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -22,6 +23,7 @@ public class BasicUserStatusService implements UserStatusService {
   private final UserRepository userRepository;
 
   @Override
+  @Transactional
   public UserStatus create(UserStatusCreateRequest request) {
     User user = request.user();
 
@@ -52,6 +54,7 @@ public class BasicUserStatusService implements UserStatusService {
   }
 
   @Override
+  @Transactional
   public UserStatus update(UUID userStatusId, UserStatusUpdateRequest request) {
     Instant newLastActiveAt = request.newLastActiveAt();
 
@@ -64,6 +67,7 @@ public class BasicUserStatusService implements UserStatusService {
   }
 
   @Override
+  @Transactional
   public UserStatus updateByUserId(UUID userId, UserStatusUpdateRequest request) {
     Instant newLastActiveAt = request.newLastActiveAt();
 
@@ -76,6 +80,7 @@ public class BasicUserStatusService implements UserStatusService {
   }
 
   @Override
+  @Transactional
   public void delete(UUID userStatusId) {
     if (!userStatusRepository.existsById(userStatusId)) {
       throw new NoSuchElementException("UserStatus with id " + userStatusId + " not found");

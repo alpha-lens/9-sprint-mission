@@ -15,6 +15,7 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -25,6 +26,7 @@ public class BasicReadStatusService implements ReadStatusService {
   private final ChannelRepository channelRepository;
 
   @Override
+  @Transactional
   public ReadStatus create(ReadStatusCreateRequest request) {
     User user = request.user();
     Channel channel = request.channel();
@@ -63,6 +65,7 @@ public class BasicReadStatusService implements ReadStatusService {
   }
 
   @Override
+  @Transactional
   public ReadStatus update(UUID readStatusId, ReadStatusUpdateRequest request) {
     Instant newLastReadAt = request.newLastReadAt();
     ReadStatus readStatus = readStatusRepository.findById(readStatusId)
@@ -73,6 +76,7 @@ public class BasicReadStatusService implements ReadStatusService {
   }
 
   @Override
+  @Transactional
   public void delete(UUID readStatusId) {
     if (!readStatusRepository.existsById(readStatusId)) {
       throw new NoSuchElementException("ReadStatus with id " + readStatusId + " not found");

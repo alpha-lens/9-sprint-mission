@@ -20,6 +20,7 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -31,6 +32,7 @@ public class BasicChannelService implements ChannelService {
   private final MessageRepository messageRepository;
 
   @Override
+  @Transactional
   public ChannelDto create(PublicChannelCreateRequest request) {
     String name = request.name();
     String description = request.description();
@@ -40,6 +42,7 @@ public class BasicChannelService implements ChannelService {
   }
 
   @Override
+  @Transactional
   public ChannelDto create(PrivateChannelCreateRequest request) {
     Channel channel = new Channel(ChannelType.PRIVATE, null, null);
     Channel createdChannel = channelRepository.save(channel);
@@ -75,6 +78,7 @@ public class BasicChannelService implements ChannelService {
   }
 
   @Override
+  @Transactional
   public ChannelDto update(UUID channelId, PublicChannelUpdateRequest request) {
     String newName = request.newName();
     String newDescription = request.newDescription();
@@ -89,6 +93,7 @@ public class BasicChannelService implements ChannelService {
   }
 
   @Override
+  @Transactional
   public void delete(UUID channelId) {
     Channel channel = channelRepository.findById(channelId)
         .orElseThrow(

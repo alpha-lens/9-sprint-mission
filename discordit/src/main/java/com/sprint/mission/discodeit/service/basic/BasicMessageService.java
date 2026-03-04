@@ -16,6 +16,7 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -28,6 +29,7 @@ public class BasicMessageService implements MessageService {
   private final BinaryContentRepository binaryContentRepository;
 
   @Override
+  @Transactional
   public Message create(MessageCreateRequest messageCreateRequest,
       List<BinaryContent> binaryContentCreateRequests) {
     Channel channel = messageCreateRequest.channel();
@@ -66,6 +68,7 @@ public class BasicMessageService implements MessageService {
   }
 
   @Override
+  @Transactional
   public Message update(UUID messageId, MessageUpdateRequest request) {
     String newContent = request.newContent();
     Message message = messageRepository.findById(messageId)
@@ -76,6 +79,7 @@ public class BasicMessageService implements MessageService {
   }
 
   @Override
+  @Transactional
   public void delete(UUID messageId) {
     Message message = messageRepository.findById(messageId)
         .orElseThrow(
