@@ -15,6 +15,9 @@ import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.MessageService;
+import com.sprint.mission.discodeit.storage.BinaryContentStorage;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -24,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Service
@@ -33,6 +37,7 @@ public class BasicMessageService implements MessageService {
   //
   private final ChannelRepository channelRepository;
   private final UserRepository userRepository;
+  private final BinaryContentStorage binaryContentStorage;
   private final BinaryContentRepository binaryContentRepository;
   private final MessageMapper messageMapper;
   private final PageResponseMapper pageResponseMapper;
@@ -40,7 +45,7 @@ public class BasicMessageService implements MessageService {
   @Override
   @Transactional
   public MessageDto create(MessageCreateRequest messageCreateRequest,
-      List<BinaryContent> binaryContentCreateRequests) {
+      List<MultipartFile> attachments) {
     UUID channelId = messageCreateRequest.channelId();
     UUID authorId = messageCreateRequest.authorId();
 
@@ -52,11 +57,32 @@ public class BasicMessageService implements MessageService {
     );
 
     String content = messageCreateRequest.content();
+    List<BinaryContent> binaryContents = new ArrayList<>();
+
+    if (attachments != null && !attachments.isEmpty()) {
+      for (MultipartFile file : attachments) {
+        BinaryContent metadata = new BinaryContent(
+            file.getOriginalFilename(),
+            file.getSize(),
+            file.getContentType()
+        );
+
+        BinaryContent savedMetadata = binaryContentRepository.save(metadata);
+        binaryContents.add(savedMetadata);
+
+        try {
+          binaryContentStorage.put(savedMetadata.getId(), file.getBytes());
+        } catch (IOException e) {
+          throw new RuntimeException("Failed file saved: " + file.getOriginalFilename(), e);
+        }
+      }
+    }
+
     Message message = new Message(
         content,
         channel,
         author,
-        binaryContentCreateRequests
+        binaryContents
     );
 
     return messageMapper.toDto(messageRepository.save(message));
@@ -104,13 +130,9 @@ public class BasicMessageService implements MessageService {
 
   @Override
   public PageResponse<MessageDto> findAllSliceByChannelId(UUID channelId, Pageable pageable) {
-    // 1. 리포지토리에서 Slice<Message>를 가져옴
     Slice<Message> messageSlice = messageRepository.findAllByChannelId(channelId, pageable);
-
-    // 2. Message 엔티티를 MessageDto로 변환 (이미 가지고 계신 messageMapper 활용)
     Slice<MessageDto> dtoSlice = messageSlice.map(messageMapper::toDto);
 
-    // 3. PageResponseMapper를 사용하여 최종 규격으로 변환하여 반환
     return pageResponseMapper.fromSlice(dtoSlice);
   }
 }

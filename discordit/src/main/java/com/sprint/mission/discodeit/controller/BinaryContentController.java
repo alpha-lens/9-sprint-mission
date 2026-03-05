@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.dto.data.BinaryContentDto;
 import com.sprint.mission.discodeit.service.BinaryContentService;
+import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class BinaryContentController {
 
   private final BinaryContentService binaryContentService;
+  private final BinaryContentStorage binaryContentStorage;
 
   @Operation(summary = "단건 조회", description = "binaryContentId를 통한 단건 조회")
   @ApiResponse(responseCode = "200", description = "binaryContent 단건 조회 성공")
@@ -45,5 +47,13 @@ public class BinaryContentController {
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(binaryContents);
+  }
+
+  @Operation(summary = "다운로드", description = "bianryContentId를 통한 다운로드")
+  @ApiResponse(responseCode = "200", description = "다운로드 성공")
+  @GetMapping("{binaryContentId}/download")
+  public ResponseEntity<?> download(@PathVariable UUID binaryContentId) {
+    BinaryContentDto dto = binaryContentService.find(binaryContentId);
+    return binaryContentStorage.download(dto);
   }
 }
