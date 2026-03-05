@@ -4,6 +4,9 @@ import com.sprint.mission.discodeit.entity.Message;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MessageRepository extends JpaRepository<Message, UUID> {
@@ -19,4 +22,9 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
   void deleteById(UUID id);
 
   void deleteAllByChannelId(UUID channelId);
+
+  Page<Message> findAllByChannelId(UUID channelId, Pageable pageable);
+
+  Slice<Message> findAllSliceByChannelId(UUID channelId, Pageable pageable);
+
 }

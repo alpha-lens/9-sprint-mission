@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserMapper {
 
-  BinaryContentMapper binaryContentMapper;
+  private final BinaryContentMapper binaryContentMapper;
 
   public UserDto toDto(User user) {
     return new UserDto(

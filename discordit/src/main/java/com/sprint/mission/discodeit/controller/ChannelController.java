@@ -4,7 +4,6 @@ import com.sprint.mission.discodeit.dto.data.ChannelDto;
 import com.sprint.mission.discodeit.dto.request.PrivateChannelCreateRequest;
 import com.sprint.mission.discodeit.dto.request.PublicChannelCreateRequest;
 import com.sprint.mission.discodeit.dto.request.PublicChannelUpdateRequest;
-import com.sprint.mission.discodeit.global.ApiResult;
 import com.sprint.mission.discodeit.service.ChannelService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -37,13 +36,13 @@ public class ChannelController {
   @Operation(summary = "public 채널 생성", description = "public 채널을 생성할 수 있습니다.")
   @ApiResponse(responseCode = "201", description = "채널 생성 성공")
   @PostMapping(path = "public")
-  public ResponseEntity<ApiResult<ChannelDto>> create(
+  public ResponseEntity<ChannelDto> create(
       @RequestBody PublicChannelCreateRequest request) {
     ChannelDto createdChannel = channelService.create(request);
 
     return ResponseEntity
         .status(HttpStatus.CREATED)
-        .body(ApiResult.success(createdChannel));
+        .body(createdChannel);
   }
 
   @Operation(summary = "private 채널 생성", description = "private 채널을 생성할 수 있습니다.")

@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.controller;
 import com.sprint.mission.discodeit.dto.data.MessageDto;
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.request.MessageUpdateRequest;
+import com.sprint.mission.discodeit.dto.response.PageResponse;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -106,9 +108,10 @@ public class MessageController {
       @ApiResponse(responseCode = "200", description = "메시지 조회 성공")
   })
   @GetMapping
-  public ResponseEntity<List<MessageDto>> findAllByChannelId(
-      @RequestParam("channelId") UUID channelId) {
-    List<MessageDto> messages = messageService.findAllByChannelId(channelId);
+  public ResponseEntity<PageResponse<MessageDto>> findAllByChannelId(
+      @RequestParam("channelId") UUID channelId,
+      Pageable pageable) {
+    PageResponse<MessageDto> messages = messageService.findAllSliceByChannelId(channelId, pageable);
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(messages);

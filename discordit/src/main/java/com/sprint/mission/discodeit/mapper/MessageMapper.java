@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MessageMapper {
 
-  BinaryContentMapper binaryContentMapper;
-  UserMapper userMapper;
+  private final BinaryContentMapper binaryContentMapper;
+  private final UserMapper userMapper;
 
   public MessageDto toDto(Message message) {
     List<BinaryContentDto> binaryContentDtos = new ArrayList<>();
@@ -25,6 +25,8 @@ public class MessageMapper {
 
     return new MessageDto(
         message.getId(),
+        message.getCreatedAt(),
+        message.getUpdatedAt(),
         message.getContent(),
         message.getChannel().getId(),
         userMapper.toDto(message.getAuthor()),

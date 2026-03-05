@@ -12,7 +12,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,7 +34,7 @@ public class Message extends BaseUpdatableEntity {
   @JoinColumn(name = "author_id")
   @OnDelete(action = OnDeleteAction.SET_NULL)
   private User author;
-  @OneToMany(cascade = CascadeType.PERSIST)
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinTable(
       name = "message_attachments",
       joinColumns = @JoinColumn(name = "message_id"),
@@ -47,11 +46,10 @@ public class Message extends BaseUpdatableEntity {
     this.channel = channel;
     this.author = author;
     this.attachments = attachmentIds;
-    this.id = UUID.randomUUID();
     this.content = content;
   }
 
-  public void update(String newContent) {
+  public Message update(String newContent) {
     boolean anyValueUpdated = false;
     if (newContent != null && !newContent.equals(this.content)) {
       this.content = newContent;
@@ -61,5 +59,7 @@ public class Message extends BaseUpdatableEntity {
     if (anyValueUpdated) {
       this.updatedAt = Instant.now();
     }
+
+    return this;
   }
 }
