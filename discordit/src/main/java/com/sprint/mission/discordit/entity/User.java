@@ -1,10 +1,9 @@
 package com.sprint.mission.discordit.entity;
 
-import lombok.Getter;
-
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
+import lombok.Getter;
 
 @Getter
 public class User implements Serializable {
@@ -23,7 +22,7 @@ public class User implements Serializable {
   public User(String username, String email, String password, UUID profileId) {
     this.id = UUID.randomUUID();
     this.createdAt = Instant.now();
-    //
+    this.updatedAt = Instant.now();
     this.username = username;
     this.email = email;
     this.password = password;

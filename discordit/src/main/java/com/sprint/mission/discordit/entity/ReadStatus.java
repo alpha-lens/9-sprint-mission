@@ -1,10 +1,9 @@
 package com.sprint.mission.discordit.entity;
 
-import lombok.Getter;
-
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
+import lombok.Getter;
 
 @Getter
 public class ReadStatus implements Serializable {
@@ -21,7 +20,7 @@ public class ReadStatus implements Serializable {
   public ReadStatus(UUID userId, UUID channelId, Instant lastReadAt) {
     this.id = UUID.randomUUID();
     this.createdAt = Instant.now();
-    //
+    this.updatedAt = Instant.now();
     this.userId = userId;
     this.channelId = channelId;
     this.lastReadAt = lastReadAt;

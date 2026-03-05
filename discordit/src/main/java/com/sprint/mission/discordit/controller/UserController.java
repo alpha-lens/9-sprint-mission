@@ -5,8 +5,8 @@ import com.sprint.mission.discordit.dto.request.BinaryContentCreateRequest;
 import com.sprint.mission.discordit.dto.request.UserCreateRequest;
 import com.sprint.mission.discordit.dto.request.UserStatusUpdateRequest;
 import com.sprint.mission.discordit.dto.request.UserUpdateRequest;
+import com.sprint.mission.discordit.entity.User;
 import com.sprint.mission.discordit.entity.UserStatus;
-import com.sprint.mission.discordit.global.ApiResult;
 import com.sprint.mission.discordit.service.UserService;
 import com.sprint.mission.discordit.service.UserStatusService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,16 +48,16 @@ public class UserController {
       @ApiResponse(responseCode = "400", description = "사용자명 혹은 이메일 중복", content = @Content)
   })
   @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-  public ResponseEntity<ApiResult<UserDto>> create(
+  public ResponseEntity<User> create(
       @RequestPart("userCreateRequest") UserCreateRequest userCreateRequest,
       @RequestPart(value = "profile", required = false) MultipartFile profile
   ) {
     Optional<BinaryContentCreateRequest> profileRequest = Optional.ofNullable(profile)
         .flatMap(this::resolveProfileRequest);
-    UserDto createdUser = userService.create(userCreateRequest, profileRequest);
+    User createdUser = userService.create(userCreateRequest, profileRequest);
     return ResponseEntity
         .status(HttpStatus.CREATED)
-        .body(ApiResult.success(createdUser));
+        .body(createdUser);
   }
 
   @Operation(summary = "사용자 수정")
@@ -67,17 +67,17 @@ public class UserController {
   })
   @PatchMapping(path = "{userId}",
       consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-  public ResponseEntity<ApiResult<UserDto>> update(
+  public ResponseEntity<User> update(
       @PathVariable UUID userId,
       @RequestPart("userUpdateRequest") UserUpdateRequest userUpdateRequest,
       @RequestPart(value = "profile", required = false) MultipartFile profile
   ) {
     Optional<BinaryContentCreateRequest> profileRequest = Optional.ofNullable(profile)
         .flatMap(this::resolveProfileRequest);
-    UserDto updatedUser = userService.update(userId, userUpdateRequest, profileRequest);
+    User updatedUser = userService.update(userId, userUpdateRequest, profileRequest);
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(ApiResult.success(updatedUser));
+        .body(updatedUser);
   }
 
   @Operation(summary = "사용자 삭제")
@@ -98,11 +98,11 @@ public class UserController {
       @ApiResponse(responseCode = "200", description = "사용자 전체 조회 완료")
   })
   @GetMapping
-  public ResponseEntity<ApiResult<List<UserDto>>> findAll() {
+  public ResponseEntity<List<UserDto>> findAll() {
     List<UserDto> users = userService.findAll();
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(ApiResult.success(users));
+        .body(users);
   }
 
   @Operation(summary = "사용자 상태 수정")
@@ -110,13 +110,13 @@ public class UserController {
       @ApiResponse(responseCode = "200", description = "사용자 수정 완료"),
       @ApiResponse(responseCode = "400", description = "사용자 상태 조회 불가", content = @Content)
   })
-  @GetMapping(path = "{userId}/userStatus")
-  public ResponseEntity<ApiResult<UserStatus>> updateUserStatusByUserId(@PathVariable UUID userId,
+  @PatchMapping(path = "{userId}/userStatus")
+  public ResponseEntity<UserStatus> updateUserStatusByUserId(@PathVariable UUID userId,
       @RequestBody UserStatusUpdateRequest request) {
     UserStatus updatedUserStatus = userStatusService.updateByUserId(userId, request);
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(ApiResult.success(updatedUserStatus));
+        .body(updatedUserStatus);
   }
 
   private Optional<BinaryContentCreateRequest> resolveProfileRequest(MultipartFile profileFile) {

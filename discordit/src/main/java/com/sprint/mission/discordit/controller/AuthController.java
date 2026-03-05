@@ -1,8 +1,7 @@
 package com.sprint.mission.discordit.controller;
 
-import com.sprint.mission.discordit.dto.data.LoginInfoDto;
 import com.sprint.mission.discordit.dto.request.LoginRequest;
-import com.sprint.mission.discordit.global.ApiResult;
+import com.sprint.mission.discordit.entity.User;
 import com.sprint.mission.discordit.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,10 +30,10 @@ public class AuthController {
       @ApiResponse(responseCode = "401", description = "인증 실패 (아이디/비밀번호 불일치)", content = @Content)
   })
   @PostMapping(path = "login")
-  public ResponseEntity<ApiResult<String>> login(@RequestBody LoginRequest loginRequest) {
-    LoginInfoDto login = authService.login(loginRequest);
+  public ResponseEntity<User> login(@RequestBody LoginRequest loginRequest) {
+    User login = authService.login(loginRequest);
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(ApiResult.success(login.username() + " is success login"));
+        .body(login);
   }
 }

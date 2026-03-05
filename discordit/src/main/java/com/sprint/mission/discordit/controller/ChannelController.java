@@ -4,7 +4,7 @@ import com.sprint.mission.discordit.dto.data.ChannelDto;
 import com.sprint.mission.discordit.dto.request.PrivateChannelCreateRequest;
 import com.sprint.mission.discordit.dto.request.PublicChannelCreateRequest;
 import com.sprint.mission.discordit.dto.request.PublicChannelUpdateRequest;
-import com.sprint.mission.discordit.global.ApiResult;
+import com.sprint.mission.discordit.entity.Channel;
 import com.sprint.mission.discordit.service.ChannelService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -37,24 +37,24 @@ public class ChannelController {
   @Operation(summary = "public 채널 생성", description = "public 채널을 생성할 수 있습니다.")
   @ApiResponse(responseCode = "201", description = "채널 생성 성공")
   @PostMapping(path = "public")
-  public ResponseEntity<ApiResult<ChannelDto>> create(
+  public ResponseEntity<Channel> create(
       @RequestBody PublicChannelCreateRequest request) {
-    ChannelDto createdChannel = channelService.create(request);
+    Channel createdChannel = channelService.create(request);
 
     return ResponseEntity
         .status(HttpStatus.CREATED)
-        .body(ApiResult.success(createdChannel));
+        .body(createdChannel);
   }
 
   @Operation(summary = "private 채널 생성", description = "private 채널을 생성할 수 있습니다.")
   @ApiResponse(responseCode = "201", description = "채널 생성 성공")
   @PostMapping(path = "private")
-  public ResponseEntity<ApiResult<ChannelDto>> create(
+  public ResponseEntity<Channel> create(
       @RequestBody PrivateChannelCreateRequest request) {
-    ChannelDto createdChannel = channelService.create(request);
+    Channel createdChannel = channelService.create(request);
     return ResponseEntity
         .status(HttpStatus.CREATED)
-        .body(ApiResult.success(createdChannel));
+        .body(createdChannel);
   }
 
   @Operation(summary = "public 채널 수정", description = "공용 채널을 수정할 수 있습니다.")
@@ -64,12 +64,12 @@ public class ChannelController {
       @ApiResponse(responseCode = "404", description = "존재하지 않는 채널을 수정하려 할 경우", content = @Content)
   })
   @PatchMapping(path = "{channelId}")
-  public ResponseEntity<ApiResult<ChannelDto>> update(@PathVariable UUID channelId,
+  public ResponseEntity<Channel> update(@PathVariable UUID channelId,
       @RequestBody PublicChannelUpdateRequest request) {
-    ChannelDto updatedChannel = channelService.update(channelId, request);
+    Channel updatedChannel = channelService.update(channelId, request);
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(ApiResult.success(updatedChannel));
+        .body(updatedChannel);
   }
 
   @Operation(summary = "채널 삭제", description = "채널을 삭제할 수 있습니다.")
@@ -90,10 +90,10 @@ public class ChannelController {
       @ApiResponse(responseCode = "200", description = "채널 조회 성공")
   })
   @RequestMapping(method = RequestMethod.GET)
-  public ResponseEntity<ApiResult<List<ChannelDto>>> findAll(@RequestParam("userId") UUID userId) {
+  public ResponseEntity<List<ChannelDto>> findAll(@RequestParam("userId") UUID userId) {
     List<ChannelDto> channels = channelService.findAllByUserId(userId);
     return ResponseEntity
         .status(HttpStatus.OK)
-        .body(ApiResult.success(channels));
+        .body(channels);
   }
 }

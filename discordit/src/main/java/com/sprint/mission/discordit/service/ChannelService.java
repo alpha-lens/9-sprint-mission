@@ -4,20 +4,21 @@ import com.sprint.mission.discordit.dto.data.ChannelDto;
 import com.sprint.mission.discordit.dto.request.PrivateChannelCreateRequest;
 import com.sprint.mission.discordit.dto.request.PublicChannelCreateRequest;
 import com.sprint.mission.discordit.dto.request.PublicChannelUpdateRequest;
+import com.sprint.mission.discordit.entity.Channel;
 import java.util.List;
 import java.util.UUID;
 
 public interface ChannelService {
 
-  ChannelDto create(PublicChannelCreateRequest request);
+  Channel create(PublicChannelCreateRequest request);
 
-  ChannelDto create(PrivateChannelCreateRequest request);
+  Channel create(PrivateChannelCreateRequest request);
 
   ChannelDto find(UUID channelId);
 
   List<ChannelDto> findAllByUserId(UUID userId);
 
-  ChannelDto update(UUID channelId, PublicChannelUpdateRequest request);
+  Channel update(UUID channelId, PublicChannelUpdateRequest request);
 
   void delete(UUID channelId);
 }

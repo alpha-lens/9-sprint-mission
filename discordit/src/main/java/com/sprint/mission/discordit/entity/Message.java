@@ -1,11 +1,10 @@
 package com.sprint.mission.discordit.entity;
 
-import lombok.Getter;
-
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import lombok.Getter;
 
 @Getter
 public class Message implements Serializable {
@@ -25,7 +24,7 @@ public class Message implements Serializable {
   public Message(String content, UUID channelId, UUID authorId, List<UUID> attachmentIds) {
     this.id = UUID.randomUUID();
     this.createdAt = Instant.now();
-    //
+    this.updatedAt = Instant.now();
     this.content = content;
     this.channelId = channelId;
     this.authorId = authorId;

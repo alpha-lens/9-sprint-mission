@@ -1,6 +1,5 @@
 package com.sprint.mission.discordit.service.basic;
 
-import com.sprint.mission.discordit.dto.data.LoginInfoDto;
 import com.sprint.mission.discordit.dto.request.LoginRequest;
 import com.sprint.mission.discordit.entity.User;
 import com.sprint.mission.discordit.repository.UserRepository;
@@ -16,7 +15,7 @@ public class BasicAuthService implements AuthService {
   private final UserRepository userRepository;
 
   @Override
-  public LoginInfoDto login(LoginRequest loginRequest) {
+  public User login(LoginRequest loginRequest) {
     String username = loginRequest.username();
     String password = loginRequest.password();
 
@@ -28,6 +27,6 @@ public class BasicAuthService implements AuthService {
       throw new IllegalArgumentException("Wrong password");
     }
 
-    return new LoginInfoDto(user.getUsername(), "로그인");
+    return user;
   }
 }

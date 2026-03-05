@@ -12,27 +12,24 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class GlobalExceptionHandler {
 
   @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<ApiResult<String>> handleException(IllegalArgumentException e) {
-    ApiError error = new ApiError("BAD_REQUEST", e.getMessage(), null);
+  public ResponseEntity<String> handleException(IllegalArgumentException e) {
 
     return ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
-        .body(ApiResult.error(error));
+        .body(e.getMessage());
   }
 
   @ExceptionHandler(NoSuchElementException.class)
-  public ResponseEntity<ApiResult<String>> handleException(NoSuchElementException e) {
-    ApiError error = new ApiError("NOT_FOUND", e.getMessage(), null);
+  public ResponseEntity<String> handleException(NoSuchElementException e) {
     return ResponseEntity
         .status(HttpStatus.NOT_FOUND)
-        .body(ApiResult.error(error));
+        .body(e.getMessage());
   }
 
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<ApiResult<String>> handleException(Exception e) {
-    ApiError error = new ApiError("INTERNAL_SERVER_ERROR", e.getMessage(), null);
+  public ResponseEntity<String> handleException(Exception e) {
     return ResponseEntity
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(ApiResult.error(error));
+        .body(e.getMessage());
   }
 }
