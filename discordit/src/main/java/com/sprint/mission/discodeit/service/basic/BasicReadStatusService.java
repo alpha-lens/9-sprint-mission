@@ -1,10 +1,12 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.data.ReadStatusDto;
 import com.sprint.mission.discodeit.dto.request.ReadStatusCreateRequest;
 import com.sprint.mission.discodeit.dto.request.ReadStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.mapper.ReadStatusMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -24,10 +26,11 @@ public class BasicReadStatusService implements ReadStatusService {
   private final ReadStatusRepository readStatusRepository;
   private final UserRepository userRepository;
   private final ChannelRepository channelRepository;
+  private final ReadStatusMapper readStatusMapper;
 
   @Override
   @Transactional
-  public ReadStatus create(ReadStatusCreateRequest request) {
+  public ReadStatusDto create(ReadStatusCreateRequest request) {
     User user = request.user();
     Channel channel = request.channel();
 
@@ -39,7 +42,7 @@ public class BasicReadStatusService implements ReadStatusService {
           "Channel with name " + channel.getName() + " does not exist");
     }
 
-    return readStatusRepository.findAllByUser_Id(user.getId()).stream()
+    return readStatusMapper.toDto(readStatusRepository.findAllByUser_Id(user.getId()).stream()
         .filter(readStatus -> readStatus.getChannelId().equals(channel))
         .findFirst()
         .orElseGet(
@@ -48,31 +51,31 @@ public class BasicReadStatusService implements ReadStatusService {
               ReadStatus readStatus = new ReadStatus(user, channel, lastReadAt);
               return readStatusRepository.save(readStatus);
             }
-        );
+        ));
   }
 
   @Override
-  public ReadStatus find(UUID readStatusId) {
-    return readStatusRepository.findById(readStatusId)
+  public ReadStatusDto find(UUID readStatusId) {
+    return readStatusMapper.toDto(readStatusRepository.findById(readStatusId)
         .orElseThrow(
-            () -> new NoSuchElementException("ReadStatus with id " + readStatusId + " not found"));
+            () -> new NoSuchElementException("ReadStatus with id " + readStatusId + " not found")));
   }
 
   @Override
-  public List<ReadStatus> findAllByUserId(UUID userId) {
+  public List<ReadStatusDto> findAllByUserId(UUID userId) {
     return readStatusRepository.findAllByUser_Id(userId).stream()
-        .toList();
+        .map(readStatusMapper::toDto).toList();
   }
 
   @Override
   @Transactional
-  public ReadStatus update(UUID readStatusId, ReadStatusUpdateRequest request) {
+  public ReadStatusDto update(UUID readStatusId, ReadStatusUpdateRequest request) {
     Instant newLastReadAt = request.newLastReadAt();
     ReadStatus readStatus = readStatusRepository.findById(readStatusId)
         .orElseThrow(
             () -> new NoSuchElementException("ReadStatus with id " + readStatusId + " not found"));
     readStatus.update(newLastReadAt);
-    return readStatusRepository.save(readStatus);
+    return readStatusMapper.toDto(readStatusRepository.save(readStatus));
   }
 
   @Override

@@ -1,9 +1,9 @@
 package com.sprint.mission.discodeit.controller;
 
+import com.sprint.mission.discodeit.dto.data.MessageDto;
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.request.MessageUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
-import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,10 +19,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,15 +42,12 @@ public class MessageController {
   @Operation(summary = "메시지 생성")
   @ApiResponses(
       value = {
-          @ApiResponse(responseCode = "200", description = "메시지 생성 성공"),
+          @ApiResponse(responseCode = "201", description = "메시지 생성 성공"),
           @ApiResponse(responseCode = "404", description = "채널 혹은 사용자가 존재하지 않을 경우", content = @Content)
       }
   )
-  @RequestMapping(
-      consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-      method = RequestMethod.POST
-  )
-  public ResponseEntity<Message> create(
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<MessageDto> create(
       @RequestPart("messageCreateRequest") MessageCreateRequest messageCreateRequest,
       @RequestPart(value = "attachments", required = false) List<MultipartFile> attachments
   ) {
@@ -68,7 +68,7 @@ public class MessageController {
             .toList())
         .orElse(new ArrayList<>());
 
-    Message createdMessage = messageService.create(messageCreateRequest, attachmentRequests);
+    MessageDto createdMessage = messageService.create(messageCreateRequest, attachmentRequests);
     return ResponseEntity
         .status(HttpStatus.CREATED)
         .body(createdMessage);
@@ -79,10 +79,10 @@ public class MessageController {
       @ApiResponse(responseCode = "200", description = "메시지 수정 성공"),
       @ApiResponse(responseCode = "404", description = "해당 메시지가 존재하지 않을 경우", content = @Content)
   })
-  @RequestMapping(path = "{messageId}")
-  public ResponseEntity<Message> update(@PathVariable UUID messageId,
+  @PatchMapping(path = "{messageId}")
+  public ResponseEntity<MessageDto> update(@PathVariable UUID messageId,
       @RequestBody MessageUpdateRequest request) {
-    Message updatedMessage = messageService.update(messageId, request);
+    MessageDto updatedMessage = messageService.update(messageId, request);
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(updatedMessage);
@@ -93,7 +93,7 @@ public class MessageController {
       @ApiResponse(responseCode = "204", description = "메시지 삭제 성공"),
       @ApiResponse(responseCode = "404", description = "해당 메시지가 존재하지 않을 경우", content = @Content)
   })
-  @RequestMapping(path = "{messageId}", method = RequestMethod.DELETE)
+  @DeleteMapping(path = "{messageId}")
   public ResponseEntity<Void> delete(@PathVariable UUID messageId) {
     messageService.delete(messageId);
     return ResponseEntity
@@ -105,10 +105,10 @@ public class MessageController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "메시지 조회 성공")
   })
-  @RequestMapping(method = RequestMethod.GET)
-  public ResponseEntity<List<Message>> findAllByChannelId(
+  @GetMapping
+  public ResponseEntity<List<MessageDto>> findAllByChannelId(
       @RequestParam("channelId") UUID channelId) {
-    List<Message> messages = messageService.findAllByChannelId(channelId);
+    List<MessageDto> messages = messageService.findAllByChannelId(channelId);
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(messages);
