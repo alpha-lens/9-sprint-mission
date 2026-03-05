@@ -61,7 +61,7 @@ public class ReadStatusController {
         .body(updatedReadStatus);
   }
 
-  @Operation(summary = "readStatus 수정")
+  @Operation(summary = "readStatus 조회")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "readStatus 조회 성공")
   })
