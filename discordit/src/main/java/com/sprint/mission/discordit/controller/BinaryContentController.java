@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -39,7 +40,7 @@ public class BinaryContentController {
 
   @Operation(summary = "다건 조회", description = "binaryContentId 여러개를 한번에 조회 가능")
   @ApiResponse(responseCode = "200", description = "binaryContent 다건 조회 성공")
-  @RequestMapping(method = RequestMethod.GET)
+  @GetMapping
   public ResponseEntity<ApiResult<List<BinaryContent>>> findAllByIdIn(
       @RequestParam("binaryContentIds") List<UUID> binaryContentIds) {
     List<BinaryContent> binaryContents = binaryContentService.findAllByIdIn(binaryContentIds);

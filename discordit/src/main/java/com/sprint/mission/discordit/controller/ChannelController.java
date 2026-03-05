@@ -16,7 +16,10 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -33,7 +36,7 @@ public class ChannelController {
 
   @Operation(summary = "public 채널 생성", description = "public 채널을 생성할 수 있습니다.")
   @ApiResponse(responseCode = "201", description = "채널 생성 성공")
-  @RequestMapping(path = "public", method = RequestMethod.POST)
+  @PostMapping(path = "public")
   public ResponseEntity<ApiResult<ChannelDto>> create(
       @RequestBody PublicChannelCreateRequest request) {
     ChannelDto createdChannel = channelService.create(request);
@@ -44,8 +47,8 @@ public class ChannelController {
   }
 
   @Operation(summary = "private 채널 생성", description = "private 채널을 생성할 수 있습니다.")
-  @ApiResponse(responseCode = "200", description = "채널 생성 성공")
-  @RequestMapping(path = "private", method = RequestMethod.POST)
+  @ApiResponse(responseCode = "201", description = "채널 생성 성공")
+  @PostMapping(path = "private")
   public ResponseEntity<ApiResult<ChannelDto>> create(
       @RequestBody PrivateChannelCreateRequest request) {
     ChannelDto createdChannel = channelService.create(request);
@@ -60,7 +63,7 @@ public class ChannelController {
       @ApiResponse(responseCode = "400", description = "Private 채널 수정 시도 시", content = @Content),
       @ApiResponse(responseCode = "404", description = "존재하지 않는 채널을 수정하려 할 경우", content = @Content)
   })
-  @RequestMapping(path = "{channelId}", method = RequestMethod.PATCH)
+  @PatchMapping(path = "{channelId}")
   public ResponseEntity<ApiResult<ChannelDto>> update(@PathVariable UUID channelId,
       @RequestBody PublicChannelUpdateRequest request) {
     ChannelDto updatedChannel = channelService.update(channelId, request);
@@ -74,7 +77,7 @@ public class ChannelController {
       @ApiResponse(responseCode = "204", description = "채널 삭제 성공"),
       @ApiResponse(responseCode = "404", description = "존재하지 않는 채널을 삭제하려 할 경우", content = @Content)
   })
-  @RequestMapping(path = "{channelId}", method = RequestMethod.DELETE)
+  @DeleteMapping(path = "{channelId}")
   public ResponseEntity<Void> delete(@PathVariable UUID channelId) {
     channelService.delete(channelId);
     return ResponseEntity

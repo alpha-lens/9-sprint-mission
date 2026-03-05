@@ -22,10 +22,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,13 +44,10 @@ public class UserController {
 
   @Operation(summary = "사용자 생성")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "사용자 생성 완료"),
+      @ApiResponse(responseCode = "201", description = "사용자 생성 완료"),
       @ApiResponse(responseCode = "400", description = "사용자명 혹은 이메일 중복", content = @Content)
   })
-  @RequestMapping(
-      consumes = {MediaType.MULTIPART_FORM_DATA_VALUE},
-      method = RequestMethod.POST
-  )
+  @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
   public ResponseEntity<ApiResult<UserDto>> create(
       @RequestPart("userCreateRequest") UserCreateRequest userCreateRequest,
       @RequestPart(value = "profile", required = false) MultipartFile profile
@@ -65,11 +65,8 @@ public class UserController {
       @ApiResponse(responseCode = "200", description = "사용자 수정 완료"),
       @ApiResponse(responseCode = "400", description = "사용자명 혹은 이메일 중복", content = @Content)
   })
-  @RequestMapping(
-      path = "{userId}",
-      consumes = {MediaType.MULTIPART_FORM_DATA_VALUE},
-      method = RequestMethod.PATCH
-  )
+  @PatchMapping(path = "{userId}",
+      consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
   public ResponseEntity<ApiResult<UserDto>> update(
       @PathVariable UUID userId,
       @RequestPart("userUpdateRequest") UserUpdateRequest userUpdateRequest,
@@ -88,7 +85,7 @@ public class UserController {
       @ApiResponse(responseCode = "204", description = "사용자 삭제 완료"),
       @ApiResponse(responseCode = "404", description = "존재하지 않는 사용자", content = @Content)
   })
-  @RequestMapping(path = "{userId}", method = RequestMethod.DELETE)
+  @DeleteMapping(path = "{userId}")
   public ResponseEntity<Void> delete(@PathVariable UUID userId) {
     userService.delete(userId);
     return ResponseEntity
@@ -100,7 +97,7 @@ public class UserController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "사용자 전체 조회 완료")
   })
-  @RequestMapping(method = RequestMethod.GET)
+  @GetMapping
   public ResponseEntity<ApiResult<List<UserDto>>> findAll() {
     List<UserDto> users = userService.findAll();
     return ResponseEntity
@@ -113,7 +110,7 @@ public class UserController {
       @ApiResponse(responseCode = "200", description = "사용자 수정 완료"),
       @ApiResponse(responseCode = "400", description = "사용자 상태 조회 불가", content = @Content)
   })
-  @RequestMapping(path = "{userId}/userStatus")
+  @GetMapping(path = "{userId}/userStatus")
   public ResponseEntity<ApiResult<UserStatus>> updateUserStatusByUserId(@PathVariable UUID userId,
       @RequestBody UserStatusUpdateRequest request) {
     UserStatus updatedUserStatus = userStatusService.updateByUserId(userId, request);
