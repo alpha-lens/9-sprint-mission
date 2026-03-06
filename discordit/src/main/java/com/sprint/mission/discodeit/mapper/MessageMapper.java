@@ -3,34 +3,19 @@ package com.sprint.mission.discodeit.mapper;
 import com.sprint.mission.discodeit.dto.data.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.data.MessageDto;
 import com.sprint.mission.discodeit.entity.Message;
-import java.util.ArrayList;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Component
-@RequiredArgsConstructor
-public class MessageMapper {
+@Mapper(componentModel = "spring", uses = {UserMapper.class})
+public interface MessageMapper {
 
-  private final BinaryContentMapper binaryContentMapper;
-  private final UserMapper userMapper;
-
-  public MessageDto toDto(Message message) {
-    List<BinaryContentDto> binaryContentDtos = new ArrayList<>();
-    message.getAttachments().forEach(
-        binaryContent -> {
-          binaryContentDtos.add(binaryContentMapper.toDto(binaryContent));
-        }
-    );
-
-    return new MessageDto(
-        message.getId(),
-        message.getCreatedAt(),
-        message.getUpdatedAt(),
-        message.getContent(),
-        message.getChannel().getId(),
-        userMapper.toDto(message.getAuthor()),
-        binaryContentDtos
-    );
-  }
+  @Mapping(source = "message.id", target = "id")
+  @Mapping(source = "message.createdAt", target = "createdAt")
+  @Mapping(source = "message.updatedAt", target = "updatedAt")
+  @Mapping(source = "message.content", target = "content")
+  @Mapping(source = "message.channel.id", target = "channelId")
+  @Mapping(source = "message.author", target = "author")
+  @Mapping(source = "binaryContentDtos", target = "attachments")
+  MessageDto toDto(Message message, List<BinaryContentDto> binaryContentDtos);
 }

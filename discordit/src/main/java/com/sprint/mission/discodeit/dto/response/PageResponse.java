@@ -9,7 +9,7 @@ import lombok.Getter;
 public class PageResponse<T> {
 
   private List<T> content;
-  private int number;
+  private Object nextCursor;
   private int size;
   private boolean hasNext;
   private Long totalElements;

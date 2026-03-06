@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.data.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.data.MessageDto;
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.request.MessageUpdateRequest;
@@ -8,6 +9,7 @@ import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.mapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.mapper.MessageMapper;
 import com.sprint.mission.discodeit.mapper.PageResponseMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
@@ -17,12 +19,12 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,7 @@ public class BasicMessageService implements MessageService {
   private final UserRepository userRepository;
   private final BinaryContentStorage binaryContentStorage;
   private final BinaryContentRepository binaryContentRepository;
+  private final BinaryContentMapper binaryContentMapper;
   private final MessageMapper messageMapper;
   private final PageResponseMapper pageResponseMapper;
 
@@ -85,20 +88,30 @@ public class BasicMessageService implements MessageService {
         binaryContents
     );
 
-    return messageMapper.toDto(messageRepository.save(message));
+    List<BinaryContentDto> binaryContentDtos = new ArrayList<>();
+    message.getAttachments().forEach(
+        binaryContent -> {
+          binaryContentDtos.add(binaryContentMapper.toDto(binaryContent));
+        }
+    );
+
+    return messageMapper.toDto(messageRepository.save(message), binaryContentDtos);
   }
 
   @Override
   public MessageDto find(UUID messageId) {
-    return messageMapper.toDto(messageRepository.findById(messageId)
+    Message message = messageRepository.findById(messageId)
         .orElseThrow(
-            () -> new NoSuchElementException("Message with id " + messageId + " not found")));
-  }
+            () -> new NoSuchElementException("Message with id " + messageId + " not found"));
 
-  @Override
-  public List<MessageDto> findAllByChannelId(UUID channelId) {
-    return messageRepository.findAllByChannelId(channelId).stream()
-        .map(messageMapper::toDto).toList();
+    List<BinaryContentDto> binaryContentDtos = new ArrayList<>();
+    message.getAttachments().forEach(
+        binaryContent -> {
+          binaryContentDtos.add(binaryContentMapper.toDto(binaryContent));
+        }
+    );
+
+    return messageMapper.toDto(message, binaryContentDtos);
   }
 
   @Override
@@ -108,13 +121,17 @@ public class BasicMessageService implements MessageService {
     Message message = messageRepository.findById(messageId)
         .orElseThrow(
             () -> new NoSuchElementException("Message with id " + messageId + " not found"));
-    return messageMapper.toDto(message.update(newContent));
+    List<BinaryContentDto> binaryContentDtos = new ArrayList<>();
+    message.getAttachments()
+        .forEach(binaryContent -> binaryContentDtos.add(binaryContentMapper.toDto(binaryContent)));
+
+    return messageMapper.toDto(message.update(newContent), binaryContentDtos);
   }
 
   @Override
   @Transactional
   public void delete(UUID messageId) {
-    Message message = messageRepository.findById(messageId)
+    messageRepository.findById(messageId)
         .orElseThrow(
             () -> new NoSuchElementException("Message with id " + messageId + " not found"));
 
@@ -122,17 +139,25 @@ public class BasicMessageService implements MessageService {
   }
 
   @Override
-  public PageResponse<Message> findAllByChannelId(UUID channelId, Pageable pageable) {
-    Page<Message> messages = messageRepository.findAllByChannelId(channelId, pageable);
-    Page<MessageDto> dtoPage = messages.map(messageMapper::toDto);
-    return pageResponseMapper.fromPage(dtoPage);
+  @Transactional(readOnly = true)
+  public PageResponse<MessageDto> findAllByChannelId(UUID channelId, Instant cursor,
+      Pageable pageable) {
+    Slice<Message> messages = messageRepository.findAllByChannelId(channelId, cursor, pageable);
+
+    Slice<MessageDto> dtoPage = messages.map(this::convertToDto);
+
+    Instant nextCursor = null;
+    if (messages.hasNext() && !messages.getContent().isEmpty()) {
+      nextCursor = messages.getContent().get(messages.getContent().size() - 1).getCreatedAt();
+    }
+
+    return pageResponseMapper.fromSlice(dtoPage, nextCursor);
   }
 
-  @Override
-  public PageResponse<MessageDto> findAllSliceByChannelId(UUID channelId, Pageable pageable) {
-    Slice<Message> messageSlice = messageRepository.findAllByChannelId(channelId, pageable);
-    Slice<MessageDto> dtoSlice = messageSlice.map(messageMapper::toDto);
-
-    return pageResponseMapper.fromSlice(dtoSlice);
+  private MessageDto convertToDto(Message message) {
+    List<BinaryContentDto> binaryContentDtos = message.getAttachments().stream()
+        .map(binaryContentMapper::toDto)
+        .toList();
+    return messageMapper.toDto(message, binaryContentDtos);
   }
 }

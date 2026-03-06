@@ -15,6 +15,7 @@ spring:
         format_sql: true
         highlight_sql: true
         default_batch_fetch_size: 100
+    open-in-view: false
 
 server:
   port: ${PORT:8080}
