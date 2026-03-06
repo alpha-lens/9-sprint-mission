@@ -14,6 +14,7 @@ import com.sprint.mission.discodeit.service.ReadStatusService;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,24 +32,24 @@ public class BasicReadStatusService implements ReadStatusService {
   @Override
   @Transactional
   public ReadStatusDto create(ReadStatusCreateRequest request) {
-    User user = request.user();
-    Channel channel = request.channel();
+    Optional<User> user = userRepository.findById(request.userId());
+    Optional<Channel> channel = channelRepository.findById(request.channelId());
 
-    if (!userRepository.existsById(user.getId())) {
-      throw new NoSuchElementException("Username " + user.getUsername() + " does not exist");
+    if (user.isEmpty()) {
+      throw new NoSuchElementException("Username " + request.userId() + " does not exist");
     }
-    if (!channelRepository.existsById(channel.getId())) {
+    if (channel.isEmpty()) {
       throw new NoSuchElementException(
-          "Channel with name " + channel.getName() + " does not exist");
+          "Channel with name " + request.channelId() + " does not exist");
     }
 
-    return readStatusMapper.toDto(readStatusRepository.findAllByUser_Id(user.getId()).stream()
-        .filter(readStatus -> readStatus.getChannelId().equals(channel))
+    return readStatusMapper.toDto(readStatusRepository.findAllByUser_Id(user.get().getId()).stream()
+        .filter(readStatus -> readStatus.getChannelId().equals(channel.get().getId()))
         .findFirst()
         .orElseGet(
             () -> {
               Instant lastReadAt = request.lastReadAt();
-              ReadStatus readStatus = new ReadStatus(user, channel, lastReadAt);
+              ReadStatus readStatus = new ReadStatus(user.get(), channel.get(), lastReadAt);
               return readStatusRepository.save(readStatus);
             }
         ));

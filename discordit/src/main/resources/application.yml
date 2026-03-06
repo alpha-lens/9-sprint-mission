@@ -14,14 +14,7 @@ spring:
       hibernate:
         format_sql: true
         highlight_sql: true
-logging:
-  level:
-    org:
-      hibernate:
-        SQL: DEBUG
-      orm:
-        jdbc:
-          bind: TRACE
+        default_batch_fetch_size: 100
 
 server:
   port: ${PORT:8080}
