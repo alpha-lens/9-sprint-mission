@@ -12,16 +12,15 @@ import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.mapper.ChannelMapper;
 import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
+import com.sprint.mission.discodeit.repository.MessageAtProjection;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class BasicChannelService implements ChannelService {
 
   private final ChannelRepository channelRepository;
@@ -75,17 +75,16 @@ public class BasicChannelService implements ChannelService {
   @Override
   public ChannelDto find(UUID channelId) {
     Channel channel = channelRepository.findById(channelId)
-        .orElseThrow(
-            () -> new NoSuchElementException("Channel with id " + channelId + " not found"));
+        .orElseThrow(() -> new NoSuchElementException("Channel not found: " + channelId));
 
-//    Instant lastMessageAt = messageRepository.findFirstByChannelOrderByCreatedAtDesc(channel).get()
-//        .getCreatedAt();
-//    List<UserDto> participants = readStatusRepository.findAllByChannel_Id(channelId).stream().map(
-//        ReadStatus::getUser
-//    ).map(userMapper::toDto).toList();
+    Instant lastMessageAt = messageRepository.findLastMessageAtByChannelId(channelId)
+        .orElse(channel.getCreatedAt());
 
-//    return channelMapper.toDto(channel, participants, lastMessageAt);
-    return null;
+    List<UserDto> participants = readStatusRepository.findAllByChannel_Id(channelId).stream()
+        .map(rs -> userMapper.toDto(rs.getUser()))
+        .toList();
+
+    return channelMapper.toDto(channel, participants, lastMessageAt);
   }
 
   /* 이 부분은 AI 도움을 받았는데 아직 학습이 필요합니다.
@@ -96,53 +95,45 @@ public class BasicChannelService implements ChannelService {
    * */
   @Override
   public List<ChannelDto> findAllByUserId(UUID userId) {
-    // 쿼리 1: 모든 채널 정보 가져오기
-    List<Channel> allChannels = channelRepository.findAll();
-    List<UUID> allChannelIds = allChannels.stream().map(Channel::getId).toList();
+    // 1. [DB 필터링] 내가 볼 수 있는 채널만 조회
+    List<Channel> channels = channelRepository.findAccessibleChannelsByUserId(userId);
+    if (channels.isEmpty()) {
+      return List.of();
+    }
 
-    // 쿼리 2: 메시지 시간 한꺼번에 (Batch)
-    Map<UUID, Instant> lastMessageMap = messageRepository.findLastMessageAtByChannelIds(
-            allChannelIds)
-        .stream().collect(Collectors.toMap(
-            obj -> (UUID) obj[0],
-            obj -> (Instant) obj[1]));
+    List<UUID> channelIds = channels.stream().map(Channel::getId).toList();
 
-    // 쿼리 3: 모든 ReadStatus(유저 포함) 한꺼번에 (Batch Fetch Join)
-    // 여기서 userId 조건 없이 채널 ID들로 긁어오면,
-    // "내가 구독한 채널"인지 여부도 이 데이터 안에서 판단 가능합니다.
-    List<ReadStatus> allReadStatuses = readStatusRepository.findAllByChannelIdsWithUser(
-        allChannelIds);
-
-    // 메모리에서 데이터 가공 (Java 상에서 처리)
-    Map<UUID, List<UserDto>> channelUsersMap = allReadStatuses.stream()
-        .collect(Collectors.groupingBy(
-            rs -> rs.getChannel().getId(), // Key: 채널 ID
-            Collectors.mapping(            // Value: ReadStatus를 UserDto로 변환해서 리스트로 수집
-                rs -> userMapper.toDto(rs.getUser()),
-                Collectors.toList()
-            )
+    // 2. [Batch Query] 마지막 메시지 시간들을 Map으로 변환 (Projection 활용)
+    Map<UUID, Instant> lastMessageMap = messageRepository.findLastMessageAtByChannelIds(channelIds)
+        .stream()
+        .collect(Collectors.toMap(
+            MessageAtProjection::getChannelId,
+            MessageAtProjection::getLastAt
         ));
 
-    // 내가 구독한 채널 ID 목록도 DB 가지 말고 여기서 추출
-    Set<UUID> mySubscribedIds = allReadStatuses.stream()
-        .filter(rs -> rs.getUser().getId().equals(userId))
-        .map(rs -> rs.getChannel().getId())
-        .collect(Collectors.toSet());
+    // 3. [Batch Query] Private 채널 참여자 목록 조회
+    // 모든 ReadStatus를 가져오되, 필요한 채널 ID들에 대해서만 필터링
+    Map<UUID, List<UserDto>> participantsMap = readStatusRepository.findAllByChannelIdsWithUser(
+            channelIds)
+        .stream()
+        .collect(Collectors.groupingBy(
+            rs -> rs.getChannel().getId(),
+            Collectors.mapping(rs -> userMapper.toDto(rs.getUser()), Collectors.toList())
+        ));
 
-    // 5. 최종 DTO 조립 및 필터링
-    return allChannels.stream()
-        // 공개 채널이거나 내가 구독한 채널만 필터링
-        .filter(c -> c.getType() == ChannelType.PUBLIC || mySubscribedIds.contains(c.getId()))
+    // 4. DTO 조립
+    return channels.stream()
         .map(channel -> {
           UUID id = channel.getId();
-          Instant lastAt = lastMessageMap.get(id);
+          List<UserDto> participants = (channel.getType() == ChannelType.PRIVATE)
+              ? participantsMap.getOrDefault(id, List.of())
+              : List.of();
 
-          // PRIVATE 채널일 때만 유저 리스트를 넣어주고, 아니면 null 처리
-          List<UserDto> users = (channel.getType() == ChannelType.PRIVATE)
-              ? channelUsersMap.getOrDefault(id, Collections.emptyList())
-              : null;
-
-          return channelMapper.toDto(channel, users, lastAt);
+          return channelMapper.toDto(
+              channel,
+              participants,
+              lastMessageMap.getOrDefault(id, channel.getCreatedAt())
+          );
         })
         .toList();
   }
@@ -159,8 +150,9 @@ public class BasicChannelService implements ChannelService {
       throw new IllegalArgumentException("Private channel cannot be updated");
     }
     channel.update(newName, newDescription);
-//    return channelMapper.toDto(channelRepository.save(channel));
-    return null;
+    Instant lastMessageAt = messageRepository.findLastMessageAtByChannelId(channelId)
+        .orElse(channel.getCreatedAt());
+    return channelMapper.toDto(channelRepository.save(channel), List.of(), lastMessageAt);
   }
 
   @Override

@@ -18,9 +18,12 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
 
   Optional<Message> findById(UUID id);
 
-  @Query("select m.channel.id, max(m.createdAt) from Message m " +
-      "where m.channel.id in :channelIds group by m.channel.id")
-  List<Object[]> findLastMessageAtByChannelIds(@Param("channelIds") List<UUID> channelIds);
+  @Query("SELECT m.channel.id AS channelId, MAX(m.createdAt) AS lastAt " +
+      "FROM Message m WHERE m.channel.id IN :channelIds GROUP BY m.channel.id")
+  List<MessageAtProjection> findLastMessageAtByChannelIds(List<UUID> channelIds);
+
+  @Query("SELECT MAX(m.createdAt) FROM Message m WHERE m.channel.id = :channelId")
+  Optional<Instant> findLastMessageAtByChannelId(@Param("channelId") UUID channelId);
 
   @EntityGraph(attributePaths = {"attachments", "author"})
   List<Message> findAllByChannelId(UUID channelId);

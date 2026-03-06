@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class BasicMessageService implements MessageService {
 
   private final MessageRepository messageRepository;
@@ -88,14 +89,7 @@ public class BasicMessageService implements MessageService {
         binaryContents
     );
 
-    List<BinaryContentDto> binaryContentDtos = new ArrayList<>();
-    message.getAttachments().forEach(
-        binaryContent -> {
-          binaryContentDtos.add(binaryContentMapper.toDto(binaryContent));
-        }
-    );
-
-    return messageMapper.toDto(messageRepository.save(message), binaryContentDtos);
+    return this.convertToDto(messageRepository.save(message));
   }
 
   @Override
@@ -104,14 +98,7 @@ public class BasicMessageService implements MessageService {
         .orElseThrow(
             () -> new NoSuchElementException("Message with id " + messageId + " not found"));
 
-    List<BinaryContentDto> binaryContentDtos = new ArrayList<>();
-    message.getAttachments().forEach(
-        binaryContent -> {
-          binaryContentDtos.add(binaryContentMapper.toDto(binaryContent));
-        }
-    );
-
-    return messageMapper.toDto(message, binaryContentDtos);
+    return this.convertToDto(message);
   }
 
   @Override
@@ -121,11 +108,8 @@ public class BasicMessageService implements MessageService {
     Message message = messageRepository.findById(messageId)
         .orElseThrow(
             () -> new NoSuchElementException("Message with id " + messageId + " not found"));
-    List<BinaryContentDto> binaryContentDtos = new ArrayList<>();
-    message.getAttachments()
-        .forEach(binaryContent -> binaryContentDtos.add(binaryContentMapper.toDto(binaryContent)));
 
-    return messageMapper.toDto(message.update(newContent), binaryContentDtos);
+    return this.convertToDto(message.update(newContent));
   }
 
   @Override
@@ -139,7 +123,6 @@ public class BasicMessageService implements MessageService {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public PageResponse<MessageDto> findAllByChannelId(UUID channelId, Instant cursor,
       Pageable pageable) {
     Slice<Message> messages = messageRepository.findAllByChannelId(channelId, cursor, pageable);
