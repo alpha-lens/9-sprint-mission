@@ -87,15 +87,8 @@ public class BasicChannelService implements ChannelService {
     return channelMapper.toDto(channel, participants, lastMessageAt);
   }
 
-  /* 이 부분은 AI 도움을 받았는데 아직 학습이 필요합니다.
-   * 1. 왜 모든 정보를 가져와서 처리하는지 모르겠습니다. (저는 쿼리문에서 필터링해서 가져오려고 생각했었는데, AI는 모든걸 가져와서 필터링했습니다.)
-   * 2. 메시지 시간 처리 로직도 좀 더 배워야 합니다.
-   * 3. 채널 ID와 UserDto로 묶는 부분은, 본래 Channel과 UserDto로 묶었던 것인데, AI는 ID로 처리했습니다. 이유를 모르겠습니다.
-   * 4. obj[0], obj[1]이 마음에 안 들어서 바꾸고 싶은데... 실패했습니다.
-   * */
   @Override
   public List<ChannelDto> findAllByUserId(UUID userId) {
-    // 1. [DB 필터링] 내가 볼 수 있는 채널만 조회
     List<Channel> channels = channelRepository.findAccessibleChannelsByUserId(userId);
     if (channels.isEmpty()) {
       return List.of();
@@ -103,7 +96,6 @@ public class BasicChannelService implements ChannelService {
 
     List<UUID> channelIds = channels.stream().map(Channel::getId).toList();
 
-    // 2. [Batch Query] 마지막 메시지 시간들을 Map으로 변환 (Projection 활용)
     Map<UUID, Instant> lastMessageMap = messageRepository.findLastMessageAtByChannelIds(channelIds)
         .stream()
         .collect(Collectors.toMap(
@@ -111,8 +103,6 @@ public class BasicChannelService implements ChannelService {
             MessageAtProjection::getLastAt
         ));
 
-    // 3. [Batch Query] Private 채널 참여자 목록 조회
-    // 모든 ReadStatus를 가져오되, 필요한 채널 ID들에 대해서만 필터링
     Map<UUID, List<UserDto>> participantsMap = readStatusRepository.findAllByChannelIdsWithUser(
             channelIds)
         .stream()
@@ -121,7 +111,6 @@ public class BasicChannelService implements ChannelService {
             Collectors.mapping(rs -> userMapper.toDto(rs.getUser()), Collectors.toList())
         ));
 
-    // 4. DTO 조립
     return channels.stream()
         .map(channel -> {
           UUID id = channel.getId();
