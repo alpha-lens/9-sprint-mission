@@ -81,7 +81,7 @@ public class BasicChannelService implements ChannelService {
         .orElse(channel.getCreatedAt());
 
     List<UserDto> participants = readStatusRepository.findAllByChannel_Id(channelId).stream()
-        .map(rs -> userMapper.toDto(rs.getUser()))
+        .map(readStatus -> userMapper.toDto(readStatus.getUser()))
         .toList();
 
     return channelMapper.toDto(channel, participants, lastMessageAt);
@@ -107,7 +107,7 @@ public class BasicChannelService implements ChannelService {
             channelIds)
         .stream()
         .collect(Collectors.groupingBy(
-            rs -> rs.getChannel().getId(),
+            readStatus -> readStatus.getChannel().getId(),
             Collectors.mapping(rs -> userMapper.toDto(rs.getUser()), Collectors.toList())
         ));
 
