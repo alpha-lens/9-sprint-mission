@@ -11,8 +11,7 @@ CREATE TABLE binary_contents (
      created_at TIMESTAMPTZ NOT NULL,
      file_name VARCHAR(255) NOT NULL,
      size BIGINT NOT NULL,
-     content_type VARCHAR(100) NOT NULL,
-     bytes BYTEA NOT NULL
+     content_type VARCHAR(100) NOT NULL
 );
 
 -- 4. users 테이블
