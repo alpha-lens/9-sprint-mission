@@ -29,12 +29,13 @@ public class BasicUserStatusService implements UserStatusService {
   @Override
   @Transactional
   public UserStatusDto create(UserStatusCreateRequest request) {
-    User user = request.user();
+    UUID userId = request.userId();
 
-    if (!userRepository.existsById(user.getId())) {
-      throw new NoSuchElementException("Username " + user.getUsername() + " does not exist");
+    if (!userRepository.existsById(userId)) {
+      throw new NoSuchElementException("UserId " + userId + " does not exist");
     }
-    if (userStatusRepository.findByUser_Id(user.getId()).isPresent()) {
+    User user = userRepository.findById(userId).orElseThrow();
+    if (userStatusRepository.findByUser_Id(userId).isPresent()) {
       throw new IllegalArgumentException(
           "UserStatus with id " + user.getStatus().getId() + " already exists");
     }
