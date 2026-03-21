@@ -125,7 +125,7 @@ public class BasicMessageService implements MessageService {
   @Override
   public PageResponse<MessageDto> findAllByChannelId(UUID channelId, Instant cursor,
       Pageable pageable) {
-    Slice<Message> messages = messageRepository.findAllByChannelId(channelId, cursor, pageable);
+    Slice<Message> messages = messageRepository.findOlderByChannelId(channelId, cursor, pageable);
 
     Slice<MessageDto> dtoPage = messages.map(this::convertToDto);
 

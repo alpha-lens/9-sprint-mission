@@ -37,7 +37,7 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
   @EntityGraph(attributePaths = {"attachments", "author"})
   @Query("SELECT m FROM Message m WHERE m.channel.id = :channelId "
       + "AND (CAST(:cursor AS timestamp) IS NULL OR m.createdAt < :cursor)")
-  Slice<Message> findAllByChannelId(
+  Slice<Message> findOlderByChannelId(
       @Param("channelId") UUID channelId,
       @Param("cursor") Instant cursor, Pageable pageable);
 }
