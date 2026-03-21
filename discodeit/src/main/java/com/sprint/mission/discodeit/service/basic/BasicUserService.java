@@ -54,8 +54,10 @@ public class BasicUserService implements UserService {
           byte[] bytes = profileRequest.bytes();
           BinaryContent binaryContent = new BinaryContent(fileName, (long) bytes.length,
               contentType);
+          BinaryContent savedContent = binaryContentRepository.save(binaryContent);
+
           binaryContentStorage.put(binaryContent.getId(), bytes);
-          return binaryContentRepository.save(binaryContent);
+          return savedContent;
         })
         .orElse(null);
     String password = userCreateRequest.password();
