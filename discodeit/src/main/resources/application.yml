@@ -1,8 +1,15 @@
 spring:
+  output:
+    ansi:
+      enabled: ALWAYS # 또는 DETECT
   application:
     name: "discodeit"
   profiles:
-    active: prod
+    active: dev
+
+logging:
+  level:
+    root: info
 
 server:
   port: ${PORT:8080}

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{yy-MM-dd HH:mm:ss.SSS} [%thread] %clr(%-5level){highlight}
+        %clr(%-36logger{36}){cyan} - %msg%n
+      </pattern>
+    </encoder>
+  </appender>
+
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>./spring.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>./spring-%d{yyyy-MM-dd}.log</fileNamePattern>
+      <maxHistory>30</maxHistory>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%d{yy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %-36logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </root>
+
+  <logger name="com.sprint.mission.discodeit" level="DEBUG"/>
+  <logger name="org.springframework" level="INFO"/>
+  <logger name="org.hibernate" level="INFO"/>
+  <logger name="com.zaxxer.hikari" level="INFO"/>
+  <logger name="sun.rmi" level="INFO"/>
+  <logger name="javax.management" level="INFO"/>
+</configuration>

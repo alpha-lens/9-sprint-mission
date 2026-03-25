@@ -16,6 +16,10 @@ spring:
         default_batch_fetch_size: 100
     open-in-view: false
 
+logging:
+  level:
+    root: debug
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html  # 접속 경로 설정
