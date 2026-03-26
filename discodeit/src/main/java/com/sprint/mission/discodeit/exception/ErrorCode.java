@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
-  INVALID_PASSWORD(400, "비밀번호가 일치하지 않습니다."),
+  INVALID_PASSWORD(401, "비밀번호가 일치하지 않습니다."),
   BINARY_CONTENT_NOT_FOUND(404, "존재하지 않는 파일입니다."),
   CHANNEL_NOT_FOUND(404, "존재하지 않는 채널입니다."),
   PRIVATE_CHANNEL_UPDATE(403, "Private 채널은 수정할 수 없습니다."),
