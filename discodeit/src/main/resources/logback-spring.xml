@@ -2,9 +2,11 @@
 <configuration>
   <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
+  <conversionRule conversionWord="lvlclr"
+    converterClass="com.sprint.mission.discodeit.logging.LevelColorConverter"/>
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%d{yy-MM-dd HH:mm:ss.SSS} [%thread] %clr(%-5level){highlight}
+      <pattern>%d{yy-MM-dd HH:mm:ss.SSS} [%thread] %lvlclr(%-5level)
         %clr(%-36logger{36}){cyan} - %msg%n
       </pattern>
     </encoder>
