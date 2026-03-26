@@ -26,3 +26,31 @@ springdoc:
     groups-order: DESC
   api-docs:
     path: /api-docs
+
+info:
+  app:
+    name: Discodeit
+    version: 1.7.0
+    java-version: 17
+    spring-boot-version: 3.4.0
+  config:
+    datasource:
+      url: ${spring.datasource.url}
+      driver-class-name: ${spring.datasource.driver-class-name}
+    jpa:
+      ddl-auto: ${spring.jpa.hibernate.ddl-auto}
+    storage:
+      type: ${storage.type:local}
+      path: ${storage.path:/tmp}
+    multipart:
+      max-file-size: ${spring.servlet.multipart.max-file-size}
+      max-request-size: ${spring.servlet.multipart.max-request-size}
+
+management:
+  info:
+    env:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,metrics,loggers"
