@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @Tag(name = "Channel API", description = "채널 서비스 전반에 관한 API를 제공")
 @RequiredArgsConstructor
 @RestController
@@ -38,8 +40,10 @@ public class ChannelController {
   @PostMapping(path = "public")
   public ResponseEntity<ChannelDto> create(
       @RequestBody PublicChannelCreateRequest request) {
+    log.debug("Public 채널 생성 접근: {}", request);
     ChannelDto createdChannel = channelService.create(request);
 
+    log.info("Public 채널 생성 완료: {}", createdChannel);
     return ResponseEntity
         .status(HttpStatus.CREATED)
         .body(createdChannel);
@@ -50,7 +54,10 @@ public class ChannelController {
   @PostMapping(path = "private")
   public ResponseEntity<ChannelDto> create(
       @RequestBody PrivateChannelCreateRequest request) {
+    log.debug("Private 채널 생성 시작: {}", request);
     ChannelDto createdChannel = channelService.create(request);
+
+    log.info("Private 채널 생성 완료: {}", createdChannel);
     return ResponseEntity
         .status(HttpStatus.CREATED)
         .body(createdChannel);
@@ -65,7 +72,9 @@ public class ChannelController {
   @PatchMapping(path = "{channelId}")
   public ResponseEntity<ChannelDto> update(@PathVariable UUID channelId,
       @RequestBody PublicChannelUpdateRequest request) {
+    log.debug("Channel 수정 접근: {}", channelId);
     ChannelDto updatedChannel = channelService.update(channelId, request);
+    log.info("Channel 수정 완료: {}", updatedChannel);
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(updatedChannel);
@@ -78,7 +87,10 @@ public class ChannelController {
   })
   @DeleteMapping(path = "{channelId}")
   public ResponseEntity<Void> delete(@PathVariable UUID channelId) {
+    log.debug("채널 삭제 접근: {}", channelId);
     channelService.delete(channelId);
+
+    log.info("채널 삭제 완료: {}", channelId);
     return ResponseEntity
         .status(HttpStatus.NO_CONTENT)
         .build();
