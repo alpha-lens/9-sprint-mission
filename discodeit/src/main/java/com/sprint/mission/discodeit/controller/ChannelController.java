@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +40,7 @@ public class ChannelController {
   @ApiResponse(responseCode = "201", description = "채널 생성 성공")
   @PostMapping(path = "public")
   public ResponseEntity<ChannelDto> create(
-      @RequestBody PublicChannelCreateRequest request) {
+      @RequestBody @Valid PublicChannelCreateRequest request) {
     log.debug("Public 채널 생성 접근: {}", request);
     ChannelDto createdChannel = channelService.create(request);
 
@@ -53,7 +54,7 @@ public class ChannelController {
   @ApiResponse(responseCode = "201", description = "채널 생성 성공")
   @PostMapping(path = "private")
   public ResponseEntity<ChannelDto> create(
-      @RequestBody PrivateChannelCreateRequest request) {
+      @RequestBody @Valid PrivateChannelCreateRequest request) {
     log.debug("Private 채널 생성 시작: {}", request);
     ChannelDto createdChannel = channelService.create(request);
 
@@ -71,7 +72,7 @@ public class ChannelController {
   })
   @PatchMapping(path = "{channelId}")
   public ResponseEntity<ChannelDto> update(@PathVariable UUID channelId,
-      @RequestBody PublicChannelUpdateRequest request) {
+      @RequestBody @Valid PublicChannelUpdateRequest request) {
     log.debug("Channel 수정 접근: {}", channelId);
     ChannelDto updatedChannel = channelService.update(channelId, request);
     log.info("Channel 수정 완료: {}", updatedChannel);
