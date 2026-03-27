@@ -1,10 +1,11 @@
 package com.sprint.mission.discodeit.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 
 import com.sprint.mission.discodeit.dto.request.PrivateChannelCreateRequest;
 import com.sprint.mission.discodeit.dto.request.PublicChannelUpdateRequest;
@@ -23,7 +24,6 @@ import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.basic.BasicChannelService;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -71,13 +71,13 @@ public class ChannelServiceTest {
       List<User> participants = List.of(user1, user2);
 
       // when
-      when(userRepository.findAllById(participantIds)).thenReturn(participants);
-      when(channelRepository.save(any(Channel.class))).thenAnswer(i -> i.getArguments()[0]);
+      given(userRepository.findAllById(participantIds)).willReturn(participants);
+      given(channelRepository.save(any(Channel.class))).willAnswer(i -> i.getArguments()[0]);
       channelService.create(request);
 
       // 3. Then: 행위 검증
-      verify(readStatusRepository).saveAll(any());
-      verify(channelRepository).save(any(Channel.class));
+      then(readStatusRepository).should().saveAll(any());
+      then(channelRepository).should().save(any(Channel.class));
     }
 
     @Test
@@ -93,17 +93,16 @@ public class ChannelServiceTest {
       List<User> participants = List.of(user1);
 
       // when
-      when(userRepository.findAllById(participantIds)).thenReturn(participants);
+      given(userRepository.findAllById(participantIds)).willReturn(participants);
 
       // then
-      UserNotFoundException ex = assertThrows(UserNotFoundException.class, () -> {
-        channelService.create(request);
-      });
-
-      assertEquals(ErrorCode.USER_NOT_FOUND, ex.getErrorCode());
-      assertEquals(
-          Map.of("요청한 사용자 수", request.participantIds().size(), "실제 사용자 수", participants.size()),
-          ex.getDetails());
+      assertThatThrownBy(() -> channelService.create(request))
+          .isInstanceOf(UserNotFoundException.class)
+          .hasMessageContaining("존재하지 않는 사용자")
+          .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND)
+          .extracting("details", MAP)
+          .containsEntry("요청한 사용자 수", request.participantIds().size())
+          .containsEntry("실제 사용자 수", participants.size());
     }
   }
 
@@ -119,15 +118,15 @@ public class ChannelServiceTest {
       Channel channel = new Channel(ChannelType.PUBLIC, "이름", "설명");
       PublicChannelUpdateRequest request = new PublicChannelUpdateRequest("새로운 이름", "새로운 설명");
 
-      when(channelRepository.findById(channelId)).thenReturn(Optional.of(channel));
+      given(channelRepository.findById(channelId)).willReturn(Optional.of(channel));
 
       // when
       channelService.update(channelId, request);
 
       // then
-      assertEquals("새로운 이름", channel.getName());
-      assertEquals("새로운 설명", channel.getDescription());
-      verify(channelRepository).save(channel);
+      assertThat("새로운 이름").isEqualTo(channel.getName());
+      assertThat("새로운 설명").isEqualTo(channel.getDescription());
+      then(channelRepository).should().save(channel);
     }
 
     @Test
@@ -138,14 +137,16 @@ public class ChannelServiceTest {
       Channel channel = new Channel(ChannelType.PRIVATE, "이름", "설명");
       PublicChannelUpdateRequest request = new PublicChannelUpdateRequest("새로운 이름", "새로운 설명");
 
-      when(channelRepository.findById(channelId)).thenReturn(Optional.of(channel));
+      given(channelRepository.findById(channelId)).willReturn(Optional.of(channel));
 
       // when & then
-      PrivateChannelUpdateException ex = assertThrows(PrivateChannelUpdateException.class,
-          () -> channelService.update(channelId, request));
 
-      assertEquals(ErrorCode.PRIVATE_CHANNEL_UPDATE, ex.getErrorCode());
-      assertEquals(Map.of("channelId", channelId), ex.getDetails());
+      assertThatThrownBy(() -> channelService.update(channelId, request))
+          .isInstanceOf(PrivateChannelUpdateException.class)
+          .hasMessageContaining("Private 채널은 수정할 수 없습니다")
+          .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PRIVATE_CHANNEL_UPDATE)
+          .extracting("details", MAP)
+          .containsEntry("channelId", channelId);
     }
   }
 
@@ -159,12 +160,12 @@ public class ChannelServiceTest {
       UUID channelId = UUID.randomUUID();
       Channel channel = new Channel(ChannelType.PUBLIC, "이름", "설명");
 
-      when(channelRepository.findById(channelId)).thenReturn(Optional.of(channel));
+      given(channelRepository.findById(channelId)).willReturn(Optional.of(channel));
       channelService.delete(channelId);
 
-      verify(messageRepository).deleteAllByChannelId(any());
-      verify(readStatusRepository).deleteAllByChannel_Id(any());
-      verify(channelRepository).deleteById(any());
+      then(messageRepository).should().deleteAllByChannelId(any());
+      then(readStatusRepository).should().deleteAllByChannel_Id(any());
+      then(channelRepository).should().deleteById(any());
     }
 
     @Test
@@ -172,13 +173,14 @@ public class ChannelServiceTest {
     void DeleteFail() {
       UUID channelId = UUID.randomUUID();
 
-      when(channelRepository.findById(channelId)).thenReturn(Optional.empty());
+      given(channelRepository.findById(channelId)).willReturn(Optional.empty());
 
-      ChannelNotFoundException ex = assertThrows(ChannelNotFoundException.class,
-          () -> channelService.delete(channelId));
-
-      assertEquals(ErrorCode.CHANNEL_NOT_FOUND, ex.getErrorCode());
-      assertEquals(Map.of("channelId", channelId), ex.getDetails());
+      assertThatThrownBy(() -> channelService.delete(channelId))
+          .isInstanceOf(ChannelNotFoundException.class)
+          .hasMessageContaining("존재하지 않는 채널")
+          .hasFieldOrPropertyWithValue("errorCode", ErrorCode.CHANNEL_NOT_FOUND)
+          .extracting("details", MAP)
+          .containsEntry("channelId", channelId);
     }
   }
 }
