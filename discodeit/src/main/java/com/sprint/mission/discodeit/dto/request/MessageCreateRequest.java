@@ -10,11 +10,11 @@ public record MessageCreateRequest(
     @Schema(description = "메시지 내용")
     String content,
 
-    @NotNull @NotBlank
+    @NotNull
     @Schema(description = "채널")
     UUID channelId,
 
-    @NotNull @NotBlank
+    @NotNull
     @Schema(description = "작성자")
     UUID authorId
 ) {
