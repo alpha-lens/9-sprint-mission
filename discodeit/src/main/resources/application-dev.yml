@@ -1,4 +1,8 @@
 spring:
+  boot:
+    admin:
+      client:
+        url: http://localhost:9090
   datasource:
     url: jdbc:h2:mem:dividends;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
     username: sa
