@@ -10,7 +10,7 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exception.ErrorCode;
-import com.sprint.mission.discodeit.exception.channel.ChannelNotfoundException;
+import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.BinaryContentMapper;
@@ -62,7 +62,7 @@ public class BasicMessageService implements MessageService {
 
     Channel channel = channelRepository.findById(channelId).orElseThrow(() -> {
       log.warn("존재하지 않는 채널: {}", channelId);
-      return new ChannelNotfoundException(ErrorCode.CHANNEL_NOT_FOUND,
+      return new ChannelNotFoundException(ErrorCode.CHANNEL_NOT_FOUND,
           Map.of("channelId", channelId));
     });
     User author = userRepository.findById(authorId).orElseThrow(() -> {
