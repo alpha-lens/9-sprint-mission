@@ -85,7 +85,7 @@ public class BasicUserServiceTest {
           "image/png", bytes);
 
       // when
-      given(userRepository.existsByEmail(anyString())).willReturn(true);
+      given(userRepository.existsByUsername(anyString())).willReturn(true);
 
       // then
       assertThatThrownBy(() -> userService.create(request, Optional.of(profileRequest)))
