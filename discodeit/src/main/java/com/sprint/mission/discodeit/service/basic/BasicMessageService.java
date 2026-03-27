@@ -129,7 +129,7 @@ public class BasicMessageService implements MessageService {
     });
 
     MessageDto dto = this.convertToDto(message);
-    log.info("message ");
+    log.info("message 수정 완료");
 
     return dto;
   }
