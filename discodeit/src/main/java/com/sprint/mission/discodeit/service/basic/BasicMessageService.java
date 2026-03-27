@@ -165,9 +165,12 @@ public class BasicMessageService implements MessageService {
   }
 
   private MessageDto convertToDto(Message message) {
-    List<BinaryContentDto> binaryContentDtos = message.getAttachments().stream()
-        .map(binaryContentMapper::toDto)
-        .toList();
+    List<BinaryContentDto> binaryContentDtos = null;
+    if (message.getAttachments() != null && !message.getAttachments().isEmpty()) {
+      binaryContentDtos = message.getAttachments().stream()
+          .map(binaryContentMapper::toDto)
+          .toList();
+    }
     return messageMapper.toDto(message, binaryContentDtos);
   }
 }
