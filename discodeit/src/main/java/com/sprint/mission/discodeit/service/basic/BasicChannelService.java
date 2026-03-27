@@ -81,7 +81,7 @@ public class BasicChannelService implements ChannelService {
     readStatusRepository.saveAll(readStatusList);
     log.debug("readStatusList 생성 완료. readStatusList 크기: {}", readStatusList.size());
 
-    ChannelDto dto = channelMapper.toDto(channelRepository.save(channel), participantsDto,
+    ChannelDto dto = channelMapper.toDto(createdChannel, participantsDto,
         Instant.MIN);
     log.info("Private 채널 생성 완료: {}", channel);
     return dto;
