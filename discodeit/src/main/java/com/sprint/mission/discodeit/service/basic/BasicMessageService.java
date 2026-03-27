@@ -128,6 +128,8 @@ public class BasicMessageService implements MessageService {
           Map.of("messageId", messageId));
     });
 
+    message.update(request.newContent());
+
     MessageDto dto = this.convertToDto(message);
     log.info("message 수정 완료");
 
