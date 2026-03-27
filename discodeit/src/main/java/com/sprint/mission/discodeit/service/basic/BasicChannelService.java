@@ -10,7 +10,7 @@ import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exception.ErrorCode;
-import com.sprint.mission.discodeit.exception.channel.ChannelNotfoundException;
+import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.channel.PrivateChannelUpdateException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.ChannelMapper;
@@ -92,7 +92,7 @@ public class BasicChannelService implements ChannelService {
     Channel channel = channelRepository.findById(channelId)
         .orElseThrow(() -> {
           log.warn("존재하지 않는 채널 조회 시도. 채널 ID: {}", channelId);
-          return new ChannelNotfoundException(ErrorCode.CHANNEL_NOT_FOUND,
+          return new ChannelNotFoundException(ErrorCode.CHANNEL_NOT_FOUND,
               Map.of("channelId", channelId));
         });
 
@@ -155,7 +155,7 @@ public class BasicChannelService implements ChannelService {
     Channel channel = channelRepository.findById(channelId)
         .orElseThrow(() -> {
           log.warn("채널 조회 실패. 채널 ID: {}", channelId);
-          return new ChannelNotfoundException(ErrorCode.CHANNEL_NOT_FOUND,
+          return new ChannelNotFoundException(ErrorCode.CHANNEL_NOT_FOUND,
               Map.of("channelId", channelId));
         });
     if (channel.getType().equals(ChannelType.PRIVATE)) {
@@ -179,7 +179,7 @@ public class BasicChannelService implements ChannelService {
     Channel channel = channelRepository.findById(channelId)
         .orElseThrow(() -> {
           log.warn("존재하지 않는 채널 삭제 시도: {}", channelId);
-          return new ChannelNotfoundException(ErrorCode.CHANNEL_NOT_FOUND,
+          return new ChannelNotFoundException(ErrorCode.CHANNEL_NOT_FOUND,
               Map.of("channelId", channelId));
         });
 
