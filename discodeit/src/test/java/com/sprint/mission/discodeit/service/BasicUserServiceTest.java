@@ -1,11 +1,11 @@
 package com.sprint.mission.discodeit.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 
 import com.sprint.mission.discodeit.dto.request.BinaryContentCreateRequest;
 import com.sprint.mission.discodeit.dto.request.UserCreateRequest;
@@ -61,18 +61,18 @@ public class BasicUserServiceTest {
       BinaryContentCreateRequest profileRequest = new BinaryContentCreateRequest("profile.png",
           "image/png", bytes);
 
-      when(userRepository.existsByEmail(anyString())).thenReturn(false);
-      when(userRepository.existsByUsername(anyString())).thenReturn(false);
-      when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+      given(userRepository.existsByEmail(anyString())).willReturn(false);
+      given(userRepository.existsByUsername(anyString())).willReturn(false);
+      given(userRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0));
 
       // when
       userService.create(request, Optional.of(profileRequest));
 
       // then
-      verify(binaryContentRepository).save(any());
-      verify(binaryContentStorage).put(any(), any());
-      verify(userRepository).save(any());
-      verify(userStatusRepository).save(any());
+      then(binaryContentRepository).should().save(any());
+      then(binaryContentStorage).should().put(any(), any());
+      then(userRepository).should().save(any());
+      then(userStatusRepository).should().save(any());
     }
 
     @Test
@@ -84,13 +84,14 @@ public class BasicUserServiceTest {
       BinaryContentCreateRequest profileRequest = new BinaryContentCreateRequest("profile.png",
           "image/png", bytes);
 
-      when(userRepository.existsByEmail(anyString())).thenReturn(true);
+      // when
+      given(userRepository.existsByEmail(anyString())).willReturn(true);
 
-      // when&then
-      UserAlreadyExistsException ex = assertThrows(UserAlreadyExistsException.class,
-          () -> userService.create(request, Optional.of(profileRequest)));
-
-      assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_EMAIL);
+      // then
+      assertThatThrownBy(() -> userService.create(request, Optional.of(profileRequest)))
+          .isInstanceOf(UserAlreadyExistsException.class)
+          .hasMessageContaining("이미 존재하는 이메일")
+          .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_EMAIL);
     }
   }
 
@@ -106,14 +107,15 @@ public class BasicUserServiceTest {
       BinaryContent profile = new BinaryContent("old.png", 3324L, "image/png");
       User user = new User("test", "test@email.com", "pass", profile);
 
-      when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+      given(userRepository.findById(userId)).willReturn(Optional.of(user));
 
       // when
       userService.delete(userId);
 
-      verify(binaryContentRepository).deleteById(profile.getId());
-      verify(userStatusRepository).deleteByUser_Id(userId);
-      verify(userRepository).findById(userId);
+      // then
+      then(binaryContentRepository).should().deleteById(profile.getId());
+      then(userStatusRepository).should().deleteByUser_Id(userId);
+      then(userRepository).should().findById(userId);
     }
 
     @Test
@@ -121,15 +123,20 @@ public class BasicUserServiceTest {
     void DeleteFail() {
       // given
       UUID userId = UUID.randomUUID();
-      when(userRepository.findById(userId)).thenReturn(Optional.empty());
+      given(userRepository.findById(userId)).willReturn(Optional.empty());
 
       // when&then
-      assertThrows(UserNotFoundException.class, () -> userService.delete(userId));
+      assertThatThrownBy(() -> userService.delete(userId))
+          .isInstanceOf(UserNotFoundException.class)
+          .hasMessageContaining("존재하지 않는 사용자")
+          .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND)
+          .extracting("details", MAP)
+          .containsEntry("userId", userId);
     }
   }
 
   @Nested
-  @DisplayName("사용자 삭제 테스트")
+  @DisplayName("사용자 수정 테스트")
   class UpdateTest {
 
     @Test
@@ -144,37 +151,38 @@ public class BasicUserServiceTest {
       BinaryContentCreateRequest profileRequest = new BinaryContentCreateRequest("profile.png",
           "image/png", bytes);
 
-      when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-      when(userRepository.existsByEmail(anyString())).thenReturn(false);
-      when(userRepository.existsByUsername(anyString())).thenReturn(false);
-      when(binaryContentRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-      when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-
       // when
+      given(userRepository.findById(userId)).willReturn(Optional.of(existingUser));
+      given(userRepository.existsByEmail(anyString())).willReturn(false);
+      given(userRepository.existsByUsername(anyString())).willReturn(false);
+      given(binaryContentRepository.save(any())).willAnswer(
+          invocation -> invocation.getArgument(0));
+      given(userRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0));
       userService.update(userId, request, Optional.of(profileRequest));
 
       // then
-      verify(binaryContentRepository).deleteById(any());
-      verify(binaryContentRepository).save(any());
-      verify(binaryContentStorage).put(any(), any());
-      verify(userRepository).save(any());
+      then(binaryContentRepository).should().deleteById(any());
+      then(binaryContentRepository).should().save(any());
+      then(binaryContentStorage).should().put(any(), any());
+      then(userRepository).should().save(any());
     }
 
     @Test
-    @DisplayName("실패: 중복되는 사용자명/이메일이 있을 경우 ")
+    @DisplayName("실패: 중복되는 사용자명이 있을 경우 ")
     void UpdateFail() {
       // given
       UUID userId = UUID.randomUUID();
       User user = new User("duplicate", "email@mail.com", "pass", null);
       UserUpdateRequest userUpdateRequest = new UserUpdateRequest("duplicate", "email@mail.com",
           "pass");
-      when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-      when(userRepository.existsByUsername(anyString())).thenReturn(true);
+      given(userRepository.findById(userId)).willReturn(Optional.of(user));
+      given(userRepository.existsByUsername(anyString())).willReturn(true);
 
       // when&then
-      assertThrows(UserAlreadyExistsException.class,
-          () -> userService.update(userId, userUpdateRequest, Optional.empty()));
+      assertThatThrownBy(() -> userService.update(userId, userUpdateRequest, Optional.empty()))
+          .isInstanceOf(UserAlreadyExistsException.class)
+          .hasMessageContaining("이미 존재하는 사용자")
+          .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_USER);
     }
   }
-
 }
