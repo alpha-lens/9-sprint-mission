@@ -51,11 +51,11 @@ public class BasicUserService implements UserService {
 
     if (userRepository.existsByEmail(email)) {
       log.warn("이메일 중복 오류: email = {}", email);
-      throw new UserAlreadyExistsException(ErrorCode.DUPLICATE_EMAIL, Map.of("email", email));
+      throw new EmailAlreadyExistsException(ErrorCode.DUPLICATE_EMAIL, Map.of("email", email));
     }
     if (userRepository.existsByUsername(username)) {
       log.warn("사용자명 중복 오류: username = {}", username);
-      throw new EmailAlreadyExistsException(ErrorCode.DUPLICATE_USER, Map.of("username", username));
+      throw new UserAlreadyExistsException(ErrorCode.DUPLICATE_USER, Map.of("username", username));
     }
 
     log.debug("프로필 이미지 처리 시작: profileCreateRequest = {}", optionalProfileCreateRequest);
