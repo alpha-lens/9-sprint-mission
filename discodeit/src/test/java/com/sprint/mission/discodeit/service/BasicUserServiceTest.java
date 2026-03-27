@@ -13,6 +13,7 @@ import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.user.EmailAlreadyExistsException;
 import com.sprint.mission.discodeit.exception.user.UserAlreadyExistsException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
@@ -90,8 +91,8 @@ public class BasicUserServiceTest {
       // then
       assertThatThrownBy(() -> userService.create(request, Optional.of(profileRequest)))
           .isInstanceOf(UserAlreadyExistsException.class)
-          .hasMessageContaining("이미 존재하는 이메일")
-          .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_EMAIL);
+          .hasMessageContaining("이미 존재하는 사용자")
+          .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_USER);
     }
 
     @Test
@@ -187,8 +188,8 @@ public class BasicUserServiceTest {
     }
 
     @Test
-    @DisplayName("실패: 중복되는 사용자명이 있을 경우 ")
-    void UpdateFail() {
+    @DisplayName("실패: 중복되는 사용자명이 있을 경우 수정에 실패한다.")
+    void UpdateFailDuplicateUsername() {
       // given
       UUID userId = UUID.randomUUID();
       User user = new User("duplicate", "email@mail.com", "pass", null);
@@ -202,6 +203,22 @@ public class BasicUserServiceTest {
           .isInstanceOf(UserAlreadyExistsException.class)
           .hasMessageContaining("이미 존재하는 사용자")
           .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_USER);
+    }
+
+    @Test
+    @DisplayName("실패: 사용자가 존재하지 않을 경우 수정에 실패한다.")
+    void UpdateFailNotFoundUser() {
+      // given
+      UUID userId = UUID.randomUUID();
+      UserUpdateRequest userUpdateRequest = new UserUpdateRequest("duplicate", "email@mail.com",
+          "pass");
+      given(userRepository.findById(userId)).willReturn(Optional.empty());
+
+      // when&then
+      assertThatThrownBy(() -> userService.update(userId, userUpdateRequest, Optional.empty()))
+          .isInstanceOf(UserNotFoundException.class)
+          .hasMessageContaining("존재하지 않는 사용자")
+          .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND);
     }
   }
 }
