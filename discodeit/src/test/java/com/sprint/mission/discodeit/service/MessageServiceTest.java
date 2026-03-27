@@ -1,12 +1,13 @@
 package com.sprint.mission.discodeit.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.times;
 
 import com.sprint.mission.discodeit.dto.data.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.data.MessageDto;
@@ -34,7 +35,6 @@ import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -99,20 +99,20 @@ public class MessageServiceTest {
           channelId, userDto, binaryContentDto);
 
       // when
-      when(channelRepository.findById(channelId)).thenReturn(Optional.of(channel));
-      when(userRepository.findById(authorId)).thenReturn(Optional.of(user));
-      when(binaryContentRepository.save(any(
-          BinaryContent.class))).thenAnswer(invocation -> invocation.getArgument(0));
-      when(messageRepository.save(any(Message.class))).thenAnswer(
+      given(channelRepository.findById(channelId)).willReturn(Optional.of(channel));
+      given(userRepository.findById(authorId)).willReturn(Optional.of(user));
+      given(binaryContentRepository.save(any(
+          BinaryContent.class))).willAnswer(invocation -> invocation.getArgument(0));
+      given(messageRepository.save(any(Message.class))).willAnswer(
           invocation -> invocation.getArgument(0));
-      when(messageMapper.toDto(any(), any())).thenReturn(messageDto);
+      given(messageMapper.toDto(any(), any())).willReturn(messageDto);
       MessageDto result = messageService.create(request, attachments);
 
       // then
       assertNotNull(result);
-      verify(binaryContentRepository, times(2)).save(any());
-      verify(binaryContentStorage, times(2)).put(any(), any());
-      verify(messageRepository).save(any());
+      then(binaryContentRepository).should(times(2)).save(any());
+      then(binaryContentStorage).should(times(2)).put(any(), any());
+      then(messageRepository).should().save(any());
     }
 
     @Test
@@ -122,13 +122,14 @@ public class MessageServiceTest {
       UUID authorId = UUID.randomUUID();
       MessageCreateRequest request = new MessageCreateRequest("메시지", channelId, authorId);
 
-      when(channelRepository.findById(channelId)).thenReturn(Optional.empty());
+      given(channelRepository.findById(channelId)).willReturn(Optional.empty());
 
-      ChannelNotFoundException ex = assertThrows(ChannelNotFoundException.class,
-          () -> messageService.create(request, null));
-
-      assertEquals(Map.of("channelId", channelId), ex.getDetails());
-      assertEquals(ErrorCode.CHANNEL_NOT_FOUND, ex.getErrorCode());
+      assertThatThrownBy(() -> messageService.create(request, null))
+          .isInstanceOf(ChannelNotFoundException.class)
+          .hasMessageContaining("존재하지 않는 채널")
+          .hasFieldOrPropertyWithValue("errorCode", ErrorCode.CHANNEL_NOT_FOUND)
+          .extracting("details", MAP)
+          .containsEntry("channelId", channelId);
     }
 
     @Test
@@ -139,13 +140,14 @@ public class MessageServiceTest {
       Channel channel = new Channel(ChannelType.PUBLIC, "이름", "설명");
       MessageCreateRequest request = new MessageCreateRequest("메시지", channelId, authorId);
 
-      when(channelRepository.findById(channelId)).thenReturn(Optional.of(channel));
+      given(channelRepository.findById(channelId)).willReturn(Optional.of(channel));
 
-      UserNotFoundException ex = assertThrows(UserNotFoundException.class,
-          () -> messageService.create(request, null));
-
-      assertEquals(Map.of("userId", authorId), ex.getDetails());
-      assertEquals(ErrorCode.USER_NOT_FOUND, ex.getErrorCode());
+      assertThatThrownBy(() -> messageService.create(request, null))
+          .isInstanceOf(UserNotFoundException.class)
+          .hasMessageContaining("존재하지 않는 사용자")
+          .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND)
+          .extracting("details", MAP)
+          .containsEntry("userId", authorId);
     }
   }
 
@@ -164,11 +166,11 @@ public class MessageServiceTest {
       MessageUpdateRequest request = new MessageUpdateRequest("새 메시지");
 
       // when
-      when(messageRepository.findById(messageId)).thenReturn(Optional.of(message));
+      given(messageRepository.findById(messageId)).willReturn(Optional.of(message));
       messageService.update(messageId, request);
 
       // then
-      assertEquals("새 메시지", message.getContent());
+      assertThat("새 메시지").isEqualTo(message.getContent());
     }
 
     @Test
@@ -179,13 +181,15 @@ public class MessageServiceTest {
       MessageUpdateRequest request = new MessageUpdateRequest("새 메시지");
 
       // when
-      when(messageRepository.findById(messageId)).thenReturn(Optional.empty());
+      given(messageRepository.findById(messageId)).willReturn(Optional.empty());
 
       // then
-      MessageNotFoundException ex = assertThrows(MessageNotFoundException.class,
-          () -> messageService.update(messageId, request));
-      assertEquals(ErrorCode.MESSAGE_NOT_FOUND, ex.getErrorCode());
-      assertEquals(Map.of("messageId", messageId), ex.getDetails());
+      assertThatThrownBy(() -> messageService.update(messageId, request))
+          .isInstanceOf(MessageNotFoundException.class)
+          .hasMessageContaining("존재하지 않는 메시지")
+          .hasFieldOrPropertyWithValue("errorCode", ErrorCode.MESSAGE_NOT_FOUND)
+          .extracting("details", MAP)
+          .containsEntry("messageId", messageId);
     }
   }
 
@@ -203,12 +207,12 @@ public class MessageServiceTest {
       Message message = new Message("메시지", channel, user, null);
 
       // when
-      when(messageRepository.findById(messageId)).thenReturn(Optional.of(message));
+      given(messageRepository.findById(messageId)).willReturn(Optional.of(message));
       messageService.delete(messageId);
 
       // then
-      verify(messageRepository).findById(messageId);
-      verify(messageRepository).delete(message);
+      then(messageRepository).should().findById(messageId);
+      then(messageRepository).should().delete(message);
     }
 
     @Test
@@ -218,11 +222,12 @@ public class MessageServiceTest {
       UUID messageId = UUID.randomUUID();
 
       // when&then
-      MessageNotFoundException ex = assertThrows(MessageNotFoundException.class,
-          () -> messageService.delete(messageId));
-
-      assertEquals(ErrorCode.MESSAGE_NOT_FOUND, ex.getErrorCode());
-      assertEquals(Map.of("messageId", messageId), ex.getDetails());
+      assertThatThrownBy(() -> messageService.delete(messageId))
+          .isInstanceOf(MessageNotFoundException.class)
+          .hasMessageContaining("존재하지 않는 메시지")
+          .hasFieldOrPropertyWithValue("errorCode", ErrorCode.MESSAGE_NOT_FOUND)
+          .extracting("details", MAP)
+          .containsEntry("messageId", messageId);
     }
   }
 }
