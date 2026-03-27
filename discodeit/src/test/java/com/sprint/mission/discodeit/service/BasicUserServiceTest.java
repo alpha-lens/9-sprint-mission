@@ -93,6 +93,25 @@ public class BasicUserServiceTest {
           .hasMessageContaining("이미 존재하는 이메일")
           .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_EMAIL);
     }
+
+    @Test
+    @DisplayName("실패: 이메일이 중복될 경우 EmailAlreadyExistsException을 발생시킨다.")
+    void CreateFailDuplicateEmail() {
+      // given
+      byte[] bytes = new byte[0];
+      UserCreateRequest request = new UserCreateRequest("test", "duplicate@gmail.com", "pass");
+      BinaryContentCreateRequest profileRequest = new BinaryContentCreateRequest("profile.png",
+          "image/png", bytes);
+
+      // when
+      given(userRepository.existsByEmail(anyString())).willReturn(true);
+
+      // then
+      assertThatThrownBy(() -> userService.create(request, Optional.of(profileRequest)))
+          .isInstanceOf(EmailAlreadyExistsException.class)
+          .hasMessageContaining("이미 존재하는 이메일")
+          .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_EMAIL);
+    }
   }
 
   @Nested
