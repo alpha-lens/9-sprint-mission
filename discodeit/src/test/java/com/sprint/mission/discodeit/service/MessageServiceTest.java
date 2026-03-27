@@ -5,15 +5,18 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.times;
+import static org.mockito.Mockito.mock;
 
 import com.sprint.mission.discodeit.dto.data.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.data.MessageDto;
 import com.sprint.mission.discodeit.dto.data.UserDto;
 import com.sprint.mission.discodeit.dto.request.MessageCreateRequest;
 import com.sprint.mission.discodeit.dto.request.MessageUpdateRequest;
+import com.sprint.mission.discodeit.dto.response.PageResponse;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
@@ -44,6 +47,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -228,6 +235,65 @@ public class MessageServiceTest {
           .hasFieldOrPropertyWithValue("errorCode", ErrorCode.MESSAGE_NOT_FOUND)
           .extracting("details", MAP)
           .containsEntry("messageId", messageId);
+    }
+  }
+
+  @Nested
+  @DisplayName("채널 내 메시지 조회 테스트")
+  class FindAllInChannel {
+
+    @Test
+    @DisplayName("채널 ID와 커서로 메시지 목록을 조회할 때, 다음 커서가 올바르게 전달되는지 검증한다")
+    void successFindAllByChannelId() {
+      // Given
+      UUID channelId = UUID.randomUUID();
+      Instant cursor = Instant.now();
+      Pageable pageable = PageRequest.of(0, 10);
+
+      Message lastMessage = mock(Message.class);
+      Instant expectedNextCursor = Instant.now().minusSeconds(100);
+      PageResponse mockResponse = mock(PageResponse.class);
+      List<Message> messageList = List.of(mock(Message.class), lastMessage);
+      Slice<Message> messageSlice = new SliceImpl<>(messageList, pageable, true);
+
+      given(lastMessage.getCreatedAt()).willReturn(expectedNextCursor);
+      given(messageRepository.findOlderByChannelId(eq(channelId), eq(cursor), any(Pageable.class)))
+          .willReturn(messageSlice);
+      given(messageMapper.toDto(any(Message.class), any())).willReturn(mock(MessageDto.class));
+      given(pageResponseMapper.fromSlice(any(Slice.class), eq(expectedNextCursor)))
+          .willReturn(mockResponse);
+
+      // When
+      PageResponse<MessageDto> result = messageService.findAllByChannelId(channelId, cursor,
+          pageable);
+
+      // Then
+      assertThat(result).isEqualTo(mockResponse);
+      then(pageResponseMapper).should(times(1)).fromSlice(any(), eq(expectedNextCursor));
+    }
+
+    @Test
+    @DisplayName("다음 페이지가 없는 경우 nextCursor는 null이 된다")
+    void findAllByChannelId_ShouldReturnNullCursor_WhenHasNoNext() {
+      // Given
+      UUID channelId = UUID.randomUUID();
+      Instant cursor = Instant.now();
+      Pageable pageable = PageRequest.of(0, 2);
+
+      List<Message> messages = List.of(mock(Message.class));
+      Slice<Message> messageSlice = new SliceImpl<>(messages, pageable, false); // hasNext = false
+
+      given(messageRepository.findOlderByChannelId(channelId, cursor, pageable))
+          .willReturn(messageSlice);
+
+      given(messageMapper.toDto(any(), any())).willReturn(mock(MessageDto.class));
+
+      // When
+      messageService.findAllByChannelId(channelId, cursor, pageable);
+
+      // Then
+      // nextCursor 자리에 null이 넘어갔는지 확인
+      then(pageResponseMapper).should(times(1)).fromSlice(any(), eq(null));
     }
   }
 }
