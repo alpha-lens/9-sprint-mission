@@ -103,7 +103,7 @@ public class ChannelController {
   })
   @GetMapping
   public ResponseEntity<List<ChannelDto>> findAll(@RequestParam("userId") UUID userId) {
-    List<ChannelDto> channels = channelService.findAllByUserId(userId);
+    List<ChannelDto> channels = channelService.findByUserId(userId);
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(channels);
