@@ -107,7 +107,7 @@ public class BasicChannelService implements ChannelService {
   }
 
   @Override
-  public List<ChannelDto> findAllByUserId(UUID userId) {
+  public List<ChannelDto> findByUserId(UUID userId) {
     List<Channel> channels = channelRepository.findAccessibleChannelsByUserId(userId);
     if (channels.isEmpty()) {
       return List.of();
