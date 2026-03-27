@@ -139,13 +139,13 @@ public class BasicMessageService implements MessageService {
   @Override
   @Transactional
   public void delete(UUID messageId) {
-    messageRepository.findById(messageId).orElseThrow(() -> {
+    Message message = messageRepository.findById(messageId).orElseThrow(() -> {
       log.warn("존재하지 않는 메시지ID: {}", messageId);
       return new MessageNotFoundException(ErrorCode.MESSAGE_NOT_FOUND,
           Map.of("messageId", messageId));
     });
 
-    messageRepository.deleteById(messageId);
+    messageRepository.delete(message);
     log.info("메시지 삭제 완료: {}", messageId);
   }
 
