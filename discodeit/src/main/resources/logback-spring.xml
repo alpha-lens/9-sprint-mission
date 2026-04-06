@@ -12,10 +12,9 @@
       </pattern>
     </encoder>
   </appender>
-  <file>./.logs/spring.log</file>
 
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>./spring.log</file>
+    <file>./.logs/spring.log</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
       <fileNamePattern>./.logs/spring-%d{yyyy-MM-dd}.log</fileNamePattern>
       <maxHistory>30</maxHistory>
