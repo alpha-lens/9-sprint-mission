@@ -38,7 +38,8 @@ public record ErrorResponse(
     return new ErrorResponse(
         Instant.now(),
         "INVALID_INPUT_VALUE",
-        e.getFieldError().getField() + "의 형식이 맞지 않습니다.",
+        e.getFieldError() != null ? e.getFieldError().getField() + "의 형식이 맞지 않습니다."
+            : "입력값 검증에 실패했습니다.",
         details,
         e.getClass().getSimpleName(),
         400
