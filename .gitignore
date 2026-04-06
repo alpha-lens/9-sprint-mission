@@ -6,4 +6,4 @@ file-data-map
 .uploads
 .discodeit
 .discodeit-storage
-.env
+discodeit/.env
