@@ -10,7 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 
 public record ErrorResponse(
     Instant timestamp, String code, String message, Map<String, Object> details,
-    String exceptionType, int staus
+    String exceptionType, int status
 ) {
 
   public static ErrorResponse from(DiscodeitException e) {
