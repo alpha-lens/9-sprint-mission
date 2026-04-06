@@ -112,11 +112,11 @@ public class BasicUserService implements UserService {
 
     String newUsername = userUpdateRequest.newUsername();
     String newEmail = userUpdateRequest.newEmail();
-    if (userRepository.existsByEmail(newEmail)) {
+    if (userRepository.existsByEmailAndIdNot(newEmail, userId)) {
       log.warn("중복되는 이메일: {}", newEmail);
       throw new EmailAlreadyExistsException(ErrorCode.DUPLICATE_EMAIL, Map.of("email", newEmail));
     }
-    if (userRepository.existsByUsername(newUsername)) {
+    if (userRepository.existsByUsernameAndIdNot(newUsername, userId)) {
       log.warn("중복되는 사용자명: {}", newUsername);
       throw new UserAlreadyExistsException(ErrorCode.DUPLICATE_USER,
           Map.of("username", newUsername));
