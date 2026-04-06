@@ -68,6 +68,6 @@ public class BasicBinaryContentService implements BinaryContentService {
           Map.of("binaryContentId", binaryContentId));
     }
     binaryContentRepository.deleteById(binaryContentId);
-    log.info("binartContent 삭제 완료: {}", binaryContentId);
+    log.info("binaryContent 삭제 완료: {}", binaryContentId);
   }
 }
