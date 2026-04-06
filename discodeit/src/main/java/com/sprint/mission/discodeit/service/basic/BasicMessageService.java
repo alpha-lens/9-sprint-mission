@@ -165,7 +165,7 @@ public class BasicMessageService implements MessageService {
   }
 
   private MessageDto convertToDto(Message message) {
-    List<BinaryContentDto> binaryContentDtos = null;
+    List<BinaryContentDto> binaryContentDtos = List.of();
     if (message.getAttachments() != null && !message.getAttachments().isEmpty()) {
       binaryContentDtos = message.getAttachments().stream()
           .map(binaryContentMapper::toDto)
