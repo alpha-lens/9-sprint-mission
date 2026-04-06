@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}        # 이 부분을 추가해야 합니다!
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 5s
+      timeout: 5s
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    ports:
+      - "5432:5432"
+
+  app:
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - "8081:80"
+    env_file:
+      - .env                           # 루트의 .env를 앱 컨테이너에 주입
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # DB 서비스 이름인 'db'를 호스트로 사용
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}    # 명시적으로 사용자명 주입
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./binary_data:/app/BinaryContentStorage
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:
