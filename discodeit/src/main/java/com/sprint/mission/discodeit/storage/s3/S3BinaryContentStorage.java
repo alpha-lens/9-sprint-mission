@@ -22,7 +22,7 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 @Component
-@ConditionalOnProperty(name = "discodeit.storage.type", havingValue = "s3", matchIfMissing = false)
+@ConditionalOnProperty(name = "discodeit.storage.type", havingValue = "s3", matchIfMissing = true)
 public class S3BinaryContentStorage implements BinaryContentStorage {
 
   private final String accessKey;
