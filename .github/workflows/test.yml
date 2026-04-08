@@ -12,6 +12,7 @@ jobs:
     defaults:
       run:
         working-directory: ./discodeit
+        run: ./gradlew clean test -Dspring.profiles.active=test
 
     steps:
       - name: Checkout Code
