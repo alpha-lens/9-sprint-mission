@@ -4,6 +4,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
@@ -173,8 +174,8 @@ public class BasicUserServiceTest {
 
       // when
       given(userRepository.findById(userId)).willReturn(Optional.of(existingUser));
-      given(userRepository.existsByEmail(anyString())).willReturn(false);
-      given(userRepository.existsByUsername(anyString())).willReturn(false);
+      given(userRepository.existsByEmailAndIdNot(anyString(), eq(userId))).willReturn(false);
+      given(userRepository.existsByUsernameAndIdNot(anyString(), eq(userId))).willReturn(false);
       given(binaryContentRepository.save(any())).willAnswer(
           invocation -> invocation.getArgument(0));
       given(userRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0));
@@ -196,7 +197,7 @@ public class BasicUserServiceTest {
       UserUpdateRequest userUpdateRequest = new UserUpdateRequest("duplicate", "email@mail.com",
           "pass");
       given(userRepository.findById(userId)).willReturn(Optional.of(user));
-      given(userRepository.existsByUsername(anyString())).willReturn(true);
+      given(userRepository.existsByUsernameAndIdNot(anyString(), eq(userId))).willReturn(true);
 
       // when&then
       assertThatThrownBy(() -> userService.update(userId, userUpdateRequest, Optional.empty()))
