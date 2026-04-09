@@ -3,9 +3,11 @@ package com.sprint.mission.discodeit.storage.s3;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.sprint.mission.discodeit.dto.data.BinaryContentDto;
+import io.github.cdimascio.dotenv.Dotenv;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +15,21 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(properties = "discodeit.storage.type=s3")
 @ActiveProfiles("test")
-@TestPropertySource(locations = "file:.env")
 class S3BinaryContentStorageTest {
+
+  @BeforeAll
+  static void setupEnv() {
+    Dotenv dotenv = Dotenv.configure()
+        .ignoreIfMissing()
+        .load();
+
+    dotenv.entries().forEach(entry ->
+        System.setProperty(entry.getKey(), entry.getValue())
+    );
+  }
 
   @Autowired(required = false)
   private S3BinaryContentStorage s3Storage;

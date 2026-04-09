@@ -3,7 +3,6 @@ package com.sprint.mission.discodeit.storage.s3;
 import io.github.cdimascio.dotenv.Dotenv;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Properties;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -34,21 +33,22 @@ class AWSS3Test {
 
   @BeforeAll
   void setUp() {
-    // 1. .env 로드 및 Properties 변환
-    Dotenv dotenv = Dotenv.load();
-    Properties props = new Properties();
-    props.setProperty("accessKey", dotenv.get("AWS_S3_ACCESS_KEY"));
-    props.setProperty("secretKey", dotenv.get("AWS_S3_SECRET_KEY"));
-    props.setProperty("region", dotenv.get("AWS_S3_REGION"));
-    this.bucketName = dotenv.get("AWS_S3_BUCKET");
+    Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+    String accessKey = dotenv.get("AWS_S3_ACCESS_KEY") != null ? dotenv.get("AWS_S3_ACCESS_KEY")
+        : System.getenv("AWS_S3_ACCESS_KEY");
+    String secretKey = dotenv.get("AWS_S3_SECRET_KEY") != null ? dotenv.get("AWS_S3_SECRET_KEY")
+        : System.getenv("AWS_S3_SECRET_KEY");
+    String regionStr = dotenv.get("AWS_S3_REGION") != null ? dotenv.get("AWS_S3_REGION")
+        : System.getenv("AWS_S3_REGION");
+    this.bucketName = dotenv.get("AWS_S3_BUCKET") != null ? dotenv.get("AWS_S3_BUCKET")
+        : System.getenv("AWS_S3_BUCKET");
 
-    // 2. S3 클라이언트 초기화
-    AwsBasicCredentials credentials = AwsBasicCredentials.create(
-        props.getProperty("accessKey"),
-        props.getProperty("secretKey")
-    );
+    if (accessKey == null) {
+      throw new IllegalStateException("AWS Credentials are missing!");
+    }
 
-    Region region = Region.of(props.getProperty("region"));
+    AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
+    Region region = Region.of(regionStr);
 
     this.s3Client = S3Client.builder()
         .region(region)
