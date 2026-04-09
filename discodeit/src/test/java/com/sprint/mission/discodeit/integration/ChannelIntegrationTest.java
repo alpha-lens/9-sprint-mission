@@ -12,7 +12,9 @@ import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 class ChannelIntegrationTest extends IntegrationTestSupport {
 
   @Test
