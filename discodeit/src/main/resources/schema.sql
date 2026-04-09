@@ -1,7 +1,7 @@
 -- 1. ENUM 타입 생성을 삭제하고 아래 테이블 정의에서 직접 처리합니다.
 
 -- 2. binary_contents 테이블
-CREATE TABLE binary_contents
+CREATE TABLE IF NOT EXISTS binary_contents
 (
     id           UUID PRIMARY KEY,
     created_at   TIMESTAMP WITH TIME ZONE NOT NULL, -- T 제거
@@ -11,7 +11,7 @@ CREATE TABLE binary_contents
 );
 
 -- 3. users 테이블
-CREATE TABLE users
+CREATE TABLE IF NOT EXISTS users
 (
     id         UUID PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE users
 );
 
 -- 4. channels 테이블
-CREATE TABLE channels
+CREATE TABLE IF NOT EXISTS channels
 (
     id          UUID PRIMARY KEY,
     created_at  TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE channels
 );
 
 -- 5. user_statuses 테이블
-CREATE TABLE user_statuses
+CREATE TABLE IF NOT EXISTS user_statuses
 (
     id             UUID PRIMARY KEY,
     created_at     TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE user_statuses
 );
 
 -- 6. messages 테이블
-CREATE TABLE messages
+CREATE TABLE IF NOT EXISTS messages
 (
     id         UUID PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE messages
 );
 
 -- 7. read_statuses 테이블
-CREATE TABLE read_statuses
+CREATE TABLE IF NOT EXISTS read_statuses
 (
     id           UUID PRIMARY KEY,
     created_at   TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -88,7 +88,7 @@ CREATE TABLE read_statuses
 );
 
 -- 8. message_attachments 테이블
-CREATE TABLE message_attachments
+CREATE TABLE IF NOT EXISTS message_attachments
 (
     message_id    UUID NOT NULL,
     attachment_id UUID NOT NULL,
