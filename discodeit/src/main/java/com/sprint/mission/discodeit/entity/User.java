@@ -1,6 +1,5 @@
 package com.sprint.mission.discodeit.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import jakarta.persistence.CascadeType;
@@ -18,8 +17,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "users")
 @Getter
-@JsonIgnoreProperties({"createdAt", "updatedAt", "password"})
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)  // JPA를 위한 기본 생성자
 public class User extends BaseUpdatableEntity {
 
   @Column(length = 50, nullable = false, unique = true)
@@ -41,10 +39,6 @@ public class User extends BaseUpdatableEntity {
     this.email = email;
     this.password = password;
     this.profile = profile;
-  }
-
-  public void setStatus(UserStatus userStatus) {
-    this.status = userStatus;
   }
 
   public void update(String newUsername, String newEmail, String newPassword,
