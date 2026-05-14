@@ -1,5 +1,8 @@
 server:
   port: 8080
+  servlet:
+    session:
+      timeout: 5m
 
 spring:
   datasource:
@@ -16,6 +19,7 @@ logging:
     com.sprint.mission.discodeit: debug
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
+#    org.springframework.security: trace
 
 management:
   endpoint:

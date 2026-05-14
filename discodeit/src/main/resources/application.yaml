@@ -13,7 +13,7 @@ spring:
     open-in-view: false
   profiles:
     active:
-      - dev
+      - ${profile}
   config:
     import: optional:file:.env[.properties]
 
