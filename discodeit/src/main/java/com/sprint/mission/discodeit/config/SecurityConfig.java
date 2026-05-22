@@ -60,7 +60,7 @@ public class SecurityConfig {
         .addFilterBefore(devToolsIgnoreFilter, WebAsyncManagerIntegrationFilter.class)
         .formLogin(login -> login
             .loginProcessingUrl("/api/auth/login")
-            .successHandler(loginSuccessHandler)
+            .successHandler(jwtLoginSuccessHandler)
             .failureHandler(loginFailureHandler))
         .rememberMe(remember -> remember
             .key("discodeit-secret-key")
@@ -74,9 +74,7 @@ public class SecurityConfig {
             .invalidateHttpSession(true)
             .deleteCookies("JSESSIONID"))
         .sessionManagement(session -> session
-            .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-            .maximumSessions(1)
-            .maxSessionsPreventsLogin(false)
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         )
         .csrf(csrf -> csrf
             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
