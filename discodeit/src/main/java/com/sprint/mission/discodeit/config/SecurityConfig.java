@@ -1,6 +1,9 @@
 package com.sprint.mission.discodeit.config;
 
 import com.sprint.mission.discodeit.config.filter.DevToolsIgnoreFilter;
+import com.sprint.mission.discodeit.config.filter.JwtAuthenticationFilter;
+import com.sprint.mission.discodeit.handler.JwtLoginSuccessHandler;
+import com.sprint.mission.discodeit.handler.JwtLogoutHandler;
 import com.sprint.mission.discodeit.handler.LoginFailureHandler;
 import com.sprint.mission.discodeit.handler.LoginSuccessHandler;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,13 +22,11 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.session.SessionRegistryImpl;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
@@ -45,7 +46,8 @@ import org.springframework.util.StringUtils;
 public class SecurityConfig {
 
   private final DevToolsIgnoreFilter devToolsIgnoreFilter;
-  private final LoginSuccessHandler loginSuccessHandler;
+  private final JwtLoginSuccessHandler jwtLoginSuccessHandler;
+  private final JwtLogoutHandler jwtLogoutHandler;
   private final LoginFailureHandler loginFailureHandler;
   private final UserDetailsService userDetailsService;
 
@@ -62,29 +64,18 @@ public class SecurityConfig {
             .loginProcessingUrl("/api/auth/login")
             .successHandler(jwtLoginSuccessHandler)
             .failureHandler(loginFailureHandler))
-        .rememberMe(remember -> remember
-            .key("discodeit-secret-key")
-            .rememberMeParameter("remember-me")
-            .tokenValiditySeconds(60 * 60 * 24 * 7).
-            userDetailsService(userDetailsService))
         .logout(logout -> logout
             .logoutUrl("/api/auth/logout")
             .logoutSuccessHandler(
                 new HttpStatusReturningLogoutSuccessHandler(HttpStatus.NO_CONTENT))
             .invalidateHttpSession(true)
-            .deleteCookies("JSESSIONID"))
+            .addLogoutHandler(jwtLogoutHandler))
         .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         )
         .csrf(csrf -> csrf
             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
             .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()))
-        .sessionManagement(session -> session
-            .sessionConcurrency(concurrency -> concurrency
-                .maximumSessions(1)
-                .sessionRegistry(sessionRegistry())
-            )
-        )
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
             .requestMatchers("/actuator/health", "/actuator/info").permitAll()
