@@ -92,7 +92,7 @@ public class SecurityConfig {
                 "/api/auth/logout",
                 "/favicon.ico",
                 "/", "/static/**", "/index.html",
-                "/api/auth/me",
+                "/api/auth/refresh",
                 "/assets/**",
                 "/api/auth/csrf-token").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
