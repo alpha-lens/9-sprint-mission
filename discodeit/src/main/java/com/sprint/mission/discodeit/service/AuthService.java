@@ -6,8 +6,6 @@ import java.util.UUID;
 
 public interface AuthService {
 
-  void invalidateUserSessions(String username);
-
   void invalidateUserSessionsByUserId(UUID userId);
 
   JwtDto refresh(String refreshToken, HttpServletResponse response);
