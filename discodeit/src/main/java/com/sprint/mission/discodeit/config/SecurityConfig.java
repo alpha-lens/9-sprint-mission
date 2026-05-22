@@ -5,7 +5,6 @@ import com.sprint.mission.discodeit.config.filter.JwtAuthenticationFilter;
 import com.sprint.mission.discodeit.handler.JwtLoginSuccessHandler;
 import com.sprint.mission.discodeit.handler.JwtLogoutHandler;
 import com.sprint.mission.discodeit.handler.LoginFailureHandler;
-import com.sprint.mission.discodeit.handler.LoginSuccessHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.function.Supplier;
@@ -36,7 +35,6 @@ import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
 import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
-import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.util.StringUtils;
 
 @Configuration
@@ -49,7 +47,7 @@ public class SecurityConfig {
   private final JwtLoginSuccessHandler jwtLoginSuccessHandler;
   private final JwtLogoutHandler jwtLogoutHandler;
   private final LoginFailureHandler loginFailureHandler;
-  private final UserDetailsService userDetailsService;
+  private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -60,6 +58,7 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     return http
         .addFilterBefore(devToolsIgnoreFilter, WebAsyncManagerIntegrationFilter.class)
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .formLogin(login -> login
             .loginProcessingUrl("/api/auth/login")
             .successHandler(jwtLoginSuccessHandler)
@@ -125,16 +124,6 @@ public class SecurityConfig {
     repository.setAllowSessionCreation(true);
 
     return repository;
-  }
-
-  @Bean
-  public SessionRegistry sessionRegistry() {
-    return new SessionRegistryImpl();
-  }
-
-  @Bean
-  public HttpSessionEventPublisher httpSessionEventPublisher() {
-    return new HttpSessionEventPublisher();
   }
 
   @Bean

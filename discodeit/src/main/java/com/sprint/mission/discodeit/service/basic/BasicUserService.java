@@ -166,7 +166,7 @@ public class BasicUserService implements UserService {
     });
 
     user.upateRole(request.newRole());
-    authService.invalidateUserSessions(user.getUsername());
+    authService.invalidateUserSessionsByUserId(userId);
     log.info("사용자 권한 업데이트 완료. id={}, role={}", userId, request.newRole());
 
     boolean isOnline = sessionService.isUserOnline(user.getUsername());
