@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.security.JwtRegistry;
 import com.sprint.mission.discodeit.service.SessionService;
 import java.util.Set;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,12 +14,12 @@ public class BasicSessionService implements SessionService {
   private final JwtRegistry jwtRegistry;
 
   @Override
-  public Set<String> getOnlineUsernames() {
-    return jwtRegistry.getAllOnlineUsernames();
+  public Set<UUID> getOnlineUserIds() {
+    return jwtRegistry.getAllOnlineUserIds();
   }
 
   @Override
-  public boolean isUserOnline(String username) {
-    return jwtRegistry.hasActiveJwtInformationByUsername(username);
+  public boolean isUserOnline(UUID userId) {
+    return jwtRegistry.hasActiveJwtInformationByUserId(userId);
   }
 }

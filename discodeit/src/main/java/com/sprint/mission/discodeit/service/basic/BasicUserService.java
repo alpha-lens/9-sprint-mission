@@ -84,7 +84,7 @@ public class BasicUserService implements UserService {
     log.debug("사용자 조회 시작: id={}", userId);
     User user = userRepository.findById(userId)
         .orElseThrow(() -> UserNotFoundException.withId(userId));
-    boolean isOnline = sessionService.isUserOnline(user.getUsername());
+    boolean isOnline = sessionService.isUserOnline(userId);
     log.info("사용자 조회 완료: id={}", userId);
     return userMapper.toDto(user, isOnline);
   }
@@ -93,11 +93,11 @@ public class BasicUserService implements UserService {
   @Override
   public List<UserDto> findAll() {
     log.debug("모든 사용자 조회 시작");
-    Set<String> onlineUsernames = sessionService.getOnlineUsernames();
+    Set<UUID> onlineUserIds = sessionService.getOnlineUserIds();
     List<UserDto> userDtos = userRepository.findAllWithProfile()
         .stream()
         .map(user -> {
-          boolean isOnline = onlineUsernames.contains(user.getUsername());
+          boolean isOnline = onlineUserIds.contains(user.getId());
           return userMapper.toDto(user, isOnline);
         })
         .toList();
@@ -150,7 +150,7 @@ public class BasicUserService implements UserService {
     }
 
     log.info("사용자 수정 완료: id={}", userId);
-    boolean isOnline = sessionService.isUserOnline(user.getUsername());
+    boolean isOnline = sessionService.isUserOnline(userId);
     return userMapper.toDto(user, isOnline);
   }
 
@@ -169,7 +169,7 @@ public class BasicUserService implements UserService {
     authService.invalidateUserSessionsByUserId(userId);
     log.info("사용자 권한 업데이트 완료. id={}, role={}", userId, request.newRole());
 
-    boolean isOnline = sessionService.isUserOnline(user.getUsername());
+    boolean isOnline = sessionService.isUserOnline(userId);
     return userMapper.toDto(user, isOnline);
   }
 

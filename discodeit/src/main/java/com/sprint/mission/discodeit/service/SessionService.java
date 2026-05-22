@@ -1,10 +1,11 @@
 package com.sprint.mission.discodeit.service;
 
 import java.util.Set;
+import java.util.UUID;
 
 public interface SessionService {
 
-  Set<String> getOnlineUsernames();
+  Set<UUID> getOnlineUserIds();
 
-  boolean isUserOnline(String username);
+  boolean isUserOnline(UUID uuid);
 }

@@ -6,6 +6,7 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -42,7 +43,7 @@ public class InMemoryJwtRegistry implements JwtRegistry {
 
   @Override
   public void invalidateJwtInformationByRefreshToken(String refreshToken) {
-    origin.values().forEach(queue -> 
+    origin.values().forEach(queue ->
         queue.removeIf(info -> info.getRefreshToken().equals(refreshToken))
     );
   }
@@ -51,13 +52,6 @@ public class InMemoryJwtRegistry implements JwtRegistry {
   public boolean hasActiveJwtInformationByUserId(UUID userId) {
     Queue<JwtInformation> queue = origin.get(userId);
     return queue != null && !queue.isEmpty();
-  }
-
-  @Override
-  public boolean hasActiveJwtInformationByUsername(String username) {
-    return origin.values().stream()
-        .flatMap(Queue::stream)
-        .anyMatch(info -> info.getUserDto().username().equals(username));
   }
 
   @Override
@@ -83,11 +77,11 @@ public class InMemoryJwtRegistry implements JwtRegistry {
   }
 
   @Override
-  public java.util.Set<String> getAllOnlineUsernames() {
-    return origin.values().stream()
-        .flatMap(Queue::stream)
-        .map(info -> info.getUserDto().username())
-        .collect(java.util.stream.Collectors.toSet());
+  public java.util.Set<UUID> getAllOnlineUserIds() {
+    return origin.entrySet().stream()
+        .filter(entry -> !entry.getValue().isEmpty())
+        .map(Map.Entry::getKey)
+        .collect(Collectors.toSet());
   }
 
   @Override
@@ -106,7 +100,7 @@ public class InMemoryJwtRegistry implements JwtRegistry {
   @Override
   public void clearExpiredJwtInformation() {
     log.debug("Cleaning up expired JWT information...");
-    origin.values().forEach(queue -> 
+    origin.values().forEach(queue ->
         queue.removeIf(info -> !jwtTokenProvider.validateToken(info.getAccessToken()))
     );
     origin.entrySet().removeIf(entry -> entry.getValue().isEmpty());
