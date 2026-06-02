@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -116,6 +117,7 @@ public class S3BinaryContentStorage implements BinaryContentStorage {
   }
 
   @Override
+  @Cacheable(value = "presignedUrls", key = "#metaData.id()")
   public ResponseEntity<Void> download(BinaryContentDto metaData) {
     try {
       String key = metaData.id().toString();

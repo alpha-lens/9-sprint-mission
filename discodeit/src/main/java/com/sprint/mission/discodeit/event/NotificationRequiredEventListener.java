@@ -5,6 +5,8 @@ import com.sprint.mission.discodeit.repository.NotificationRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -17,6 +19,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class NotificationRequiredEventListener {
   private final ReadStatusRepository readStatusRepository;
   private final NotificationRepository notificationRepository;
+  private final CacheManager cacheManager;
 
   @Async("taskExecutor")
   @TransactionalEventListener
@@ -28,12 +31,18 @@ public class NotificationRequiredEventListener {
         event.message().getChannel().getName() + ")";
     String content = event.message().getContent();
 
+    Cache userNotificationsCache = cacheManager.getCache("userNotifications");
+
     readStatusRepository.findAllByChannelIdWithUser(channelId)
         .stream()
         .filter(rs -> !rs.getUser().getId().equals(authorId) && rs.isNotificationEnabled())
-        .forEach(rs -> notificationRepository.save(
-            new Notification(rs.getUser().getId(), title, content)
-        ));
+        .forEach(rs -> {
+          UUID receiverId = rs.getUser().getId();
+          notificationRepository.save(new Notification(receiverId, title, content));
+          if (userNotificationsCache != null) {
+            userNotificationsCache.evict(receiverId);
+          }
+        });
   }
 
   @Async("taskExecutor")
@@ -45,6 +54,8 @@ public class NotificationRequiredEventListener {
     String content = event.oldRole() + " -> " + event.newRole();
 
     notificationRepository.save(new Notification(userId, title, content));
+
+    evictUserNotifications(userId);
   }
 
   @Async("taskExecutor")
@@ -56,5 +67,14 @@ public class NotificationRequiredEventListener {
     String error = event.errorMessage();
 
     notificationRepository.save(new Notification(userId, title, error));
+
+    evictUserNotifications(userId);
+  }
+
+  private void evictUserNotifications(UUID userId) {
+    Cache cache = cacheManager.getCache("userNotifications");
+    if (cache != null) {
+      cache.evict(userId);
+    }
   }
 }
