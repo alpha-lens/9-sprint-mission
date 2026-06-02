@@ -24,6 +24,9 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.parameters.P;
@@ -47,6 +50,7 @@ public class BasicUserService implements UserService {
   private final ApplicationEventPublisher eventPublisher;
 
   @Override
+  @CacheEvict(value = "userDetails", allEntries = true)
   public UserDto create(UserCreateRequest userCreateRequest,
       Optional<BinaryContentCreateRequest> optionalProfileCreateRequest) {
     log.debug("사용자 생성 시작: {}", userCreateRequest);
@@ -84,6 +88,7 @@ public class BasicUserService implements UserService {
 
   @Transactional(readOnly = true)
   @Override
+  @Cacheable(value = "userDetail", key = "#userId")
   public UserDto find(UUID userId) {
     log.debug("사용자 조회 시작: id={}", userId);
     User user = userRepository.findById(userId)
@@ -95,6 +100,7 @@ public class BasicUserService implements UserService {
 
   @Transactional(readOnly = true)
   @Override
+  @Cacheable(value = "userDetails")
   public List<UserDto> findAll() {
     log.debug("모든 사용자 조회 시작");
     Set<UUID> onlineUserIds = sessionService.getOnlineUserIds();
@@ -110,6 +116,10 @@ public class BasicUserService implements UserService {
   }
 
   @Override
+  @Caching(evict = {
+      @CacheEvict(value = "userDetail", key = "#userId"),
+      @CacheEvict(value = "userDetails", allEntries = true)
+  })
   @PreAuthorize("@securityUtils.isResourceOwner(#userId, principal.username)")
   public UserDto update(@P("userId") UUID userId, UserUpdateRequest userUpdateRequest,
       Optional<BinaryContentCreateRequest> optionalProfileCreateRequest) {
@@ -155,6 +165,10 @@ public class BasicUserService implements UserService {
   }
 
   @Override
+  @Caching(evict = {
+      @CacheEvict(value = "userDetail", key = "#request.userId()"),
+      @CacheEvict(value = "userDetails", allEntries = true)
+  })
   @PreAuthorize("hasRole('ADMIN')")
   public UserDto update(RoleUpdateRequest request) {
     UUID userId = request.userId();
@@ -178,6 +192,10 @@ public class BasicUserService implements UserService {
   }
 
   @Override
+  @Caching(evict = {
+      @CacheEvict(value = "userDetail", key = "#userId"),
+      @CacheEvict(value = "userDetails", allEntries = true)
+  })
   @PreAuthorize("@securityUtils.isResourceOwner(#userId, principal.username)")
   public void delete(@P("userId") UUID userId) {
     log.debug("사용자 삭제 시작: id={}", userId);

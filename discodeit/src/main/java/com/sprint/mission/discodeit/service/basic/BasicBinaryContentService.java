@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -57,6 +59,7 @@ public class BasicBinaryContentService implements BinaryContentService {
   }
 
   @Override
+  @Cacheable(value = "binaryContents", key = "#binaryContentId")
   public BinaryContentDto find(UUID binaryContentId) {
     log.debug("바이너리 컨텐츠 조회 시작: id={}", binaryContentId);
     BinaryContentDto dto = binaryContentRepository.findById(binaryContentId)
@@ -79,6 +82,7 @@ public class BasicBinaryContentService implements BinaryContentService {
 
   @Transactional
   @Override
+  @CacheEvict(value = "binaryContents", key = "#binaryContentId")
   public void delete(UUID binaryContentId) {
     log.debug("바이너리 컨텐츠 삭제 시작: id={}", binaryContentId);
     if (!binaryContentRepository.existsById(binaryContentId)) {

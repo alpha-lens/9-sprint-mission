@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ public class BasicNotificationService implements NotificationService {
   private final NotificationMapper notificationMapper;
 
   @Transactional(readOnly = true)
+  @Cacheable(value = "userNotifications", key = "#receiverId")
   @Override
   public List<NotificationDto> findAllByReceiverId(UUID receiverId) {
     log.info("수신자 알림 목록 조회: receiverId={}", receiverId);
@@ -33,6 +36,7 @@ public class BasicNotificationService implements NotificationService {
 
 
   @Transactional
+  @CacheEvict(value = "userNotifications", key = "#requestUserId")
   @Override
   public void delete(UUID notificationId, UUID requestUserId) {
     log.info("알림 삭제 요청: id={}, requestUserId={}", notificationId, requestUserId);
