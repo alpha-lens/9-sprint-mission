@@ -6,7 +6,10 @@ import com.sprint.mission.discodeit.dto.request.RoleUpdateRequest;
 import com.sprint.mission.discodeit.dto.request.UserCreateRequest;
 import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.entity.Role;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.event.MessageCreatedEvent;
+import com.sprint.mission.discodeit.event.RoleUpdatedEvent;
 import com.sprint.mission.discodeit.exception.user.UserAlreadyExistsException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
@@ -22,6 +25,7 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -41,6 +45,7 @@ public class BasicUserService implements UserService {
   private final BinaryContentStorage binaryContentStorage;
   private final AuthService authService;
   private final SessionService sessionService;
+  private final ApplicationEventPublisher eventPublisher;
 
   @Override
   public UserDto create(UserCreateRequest userCreateRequest,
@@ -111,11 +116,7 @@ public class BasicUserService implements UserService {
       Optional<BinaryContentCreateRequest> optionalProfileCreateRequest) {
     log.debug("사용자 수정 시작: id={}, request={}", userId, userUpdateRequest);
 
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> {
-          UserNotFoundException exception = UserNotFoundException.withId(userId);
-          return exception;
-        });
+    User user = userRepository.findById(userId).orElseThrow(() -> UserNotFoundException.withId(userId));
 
     String newUsername = userUpdateRequest.newUsername();
     String newEmail = userUpdateRequest.newEmail();
@@ -165,9 +166,13 @@ public class BasicUserService implements UserService {
       return UserNotFoundException.withId(userId);
     });
 
-    user.upateRole(request.newRole());
+    Role oldRole = user.getRole();
+    Role newRole = request.newRole();
+    user.upateRole(newRole);
     authService.invalidateUserSessionsByUserId(userId);
-    log.info("사용자 권한 업데이트 완료. id={}, role={}", userId, request.newRole());
+    log.info("사용자 권한 업데이트 완료. id={}, role={}", userId, newRole);
+
+    eventPublisher.publishEvent(new RoleUpdatedEvent(userId, oldRole, newRole));
 
     boolean isOnline = sessionService.isUserOnline(userId);
     return userMapper.toDto(user, isOnline);
