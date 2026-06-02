@@ -31,6 +31,7 @@ public class BasicNotificationService implements NotificationService {
         .toList();
   }
 
+
   @Transactional
   @Override
   public void delete(UUID notificationId, UUID requestUserId) {

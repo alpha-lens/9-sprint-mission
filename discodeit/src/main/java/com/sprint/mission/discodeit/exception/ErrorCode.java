@@ -19,6 +19,7 @@ public enum ErrorCode {
     
     // BinaryContent 관련 에러 코드
     BINARY_CONTENT_NOT_FOUND("바이너리 컨텐츠를 찾을 수 없습니다."),
+    BINARY_CONTENT_UPLOAD_FAIL("바이너리 컨텐츠를 업로드하는데에 실패했습니다."),
     
     // ReadStatus 관련 에러 코드
     READ_STATUS_NOT_FOUND("읽음 상태를 찾을 수 없습니다."),
