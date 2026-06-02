@@ -1,7 +1,5 @@
 package com.sprint.mission.discodeit.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -11,7 +9,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sprint.mission.discodeit.dto.data.DiscodeitUserDetails;
 import com.sprint.mission.discodeit.dto.data.NotificationDto;
 import com.sprint.mission.discodeit.dto.data.UserDto;
@@ -50,9 +47,9 @@ class NotificationControllerTest {
         userId,
         "testuser",
         "test@example.com",
-        Role.USER,
+        null,
         true,
-        null
+        Role.USER
     );
     userDetails = new DiscodeitUserDetails(userDto, "password");
   }
