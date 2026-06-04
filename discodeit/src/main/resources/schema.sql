@@ -9,7 +9,7 @@ CREATE TABLE users
     email      varchar(100) UNIQUE      NOT NULL,
     password   varchar(60)              NOT NULL,
     profile_id uuid,
-    role       varchar(20)              NOT NULL DEFAULT USER
+    role       varchar(20)              NOT NULL DEFAULT 'USER'
 );
 
 -- BinaryContent
@@ -21,7 +21,7 @@ CREATE TABLE binary_contents
     file_name    varchar(255)             NOT NULL,
     size         bigint                   NOT NULL,
     content_type varchar(100)             NOT NULL,
-    status       varchar(20)              NOT NULL DEFAULT PROCESSING
+    status       varchar(20)              NOT NULL DEFAULT 'PROCESSING'
 );
 
 -- Channel

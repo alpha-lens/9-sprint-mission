@@ -27,6 +27,18 @@ public class AsyncConfig {
     return executor;
   }
 
+  @Bean(name = "eventTaskExecutor")
+  public Executor eventTaskExecutor() {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+    executor.setCorePoolSize(5);
+    executor.setMaxPoolSize(10);
+    executor.setQueueCapacity(100);
+    executor.setThreadNamePrefix("EventAsyncExecutor-");
+    executor.setTaskDecorator(new ContextCopyingDecorator());
+    executor.initialize();
+    return executor;
+  }
+
   /**
    * 메인 스레드의 MDC와 SecurityContext를 비동기 스레드로 복사하는 데코레이터
    */

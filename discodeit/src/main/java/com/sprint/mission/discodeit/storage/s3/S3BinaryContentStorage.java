@@ -2,7 +2,7 @@ package com.sprint.mission.discodeit.storage.s3;
 
 import com.sprint.mission.discodeit.dto.data.BinaryContentDto;
 import com.sprint.mission.discodeit.entity.Role;
-import com.sprint.mission.discodeit.event.BinaryContentUploadFailureEvent;
+import com.sprint.mission.discodeit.event.S3UploadFailedEvent;
 import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentException;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -82,7 +82,7 @@ public class S3BinaryContentStorage implements BinaryContentStorage {
       return binaryContentId;
     } catch (S3Exception e) {
       log.error("S3에 파일 업로드 실패: {}", e.getMessage());
-      throw new RuntimeException("S3에 파일 업로드 실패: " + key, e);
+      throw e;
     }
   }
 
@@ -180,7 +180,7 @@ public class S3BinaryContentStorage implements BinaryContentStorage {
     log.error("비동기 로직 최종 실패 - {}", notificationMessage);
 
     userRepository.findAllByRole(Role.ADMIN).forEach(user ->
-        eventPublisher.publishEvent(new BinaryContentUploadFailureEvent(user.getId(), notificationMessage.toString())));
+        eventPublisher.publishEvent(new S3UploadFailedEvent(user.getId(), notificationMessage.toString())));
     throw new BinaryContentException(ErrorCode.BINARY_CONTENT_UPLOAD_FAIL);
   }
 } 
