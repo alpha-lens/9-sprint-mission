@@ -27,13 +27,19 @@ spring:
   config:
     import: optional:file:.env[.properties]
   cache:
-    type: caffeine
+    type: redis
     cache-names:
       - userChannels
       - userNotifications
       - users
     caffeine:
       spec: maximumSize=100,expireAfterAccess=600s,recordStats
+    redis:
+      enable-statistics: true
+      data:
+        redis:
+          host: ${REDIS_HOST:localhost}
+          port: ${REDIS_PORT:6379}
 
 management:
   endpoints:
