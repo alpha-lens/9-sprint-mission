@@ -13,7 +13,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   public void registerStompEndpoints(StompEndpointRegistry registry) {
     // `/ws` : 서버 내부 엔드포인트 경로
     // 	CORS 설정 + SockJS 프로토콜 지원 추가 (fallback)
-    registry.addEndpoint("/ws").setAllowedOrigins("*").withSockJS();
+    registry.addEndpoint("/ws").setAllowedOriginPatterns("*").withSockJS();
   }
 
   /* STOMP 메시지 라우팅 규칙 설정
