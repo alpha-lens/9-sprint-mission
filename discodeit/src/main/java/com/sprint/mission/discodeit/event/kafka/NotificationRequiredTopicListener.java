@@ -6,8 +6,6 @@ import com.sprint.mission.discodeit.dto.kafka.MessageCreatedPayload;
 import com.sprint.mission.discodeit.dto.kafka.RoleUpdatedPayload;
 import com.sprint.mission.discodeit.dto.kafka.S3UploadFailedPayload;
 import com.sprint.mission.discodeit.entity.Notification;
-import com.sprint.mission.discodeit.event.RoleUpdatedEvent;
-import com.sprint.mission.discodeit.event.S3UploadFailedEvent;
 import com.sprint.mission.discodeit.event.SseEvent;
 import com.sprint.mission.discodeit.mapper.NotificationMapper;
 import com.sprint.mission.discodeit.repository.NotificationRepository;
