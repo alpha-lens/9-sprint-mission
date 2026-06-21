@@ -29,6 +29,7 @@ public class KafkaProduceRequiredEventListener {
   public void on(MessageCreatedEvent event) {
     try {
       MessageCreatedPayload messageData = new MessageCreatedPayload(
+          event.messageId(),
           event.authorId(),
           event.channelId(),
           event.authorName(),
