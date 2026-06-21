@@ -1,34 +1,28 @@
 version: '3.8'
 
 services:
-  # 1. Reverse Proxy (Nginx 추가)
-  frontend-proxy:
-    image: nginx:alpine
+  reverse-proxy:
+    image: nginx:latest
     container_name: reverse-proxy
     ports:
-      - "3000:3000" # 유일하게 외부로 노출되는 포트
+      - "3000:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./frontend/dist:/usr/share/nginx/html:ro # 프론트엔드 빌드 결과물 경로
+      - ./src/main/resources/static:/usr/share/nginx/html:ro
     depends_on:
       - backend
     networks:
-      - discodeit-network
+      - app-network
 
-  # 2. Backend (기존 app에서 이름 변경 및 포트 노출 제거)
   backend:
-    image: discodeit:local
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: discodeit
-    # ports: - "8081:80" <- 외부 노출을 위해 제거합니다.
+    image: spring-backend:latest
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - SERVER_PORT=8080 # 다이어그램의 backend:8080에 맞추기 위해 추가
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/discodeit
-      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
       - STORAGE_TYPE=s3
       - STORAGE_LOCAL_ROOT_PATH=.discodeit/storage
       - AWS_S3_ACCESS_KEY=${AWS_S3_ACCESS_KEY}
@@ -36,73 +30,63 @@ services:
       - AWS_S3_REGION=${AWS_S3_REGION}
       - AWS_S3_BUCKET=${AWS_S3_BUCKET}
       - AWS_S3_PRESIGNED_URL_EXPIRATION=600
-      # 인프라 연결 설정들
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=broker:29092
+    deploy:
+      replicas: 3
     depends_on:
       - db
       - redis
       - broker
     volumes:
-      - binary-content-storage:/app/.discodeit/storage
+      - ./.discodeit/storage:/app/.discodeit/storage
     networks:
-      - discodeit-network
+      - app-network
 
-  # 3. DB (PostgreSQL - 외부 포트 제거)
   db:
-    image: postgres:16-alpine
-    container_name: discodeit-db
+    image: postgres:15-alpine
+    container_name: postgres-db
     environment:
-      - POSTGRES_DB=discodeit
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    # ports: - "5432:5432" <- 외부 네트워크 단절을 위해 제거합니다.
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: discodeit
+    ports:
+      - "5432:5432"
     networks:
-      - discodeit-network
+      - app-network
 
-  # 4. Memory DB (Redis 추가 - 포트 노출 없음)
   redis:
     image: redis:7-alpine
     container_name: redis-memory-db
-    volumes:
-      - redis-data:/data
+    ports:
+      - "6339:6379"
     networks:
-      - discodeit-network
+      - app-network
 
-  # 5. Message Broker (Kafka & Zookeeper 추가 - 포트 노출 없음)
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
-    container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
     networks:
-      - discodeit-network
+      - app-network
 
   broker:
     image: confluentinc/cp-kafka:7.4.0
-    container_name: kafka-broker
     depends_on:
       - zookeeper
+    ports:
+      - "9092:9092"
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://broker:29092
-      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     networks:
-      - discodeit-network
-
-volumes:
-  postgres-data:
-  binary-content-storage:
-  redis-data: # Redis 데이터 보존용 볼륨 추가
+      - app-network
 
 networks:
-  discodeit-network:
+  app-network:
     driver: bridge
